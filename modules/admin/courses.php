@@ -104,15 +104,19 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td class="px-6 py-4 text-sm text-gray-900"><?php echo $course['credits']; ?></td>
                             <td class="px-6 py-4 text-sm text-gray-600"><?php echo htmlspecialchars(substr($course['description'] ?? '', 0, 50)); ?>...</td>
                             <td class="px-6 py-4 text-sm">
-                                <button onclick="editCourse(<?php echo $course['id']; ?>, '<?php echo htmlspecialchars($course['code']); ?>', '<?php echo htmlspecialchars($course['name']); ?>', <?php echo $course['credits']; ?>, '<?php echo htmlspecialchars($course['description'] ?? ''); ?>')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-xs mr-2 transition duration-200">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <form method="POST" class="inline" onsubmit="return confirm('¿Está seguro de eliminar este curso?')">
-                                    <input type="hidden" name="id" value="<?php echo $course['id']; ?>">
-                                    <button type="submit" name="delete_course" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-xs transition duration-200">
-                                        <i class="fas fa-trash"></i>
+                                <div class="flex space-x-2">
+                                    <button onclick="editCourse(<?php echo $course['id']; ?>, '<?php echo htmlspecialchars($course['code']); ?>', '<?php echo htmlspecialchars($course['name']); ?>', <?php echo $course['credits']; ?>, '<?php echo htmlspecialchars($course['description'] ?? ''); ?>')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200 flex items-center" title="Editar curso">
+                                        <i class="fas fa-edit mr-1"></i>
+                                        <span class="hidden sm:inline">Editar</span>
                                     </button>
-                                </form>
+                                    <form method="POST" class="inline" onsubmit="return confirm('¿Está seguro de eliminar este curso?')">
+                                        <input type="hidden" name="id" value="<?php echo $course['id']; ?>">
+                                        <button type="submit" name="delete_course" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200 flex items-center" title="Eliminar curso">
+                                            <i class="fas fa-trash mr-1"></i>
+                                            <span class="hidden sm:inline">Eliminar</span>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
