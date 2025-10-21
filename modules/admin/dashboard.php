@@ -229,20 +229,127 @@ $totalActivities = $pdo->query("SELECT COUNT(*) FROM activities")->fetchColumn()
             Acciones Rápidas
         </h3>
         <div class="grid md:grid-cols-3 gap-6">
-            <button class="bg-gradient-to-r from-primary to-secondary text-white p-4 rounded-xl hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center justify-center space-x-3">
+            <a href="users.php" class="bg-gradient-to-r from-primary to-secondary text-white p-4 rounded-xl hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center justify-center space-x-3">
                 <i class="fas fa-plus-circle text-2xl"></i>
                 <span>Crear Usuario</span>
-            </button>
-            <button class="bg-gradient-to-r from-green-500 to-teal-500 text-white p-4 rounded-xl hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center justify-center space-x-3">
+            </a>
+            <a href="../library/manage.php" class="bg-gradient-to-r from-green-500 to-teal-500 text-white p-4 rounded-xl hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center justify-center space-x-3">
                 <i class="fas fa-upload text-2xl"></i>
                 <span>Subir Recurso</span>
-            </button>
-            <button class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-4 rounded-xl hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center justify-center space-x-3">
+            </a>
+            <button onclick="showSystemStats()" class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-4 rounded-xl hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center justify-center space-x-3">
                 <i class="fas fa-chart-pie text-2xl"></i>
                 <span>Ver Estadísticas</span>
             </button>
         </div>
     </div>
+
+    <!-- System Stats Modal -->
+    <div id="statsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-chart-bar mr-3 text-primary"></i>
+                        Estadísticas del Sistema
+                    </h3>
+                    <button onclick="closeStatsModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-lg text-center">
+                        <div class="text-4xl text-blue-600 mb-2"><i class="fas fa-users"></i></div>
+                        <div class="text-3xl font-bold text-blue-800"><?php echo number_format($totalUsers); ?></div>
+                        <div class="text-sm text-blue-600">Total Usuarios</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-lg text-center">
+                        <div class="text-4xl text-green-600 mb-2"><i class="fas fa-graduation-cap"></i></div>
+                        <div class="text-3xl font-bold text-green-800"><?php echo number_format($totalCourses); ?></div>
+                        <div class="text-sm text-green-600">Cursos Activos</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-purple-50 to-purple-100 p-6 rounded-lg text-center">
+                        <div class="text-4xl text-purple-600 mb-2"><i class="fas fa-book"></i></div>
+                        <div class="text-3xl font-bold text-purple-800"><?php echo number_format($totalLibraryResources); ?></div>
+                        <div class="text-sm text-purple-600">Recursos Biblioteca</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-orange-50 to-orange-100 p-6 rounded-lg text-center">
+                        <div class="text-4xl text-orange-600 mb-2"><i class="fas fa-tasks"></i></div>
+                        <div class="text-3xl font-bold text-orange-800"><?php echo number_format($totalActivities); ?></div>
+                        <div class="text-sm text-orange-600">Actividades</div>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <h4 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fas fa-user-graduate mr-2 text-blue-600"></i>
+                            Distribución de Usuarios
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span>Estudiantes</span>
+                                <span class="font-bold"><?php echo $totalStudents; ?> (<?php echo $totalUsers > 0 ? round(($totalStudents / $totalUsers) * 100, 1) : 0; ?>%)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Docentes</span>
+                                <span class="font-bold"><?php echo $totalTeachers; ?> (<?php echo $totalUsers > 0 ? round(($totalTeachers / $totalUsers) * 100, 1) : 0; ?>%)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Administradores</span>
+                                <span class="font-bold"><?php echo $totalUsers - $totalStudents - $totalTeachers; ?> (<?php echo $totalUsers > 0 ? round((($totalUsers - $totalStudents - $totalTeachers) / $totalUsers) * 100, 1) : 0; ?>%)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <h4 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fas fa-calendar-alt mr-2 text-green-600"></i>
+                            Información del Sistema
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span>Horarios Programados</span>
+                                <span class="font-bold"><?php echo number_format($pdo->query("SELECT COUNT(*) FROM schedules")->fetchColumn()); ?></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Inscripciones Activas</span>
+                                <span class="font-bold"><?php echo number_format($pdo->query("SELECT COUNT(*) FROM enrollments WHERE status = 'enrolled'")->fetchColumn()); ?></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Aulas Disponibles</span>
+                                <span class="font-bold"><?php echo number_format($totalClassrooms); ?></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end mt-6">
+                    <button onclick="closeStatsModal()" class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-lg transition duration-200">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 
 <?php include '../../templates/footer.php'; ?>
+<script>
+function showSystemStats() {
+    document.getElementById('statsModal').classList.remove('hidden');
+}
+
+function closeStatsModal() {
+    document.getElementById('statsModal').classList.add('hidden');
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('statsModal');
+    if (event.target === modal) {
+        closeStatsModal();
+    }
+});
+</script>
