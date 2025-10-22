@@ -351,8 +351,72 @@ $recent_activities = $pdo->query("
 
 <script>
 function exportReport(format) {
-    // This would typically send an AJAX request to generate and download the report
-    alert('Funcionalidad de exportación ' + format.toUpperCase() + ' próximamente disponible.');
+    const reportType = '<?php echo $report_type; ?>';
+
+    // Create form to submit export request
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'export.php';
+    form.style.display = 'none';
+
+    // Add form fields
+    const fields = {
+        'format': format,
+        'report_type': reportType,
+        'export_data': JSON.stringify(getReportData())
+    };
+
+    for (const [key, value] of Object.entries(fields)) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+}
+
+function getReportData() {
+    const reportType = '<?php echo $report_type; ?>';
+
+    switch(reportType) {
+        case 'overview':
+            return {
+                total_users: <?php echo $total_users; ?>,
+                total_students: <?php echo $total_students; ?>,
+                total_teachers: <?php echo $total_teachers; ?>,
+                total_courses: <?php echo $total_courses; ?>,
+                total_enrollments: <?php echo $total_enrollments; ?>,
+                total_library_resources: <?php echo $total_library_resources; ?>,
+                total_activities: <?php echo $total_activities; ?>,
+                total_schedules: <?php echo $total_schedules; ?>,
+                recent_activities: <?php echo json_encode($recent_activities); ?>
+            };
+
+        case 'grades':
+            return {
+                grade_distribution: <?php echo json_encode($grade_distribution); ?>,
+                total_graded: <?php echo array_sum(array_column($grade_distribution, 'count')); ?>,
+                approved_count: <?php echo array_sum(array_map(function($r) { return in_array($r['range'], ['10-11', '12-14', '15-17', '18-20']) ? $r['count'] : 0; }, $grade_distribution)); ?>,
+                failed_count: <?php echo array_sum(array_map(function($r) { return in_array($r['range'], ['0-9']) ? $r['count'] : 0; }, $grade_distribution)); ?>
+            };
+
+        case 'courses':
+            return {
+                courses: <?php echo json_encode($top_courses); ?>
+            };
+
+        case 'activities':
+            return {
+                activities: <?php echo json_encode($recent_activities); ?>
+            };
+
+        default:
+            return {};
+    }
 }
 </script>
 
