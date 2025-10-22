@@ -12,9 +12,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $day_of_week = sanitize($_POST['day_of_week']);
         $start_time = $_POST['start_time'];
         $end_time = $_POST['end_time'];
-        $semester = sanitize($_POST['semester']);
-        $academic_year = sanitize($_POST['academic_year']);
-        $notes = sanitize($_POST['notes']);
+        $semester = isset($_POST['semester']) ? sanitize($_POST['semester']) : '2025-1';
+        $academic_year = isset($_POST['academic_year']) ? sanitize($_POST['academic_year']) : '2025';
+        $notes = isset($_POST['notes']) ? sanitize($_POST['notes']) : '';
 
         // Check for conflicts
         $conflicts = checkScheduleConflicts($pdo, $classroom_id, $teacher_id, $day_of_week, $start_time, $end_time);
@@ -34,10 +34,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $day_of_week = sanitize($_POST['day_of_week']);
         $start_time = $_POST['start_time'];
         $end_time = $_POST['end_time'];
-        $semester = sanitize($_POST['semester']);
-        $academic_year = sanitize($_POST['academic_year']);
-        $status = sanitize($_POST['status']);
-        $notes = sanitize($_POST['notes']);
+        $semester = isset($_POST['semester']) ? sanitize($_POST['semester']) : '2025-1';
+        $academic_year = isset($_POST['academic_year']) ? sanitize($_POST['academic_year']) : '2025';
+        $status = isset($_POST['status']) ? sanitize($_POST['status']) : 'active';
+        $notes = isset($_POST['notes']) ? sanitize($_POST['notes']) : '';
 
         // Check for conflicts (excluding current schedule)
         $conflicts = checkScheduleConflicts($pdo, $classroom_id, $teacher_id, $day_of_week, $start_time, $end_time, $id);
