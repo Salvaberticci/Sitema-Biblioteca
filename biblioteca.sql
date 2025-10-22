@@ -129,12 +129,31 @@ CREATE TABLE `library_resources` (
 
 -- --------------------------------------------------------
 --
--- Estructura de tabla para la tabla `loans`
+-- Estructura de tabla para la tabla `physical_books`
 --
 
-CREATE TABLE `loans` (
+CREATE TABLE `physical_books` (
   `id` int(11) NOT NULL,
-  `resource_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `author` varchar(100) DEFAULT NULL,
+  `isbn` varchar(20) DEFAULT NULL,
+  `category` varchar(100) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `total_copies` int(11) NOT NULL DEFAULT 1,
+  `available_copies` int(11) NOT NULL DEFAULT 1,
+  `location` varchar(100) DEFAULT NULL,
+  `added_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `status` enum('available','maintenance','lost') NOT NULL DEFAULT 'available'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+--
+-- Estructura de tabla para la tabla `book_loans`
+--
+
+CREATE TABLE `book_loans` (
+  `id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `loan_date` datetime NOT NULL DEFAULT current_timestamp(),
   `due_date` datetime NOT NULL,
@@ -281,11 +300,18 @@ ALTER TABLE `library_resources`
   ADD KEY `uploaded_by` (`uploaded_by`);
 
 --
--- Indices de la tabla `loans`
+-- Indices de la tabla `physical_books`
 --
-ALTER TABLE `loans`
+ALTER TABLE `physical_books`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `resource_id` (`resource_id`),
+  ADD UNIQUE KEY `isbn` (`isbn`);
+
+--
+-- Indices de la tabla `book_loans`
+--
+ALTER TABLE `book_loans`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `book_id` (`book_id`),
   ADD KEY `user_id` (`user_id`);
 
 --
@@ -361,9 +387,15 @@ ALTER TABLE `library_resources`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT de la tabla `loans`
+-- AUTO_INCREMENT de la tabla `physical_books`
 --
-ALTER TABLE `loans`
+ALTER TABLE `physical_books`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `book_loans`
+--
+ALTER TABLE `book_loans`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -422,11 +454,11 @@ ALTER TABLE `library_resources`
   ADD CONSTRAINT `library_resources_ibfk_1` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`id`);
 
 --
--- Filtros para la tabla `loans`
+-- Filtros para la tabla `book_loans`
 --
-ALTER TABLE `loans`
-  ADD CONSTRAINT `loans_ibfk_1` FOREIGN KEY (`resource_id`) REFERENCES `library_resources` (`id`),
-  ADD CONSTRAINT `loans_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+ALTER TABLE `book_loans`
+  ADD CONSTRAINT `book_loans_ibfk_1` FOREIGN KEY (`book_id`) REFERENCES `physical_books` (`id`),
+  ADD CONSTRAINT `book_loans_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
 -- Filtros para la tabla `schedules`
