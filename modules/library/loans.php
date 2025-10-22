@@ -745,8 +745,132 @@ function closeEditModal() {
 }
 
 function viewLoanDetails(loanId) {
-    // This would open a modal with loan details
-    alert('Funcionalidad de detalles próximamente disponible. ID del préstamo: ' + loanId);
+    // Find loan data
+    const loans = <?php echo json_encode($all_loans); ?>;
+    const loan = loans.find(l => l.id == loanId);
+
+    if (loan) {
+        // Create and show loan details modal
+        const modalHtml = `
+            <div id="loanDetailsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+                    <div class="mt-3">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-2xl font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-info-circle mr-3 text-primary"></i>
+                                Detalles del Préstamo
+                            </h3>
+                            <button onclick="closeLoanDetailsModal()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times text-2xl"></i>
+                            </button>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-gray-800 mb-2">Información del Libro</h4>
+                                    <div class="space-y-2 text-sm">
+                                        <p><span class="font-medium">Título:</span> ${loan.title}</p>
+                                        <p><span class="font-medium">Autor:</span> ${loan.author || 'N/A'}</p>
+                                        <p><span class="font-medium">ISBN:</span> ${loan.isbn || 'N/A'}</p>
+                                        <p><span class="font-medium">Categoría:</span> ${loan.category || 'N/A'}</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-gray-800 mb-2">Información del Usuario</h4>
+                                    <div class="space-y-2 text-sm">
+                                        <p><span class="font-medium">Estudiante:</span> ${loan.user_name}</p>
+                                        <p><span class="font-medium">ID Préstamo:</span> #${loan.id}</p>
+                                        <p><span class="font-medium">Estado:</span>
+                                            <span class="px-2 py-1 text-xs rounded-full ml-2 ${
+                                                loan.status == 'active' ? 'bg-green-100 text-green-800' :
+                                                (loan.status == 'returned' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800')
+                                            }">
+                                                ${loan.status == 'active' ? 'Activo' : (loan.status == 'returned' ? 'Devuelto' : 'Vencido')}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-gray-800 mb-2">Fechas del Préstamo</h4>
+                                <div class="grid md:grid-cols-3 gap-4 text-sm">
+                                    <div>
+                                        <p class="font-medium text-gray-600">Fecha de Préstamo</p>
+                                        <p class="text-lg">${new Date(loan.loan_date).toLocaleDateString('es-ES')}</p>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-600">Fecha de Devolución</p>
+                                        <p class="text-lg">${new Date(loan.due_date).toLocaleDateString('es-ES')}</p>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-600">Fecha de Devolución Real</p>
+                                        <p class="text-lg">${loan.return_date ? new Date(loan.return_date).toLocaleDateString('es-ES') : 'Pendiente'}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            ${loan.notes ? `
+                                <div class="bg-blue-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-gray-800 mb-2">Notas del Préstamo</h4>
+                                    <p class="text-sm text-gray-700">${loan.notes}</p>
+                                </div>
+                            ` : ''}
+
+                            <div class="bg-yellow-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-gray-800 mb-2">Estado del Préstamo</h4>
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 rounded-full ${
+                                            loan.status == 'active' ? 'bg-green-500' :
+                                            (loan.status == 'returned' ? 'bg-blue-500' : 'bg-red-500')
+                                        } mr-2"></div>
+                                        <span class="text-sm font-medium">
+                                            ${loan.status == 'active' ? 'Préstamo Activo' :
+                                              (loan.status == 'returned' ? 'Libro Devuelto' : 'Préstamo Vencido')}
+                                        </span>
+                                    </div>
+                                    ${loan.status == 'active' ? `
+                                        <div class="text-sm text-gray-600">
+                                            ${loan.due_date && new Date(loan.due_date) < new Date() ? '⚠️ Préstamo vencido' : '✓ En plazo'}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end mt-6 space-x-3">
+                            ${loan.status == 'active' || loan.status == 'overdue' ? `
+                                <form method="POST" class="inline" onsubmit="return confirm('¿Marcar este préstamo como devuelto?')">
+                                    <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+                                    <input type="hidden" name="loan_id" value="${loan.id}">
+                                    <button type="submit" name="return_book" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition duration-200">
+                                        <i class="fas fa-check mr-2"></i>
+                                        Marcar como Devuelto
+                                    </button>
+                                </form>
+                            ` : ''}
+                            <button onclick="closeLoanDetailsModal()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition duration-200">
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add modal to page
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+}
+
+function closeLoanDetailsModal() {
+    const modal = document.getElementById('loanDetailsModal');
+    if (modal) {
+        modal.remove();
+    }
 }
 
 // Close modals when clicking outside
