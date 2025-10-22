@@ -24,9 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $stmt = $pdo->prepare("INSERT INTO physical_books (title, author, isbn, category, description, total_copies, available_copies, location) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                 $stmt->execute([$title, $author, $isbn, $category, $description, $total_copies, $total_copies, $location]);
                 $success = "Libro físico agregado exitosamente.";
-                regenerateCSRFToken();
-                header("Location: " . $_SERVER['PHP_SELF'] . "?success=add_book");
-                exit();
             }
         } elseif (isset($_POST['loan_book'])) {
             $book_id = (int)$_POST['book_id'];
@@ -65,9 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             $pdo->prepare("UPDATE physical_books SET available_copies = available_copies - 1 WHERE id = ?")->execute([$book_id]);
 
                             $success = "Libro prestado exitosamente. Fecha de devolución: " . date('d/m/Y', strtotime($due_date));
-                            regenerateCSRFToken();
-                            header("Location: " . $_SERVER['PHP_SELF'] . "?success=loan");
-                            exit();
                         }
                     }
                 }
@@ -89,9 +83,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $pdo->prepare("UPDATE physical_books SET available_copies = available_copies + 1 WHERE id = ?")->execute([$loan['book_id']]);
 
                 $success = "Libro devuelto exitosamente.";
-                regenerateCSRFToken();
-                header("Location: " . $_SERVER['PHP_SELF'] . "?success=return");
-                exit();
             } else {
                 $error = "Préstamo no encontrado";
             }
@@ -107,9 +98,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $stmt = $pdo->prepare("DELETE FROM physical_books WHERE id = ?");
                 $stmt->execute([$book_id]);
                 $success = "Libro eliminado exitosamente.";
-                regenerateCSRFToken();
-                header("Location: " . $_SERVER['PHP_SELF'] . "?success=delete");
-                exit();
             }
         }
     }
