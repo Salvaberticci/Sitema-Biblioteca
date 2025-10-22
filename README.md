@@ -199,6 +199,19 @@ El sistema incluye usuarios de prueba preconfigurados:
 - **Tema Personalizado**: Colores institucionales de la ETC "Pedro García Leal"
 - **Accesibilidad**: Diseño inclusivo con contraste adecuado
 
+## 🦶 Sticky Footer Implementation
+
+The system incorporates a sticky footer design that ensures the footer remains anchored at the bottom of the viewport when page content is shorter than the screen height, maintaining a consistent and professional layout across all pages.
+
+### Implementation Details
+
+- **CSS Flexbox Layout**: Utilizes a flexbox container applied to the page structure with `min-height: 100vh` and `flex-direction: column` for vertical stacking.
+- **Main Content Expansion**: The main content wrapper employs `flex-grow: 1` to dynamically fill available vertical space, effectively pushing the footer to the bottom.
+- **Footer Positioning**: The footer is naturally positioned at the end of the flex container, guaranteeing it "sticks" to the bottom when content is minimal.
+- **Responsive Compatibility**: Fully responsive implementation that adapts seamlessly to all device sizes and screen resolutions.
+
+This technique enhances user experience by providing visual consistency and preventing awkward spacing on pages with limited content.
+
 ## 📈 Funcionalidades Avanzadas
 
 - **Sistema de Roles Completo**: Control de acceso granular por roles (admin, teacher, student)
