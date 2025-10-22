@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 22-10-2025 a las 02:26:34
+-- Tiempo de generación: 22-10-2025 a las 20:05:01
 -- Versión del servidor: 10.4.28-MariaDB
 -- Versión de PHP: 8.2.4
 
@@ -213,8 +213,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `username`, `password`, `email`, `name`, `role`, `created_at`) VALUES
 (1, 'admin', '$2y$10$gCaJ3XJEgbt3DYmPQR0dF.qr52IsXc6gF5d1PlnWoarXc8fyPf/pO', 'admin@etc.edu', 'Administrador', 'admin', '2025-10-15 03:04:03'),
-(2, 'teacher1', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'teacher@etc.edu', 'Profesor Ejemplo', 'teacher', '2025-10-15 03:04:03'),
-(3, 'student1', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student@etc.edu', 'Estudiante Ejemplo', 'student', '2025-10-15 03:04:03');
+(2, 'teacher1', '$2y$10$mH6D7lUIGNLxGI2rvwQrLONflA/dS0modlsu8qcQBHmOHyLUOChju', 'teacher@etc.edu', 'Profesor Ejemplo', 'teacher', '2025-10-15 03:04:03'),
+(3, 'student1', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'student@etc.edu', 'Estudiante Ejemplo', 'student', '2025-10-15 03:04:03');
 
 --
 -- Índices para tablas volcadas
