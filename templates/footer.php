@@ -1,3 +1,4 @@
+    </div>
     <footer class="bg-gradient-to-r from-dark to-secondary text-white py-12 mt-8 relative overflow-hidden">
         <div class="absolute inset-0 bg-black opacity-10"></div>
         <div class="container mx-auto px-6 relative z-10">

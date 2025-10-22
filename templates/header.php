@@ -44,7 +44,7 @@
     </script>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body class="bg-gradient-to-br from-gray-50 to-accent min-h-screen">
+<body class="bg-gradient-to-br from-gray-50 to-accent min-h-screen flex flex-col">
     <header class="bg-gradient-to-r from-primary to-secondary text-white shadow-2xl sticky top-0 z-50">
         <div class="container mx-auto px-6 py-4">
             <div class="flex justify-between items-center">
@@ -82,4 +82,5 @@
                 </ul>
             </nav>
         </div>
+    <div class="flex-grow">
     </header>
