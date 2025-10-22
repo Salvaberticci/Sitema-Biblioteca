@@ -39,11 +39,16 @@ Este proyecto es un sistema de gestión completo diseñado para instituciones ed
 - **Gestión de Recursos**: Subida, organización y eliminación de materiales multimedia
 - **Tipos de Recursos**: Libros, artículos, videos, documentos con iconografía distintiva
 
-### 🏫 Horarios de Aulas Inteligentes
-- **Programación Completa**: Gestión de horarios por aula, docente y curso
-- **Visualización por Roles**: Horarios personalizados según perfil de usuario
-- **Gestión de Disponibilidad**: Control de espacios educativos
-- **Vista por Día**: Organización semanal con información detallada
+### 🏫 Gestión Completa de Horarios Inteligentes
+- **Programación con IA**: Creación de horarios con detección automática de conflictos
+- **Gestión Avanzada**: Filtros por semestre, año académico y estado de horarios
+- **Control de Conflictos**: Prevención de superposiciones entre aulas y docentes
+- **Acciones Masivas**: Activación, cancelación y eliminación de múltiples horarios
+- **Estados de Horarios**: Activo, cancelado, completado con seguimiento completo
+- **Estadísticas en Tiempo Real**: Métricas de ocupación y conflictos diarios
+- **Edición Completa**: Modificación de todos los parámetros con validaciones
+- **Visualización Mejorada**: Información detallada con estado, notas y estadísticas
+- **Base de Datos Extendida**: Campos adicionales para mejor gestión académica
 
 ### 📊 Sistema de Reportes Avanzado
 - **Reportes por Categoría**: Usuarios, cursos, calificaciones, actividades
