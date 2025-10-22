@@ -10,11 +10,6 @@ if (isset($_GET['success'])) {
     } elseif ($_GET['success'] == 'return') {
         $success_message = 'Recurso devuelto exitosamente.';
     }
-    // Clear the GET parameter by redirecting without it
-    if (!empty($success_message)) {
-        header("Location: " . strtok($_SERVER["REQUEST_URI"], '?'));
-        exit();
-    }
 }
 ?>
 
@@ -112,9 +107,26 @@ $recent_uploads = $pdo->query("SELECT COUNT(*) FROM library_resources WHERE uplo
     </h2>
 
     <?php if ($success_message): ?>
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 animate-fade-in-up">
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 animate-fade-in-up" id="success-message">
             <?php echo $success_message; ?>
         </div>
+        <script>
+            // Auto-hide success message after 5 seconds and clean URL
+            setTimeout(function() {
+                const messageDiv = document.getElementById('success-message');
+                if (messageDiv) {
+                    messageDiv.style.transition = 'opacity 0.5s';
+                    messageDiv.style.opacity = '0';
+                    setTimeout(function() {
+                        messageDiv.remove();
+                        // Clean URL by removing success parameter
+                        const url = new URL(window.location);
+                        url.searchParams.delete('success');
+                        window.history.replaceState({}, '', url);
+                    }, 500);
+                }
+            }, 5000);
+        </script>
     <?php endif; ?>
 
     <!-- Library Statistics -->
