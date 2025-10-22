@@ -162,17 +162,21 @@ $resources = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td class="px-6 py-4 text-sm text-gray-900"><?php echo htmlspecialchars($resource['uploader_name'] ?? 'Sistema'); ?></td>
                             <td class="px-6 py-4 text-sm text-gray-600"><?php echo date('d/m/Y', strtotime($resource['upload_date'])); ?></td>
                             <td class="px-6 py-4 text-sm">
-                                <?php if ($resource['file_path']): ?>
-                                    <a href="/biblioteca/<?php echo htmlspecialchars($resource['file_path']); ?>" target="_blank" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-3 rounded text-xs mr-2 transition duration-200">
-                                        <i class="fas fa-download"></i>
-                                    </a>
-                                <?php endif; ?>
-                                <form method="POST" class="inline" onsubmit="return confirm('¿Está seguro de eliminar este recurso?')">
-                                    <input type="hidden" name="id" value="<?php echo $resource['id']; ?>">
-                                    <button type="submit" name="delete_resource" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-xs transition duration-200">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                                <div class="flex space-x-2">
+                                    <?php if ($resource['file_path']): ?>
+                                        <a href="/biblioteca/<?php echo htmlspecialchars($resource['file_path']); ?>" target="_blank" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200 flex items-center" title="Descargar recurso">
+                                            <i class="fas fa-download mr-1"></i>
+                                            <span class="hidden sm:inline">Descargar</span>
+                                        </a>
+                                    <?php endif; ?>
+                                    <form method="POST" class="inline" onsubmit="return confirm('¿Está seguro de eliminar este recurso?')">
+                                        <input type="hidden" name="id" value="<?php echo $resource['id']; ?>">
+                                        <button type="submit" name="delete_resource" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200 flex items-center" title="Eliminar recurso">
+                                            <i class="fas fa-trash mr-1"></i>
+                                            <span class="hidden sm:inline">Eliminar</span>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
