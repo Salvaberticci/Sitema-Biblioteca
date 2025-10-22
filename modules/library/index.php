@@ -2,6 +2,23 @@
 <?php include '../../templates/header.php'; ?>
 
 <?php
+// Handle success messages from redirects
+$success_message = '';
+if (isset($_GET['success'])) {
+    if ($_GET['success'] == 'loan') {
+        $success_message = 'Préstamo solicitado exitosamente.';
+    } elseif ($_GET['success'] == 'return') {
+        $success_message = 'Recurso devuelto exitosamente.';
+    }
+    // Clear the GET parameter by redirecting without it
+    if (!empty($success_message)) {
+        header("Location: " . strtok($_SERVER["REQUEST_URI"], '?'));
+        exit();
+    }
+}
+?>
+
+<?php
 $search = isset($_GET['search']) ? sanitize($_GET['search']) : '';
 $type = isset($_GET['type']) ? sanitize($_GET['type']) : '';
 $subject = isset($_GET['subject']) ? sanitize($_GET['subject']) : '';
@@ -93,6 +110,12 @@ $recent_uploads = $pdo->query("SELECT COUNT(*) FROM library_resources WHERE uplo
         <i class="fas fa-books mr-4 text-primary"></i>
         Biblioteca Virtual
     </h2>
+
+    <?php if ($success_message): ?>
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 animate-fade-in-up">
+            <?php echo $success_message; ?>
+        </div>
+    <?php endif; ?>
 
     <!-- Library Statistics -->
     <div class="grid md:grid-cols-4 gap-6 mb-8">
@@ -413,7 +436,8 @@ function loanResource(resourceId) {
         .then(data => {
             if (data.success) {
                 alert('Préstamo solicitado exitosamente. Fecha de devolución: ' + data.due_date);
-                location.reload();
+                // Redirect to prevent form resubmission
+                window.location.href = 'index.php?success=loan';
             } else {
                 alert('Error: ' + data.message);
             }
@@ -438,7 +462,8 @@ function returnLoan(loanId) {
         .then(data => {
             if (data.success) {
                 alert('Recurso devuelto exitosamente.');
-                location.reload();
+                // Redirect to prevent form resubmission
+                window.location.href = 'index.php?success=return';
             } else {
                 alert('Error: ' + data.message);
             }
