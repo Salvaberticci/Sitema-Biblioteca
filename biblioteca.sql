@@ -128,6 +128,22 @@ CREATE TABLE `library_resources` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
+--
+-- Estructura de tabla para la tabla `loans`
+--
+
+CREATE TABLE `loans` (
+  `id` int(11) NOT NULL,
+  `resource_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `loan_date` datetime NOT NULL DEFAULT current_timestamp(),
+  `due_date` datetime NOT NULL,
+  `return_date` datetime DEFAULT NULL,
+  `status` enum('active','returned','overdue') NOT NULL DEFAULT 'active',
+  `notes` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
 
 --
 -- Estructura de tabla para la tabla `schedules`
@@ -265,6 +281,14 @@ ALTER TABLE `library_resources`
   ADD KEY `uploaded_by` (`uploaded_by`);
 
 --
+-- Indices de la tabla `loans`
+--
+ALTER TABLE `loans`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `resource_id` (`resource_id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
 -- Indices de la tabla `schedules`
 --
 ALTER TABLE `schedules`
@@ -337,6 +361,12 @@ ALTER TABLE `library_resources`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT de la tabla `loans`
+--
+ALTER TABLE `loans`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `schedules`
 --
 ALTER TABLE `schedules`
@@ -390,6 +420,13 @@ ALTER TABLE `enrollments`
 --
 ALTER TABLE `library_resources`
   ADD CONSTRAINT `library_resources_ibfk_1` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`id`);
+
+--
+-- Filtros para la tabla `loans`
+--
+ALTER TABLE `loans`
+  ADD CONSTRAINT `loans_ibfk_1` FOREIGN KEY (`resource_id`) REFERENCES `library_resources` (`id`),
+  ADD CONSTRAINT `loans_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
 -- Filtros para la tabla `schedules`

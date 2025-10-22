@@ -129,7 +129,11 @@ $resources = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up">
         <h3 class="text-xl font-semibold mb-6 flex items-center">
             <i class="fas fa-list mr-2 text-primary"></i>
-            Recursos en Biblioteca (<?php echo count($resources); ?>)
+            Recursos en Biblioteca (<?php echo count($resources); ?>) |
+            <a href="loans.php" class="ml-4 text-blue-600 hover:text-blue-800 text-sm font-normal">
+                <i class="fas fa-hand-holding mr-1"></i>
+                Gestionar Préstamos
+            </a>
         </h3>
         <div class="overflow-x-auto">
             <table class="min-w-full table-auto">

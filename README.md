@@ -11,6 +11,7 @@ Este proyecto es un sistema de gestión completo diseñado para instituciones ed
 ### 👨‍💼 Panel de Administración
 - **Gestión de Usuarios**: Crear, editar y gestionar usuarios del sistema (estudiantes, docentes, administradores)
 - **Gestión de Cursos**: Administrar programas académicos y asignaturas
+- **Gestión de Préstamos**: Control completo de préstamos de biblioteca con estadísticas
 - **Reportes Avanzados**: Generar estadísticas y reportes académicos detallados con gráficos
 - **Configuración del Sistema**: Parámetros globales y ajustes institucionales
 - **Perfil de Administrador**: Gestión personal de cuenta y estadísticas del sistema
@@ -28,16 +29,20 @@ Este proyecto es un sistema de gestión completo diseñado para instituciones ed
 - **Consulta de Notas**: Ver calificaciones y promedio académico con análisis detallado
 - **Historial Académico**: Historial completo de cursos y notas con GPA
 - **Actividades**: Ver y subir tareas asignadas con estado de calificación
-- **Biblioteca Virtual**: Buscar y descargar recursos educativos
+- **Biblioteca Virtual**: Buscar, descargar y gestionar préstamos de recursos educativos
+- **Sistema de Préstamos**: Solicitar y devolver recursos prestados con seguimiento
 - **Perfil de Estudiante**: Gestión de información personal y estadísticas académicas
 - **Horarios de Clases**: Visualización personalizada de horarios matriculados
 
 ### 📚 Biblioteca Virtual Avanzada
 - **Catálogo Digital Completo**: Recursos educativos organizados por tipo y asignatura
 - **Búsqueda Avanzada**: Filtros por autor, fecha, tipo, asignatura y ordenamiento múltiple
-- **Estadísticas de Biblioteca**: Métricas de uso y recursos disponibles
+- **Sistema de Préstamos**: Gestión completa de préstamos de recursos con control de fechas y límites
+- **Estadísticas de Biblioteca**: Métricas de uso, recursos disponibles y préstamos activos
 - **Gestión de Recursos**: Subida, organización y eliminación de materiales multimedia
 - **Tipos de Recursos**: Libros, artículos, videos, documentos con iconografía distintiva
+- **Control de Disponibilidad**: Verificación automática de recursos disponibles para préstamo
+- **Historial de Préstamos**: Seguimiento completo de préstamos por usuario y recurso
 
 ### 🏫 Gestión Completa de Horarios Inteligentes
 - **Programación con IA**: Creación de horarios con detección automática de conflictos
@@ -119,6 +124,7 @@ biblioteca/
 │   │   └── profile.php       # Perfil personal del docente
 │   ├── library/              # Biblioteca virtual avanzada
 │   │   ├── index.php         # Catálogo con búsqueda avanzada
+│   │   ├── loans.php         # Gestión de préstamos
 │   │   └── manage.php        # Gestión de recursos (admin)
 │   └── schedules/            # Sistema de horarios inteligentes
 │       ├── manage.php        # Gestión de horarios (admin)
@@ -138,6 +144,7 @@ biblioteca/
 - **classrooms**: Aulas y espacios educativos
 - **schedules**: Horarios de clases
 - **library_resources**: Recursos de la biblioteca virtual
+- **loans**: Sistema de préstamos de recursos de biblioteca
 - **activities**: Actividades y tareas académicas
 - **submissions**: Entregas de actividades por estudiantes
 - **attendance**: Control de asistencia
@@ -230,6 +237,7 @@ Para soporte técnico o consultas:
   - ✅ Módulos de calificaciones completos para docentes y estudiantes
   - ✅ Sistema de perfiles de usuario para todos los roles
   - ✅ Búsqueda avanzada en biblioteca virtual con filtros múltiples
+  - ✅ Sistema de préstamos de biblioteca con control completo
   - ✅ API REST completa para integraciones futuras
   - ✅ Interfaz mejorada con estadísticas detalladas
   - ✅ Validaciones robustas y manejo de errores

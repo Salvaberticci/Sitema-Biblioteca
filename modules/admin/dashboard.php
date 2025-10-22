@@ -183,10 +183,25 @@ $totalActivities = $pdo->query("SELECT COUNT(*) FROM activities")->fetchColumn()
                     <i class="fas fa-books"></i>
                 </div>
                 <h3 class="text-2xl font-bold mb-3">Biblioteca Virtual</h3>
-                <p class="opacity-90">Gestionar recursos digitales y catálogo bibliográfico.</p>
+                <p class="opacity-90">Gestionar recursos digitales, catálogo bibliográfico y préstamos.</p>
                 <div class="mt-4 flex items-center text-sm">
                     <i class="fas fa-arrow-right mr-2"></i>
                     <span>Administrar biblioteca</span>
+                </div>
+            </div>
+        </a>
+
+        <a href="../library/loans.php" class="group bg-gradient-to-br from-teal-500 to-cyan-500 p-8 rounded-2xl shadow-xl card-hover text-white relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-20 h-20 bg-white opacity-10 rounded-full -mr-10 -mt-10"></div>
+            <div class="relative z-10">
+                <div class="text-5xl mb-4 group-hover:scale-110 transition duration-300">
+                    <i class="fas fa-hand-holding"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-3">Gestión de Préstamos</h3>
+                <p class="opacity-90">Administrar préstamos de recursos y controlar devoluciones.</p>
+                <div class="mt-4 flex items-center text-sm">
+                    <i class="fas fa-arrow-right mr-2"></i>
+                    <span>Gestionar préstamos</span>
                 </div>
             </div>
         </a>

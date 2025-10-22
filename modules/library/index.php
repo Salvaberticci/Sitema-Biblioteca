@@ -302,16 +302,42 @@ $recent_uploads = $pdo->query("SELECT COUNT(*) FROM library_resources WHERE uplo
                     </div>
 
                     <div class="flex space-x-2">
-                        <?php if ($resource['file_path']): ?>
-                            <a href="/biblioteca/<?php echo htmlspecialchars($resource['file_path']); ?>" target="_blank" class="flex-1 bg-gradient-to-r from-primary to-secondary text-white font-bold py-2 px-4 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center justify-center">
-                                <i class="fas fa-download mr-2"></i>
-                                <span>Descargar</span>
-                            </a>
+                        <?php
+                        // Check if user has active loan for this resource
+                        $loan_check = $pdo->prepare("SELECT id, status FROM loans WHERE resource_id = ? AND user_id = ? AND status IN ('active', 'overdue')");
+                        $loan_check->execute([$resource['id'], $_SESSION['user_id'] ?? 0]);
+                        $active_loan = $loan_check->fetch(PDO::FETCH_ASSOC);
+                        ?>
+
+                        <?php if ($active_loan): ?>
+                            <?php if ($active_loan['status'] == 'active'): ?>
+                                <button onclick="returnLoan(<?php echo $active_loan['id']; ?>)" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 transform hover:scale-105 flex items-center justify-center">
+                                    <i class="fas fa-undo mr-2"></i>
+                                    <span>Devolver</span>
+                                </button>
+                            <?php else: ?>
+                                <span class="flex-1 bg-red-500 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    <span>Vencido</span>
+                                </span>
+                            <?php endif; ?>
+                        <?php elseif (isLoggedIn() && getUserRole() == 'student'): ?>
+                            <button onclick="loanResource(<?php echo $resource['id']; ?>)" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 transform hover:scale-105 flex items-center justify-center">
+                                <i class="fas fa-hand-holding mr-2"></i>
+                                <span>Pedir Prestado</span>
+                            </button>
                         <?php else: ?>
-                            <span class="flex-1 bg-gray-300 text-gray-500 font-bold py-2 px-4 rounded-lg flex items-center justify-center cursor-not-allowed">
-                                <i class="fas fa-exclamation-triangle mr-2"></i>
-                                <span>No disponible</span>
-                            </span>
+                            <?php if ($resource['file_path']): ?>
+                                <a href="/biblioteca/<?php echo htmlspecialchars($resource['file_path']); ?>" target="_blank" class="flex-1 bg-gradient-to-r from-primary to-secondary text-white font-bold py-2 px-4 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center justify-center">
+                                    <i class="fas fa-download mr-2"></i>
+                                    <span>Descargar</span>
+                                </a>
+                            <?php else: ?>
+                                <span class="flex-1 bg-gray-300 text-gray-500 font-bold py-2 px-4 rounded-lg flex items-center justify-center cursor-not-allowed">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    <span>No disponible</span>
+                                </span>
+                            <?php endif; ?>
                         <?php endif; ?>
 
                         <button onclick="showResourceDetails(<?php echo $resource['id']; ?>)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2 px-3 rounded-lg transition duration-300" title="Ver detalles">
@@ -372,6 +398,56 @@ function showResourceDetails(resourceId) {
     // This would open a modal with full resource details
     // For now, just show an alert
     alert('Funcionalidad de detalles completa próximamente disponible. ID del recurso: ' + resourceId);
+}
+
+function loanResource(resourceId) {
+    if (confirm('¿Está seguro de que desea pedir prestado este recurso? Tendrá 7 días para devolverlo.')) {
+        fetch('loans.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'action=loan&resource_id=' + resourceId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Préstamo solicitado exitosamente. Fecha de devolución: ' + data.due_date);
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al procesar la solicitud');
+        });
+    }
+}
+
+function returnLoan(loanId) {
+    if (confirm('¿Está seguro de que desea devolver este recurso?')) {
+        fetch('loans.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'action=return&loan_id=' + loanId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Recurso devuelto exitosamente.');
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al procesar la solicitud');
+        });
+    }
 }
 </script>
 

@@ -20,7 +20,11 @@
         </a>
         <a href="../library/index.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
             <h3 class="text-xl font-semibold text-primary mb-2">Biblioteca Virtual</h3>
-            <p class="text-gray-600">Buscar y descargar recursos educativos.</p>
+            <p class="text-gray-600">Buscar, descargar y pedir prestados recursos educativos.</p>
+        </a>
+        <a href="../library/loans.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
+            <h3 class="text-xl font-semibold text-primary mb-2">Mis Préstamos</h3>
+            <p class="text-gray-600">Ver y gestionar recursos prestados.</p>
         </a>
         <a href="../schedules/view.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
             <h3 class="text-xl font-semibold text-primary mb-2">Horarios de Aulas</h3>
