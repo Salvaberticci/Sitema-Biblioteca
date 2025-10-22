@@ -311,19 +311,19 @@ $recent_uploads = $pdo->query("SELECT COUNT(*) FROM library_resources WHERE uplo
 
                         <?php if ($active_loan): ?>
                             <?php if ($active_loan['status'] == 'active'): ?>
-                                <button onclick="returnLoan(<?php echo $active_loan['id']; ?>)" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 transform hover:scale-105 flex items-center justify-center">
-                                    <i class="fas fa-undo mr-2"></i>
+                                <button onclick="returnLoan(<?php echo $active_loan['id']; ?>)" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105 flex items-center justify-center text-lg">
+                                    <i class="fas fa-undo mr-3 text-xl"></i>
                                     <span>Devolver</span>
                                 </button>
                             <?php else: ?>
-                                <span class="flex-1 bg-red-500 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                <span class="flex-1 bg-red-500 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center text-lg">
+                                    <i class="fas fa-exclamation-triangle mr-3 text-xl"></i>
                                     <span>Vencido</span>
                                 </span>
                             <?php endif; ?>
                         <?php elseif (isLoggedIn() && getUserRole() == 'student'): ?>
-                            <button onclick="loanResource(<?php echo $resource['id']; ?>)" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 transform hover:scale-105 flex items-center justify-center">
-                                <i class="fas fa-hand-holding mr-2"></i>
+                            <button onclick="loanResource(<?php echo $resource['id']; ?>)" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105 flex items-center justify-center text-lg">
+                                <i class="fas fa-hand-holding mr-3 text-xl"></i>
                                 <span>Pedir Prestado</span>
                             </button>
                         <?php else: ?>

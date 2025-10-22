@@ -22,9 +22,21 @@
             <h3 class="text-xl font-semibold text-primary mb-2">Biblioteca Virtual</h3>
             <p class="text-gray-600">Buscar, descargar y pedir prestados recursos educativos.</p>
         </a>
-        <a href="../library/loans.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
-            <h3 class="text-xl font-semibold text-primary mb-2">Mis Préstamos</h3>
-            <p class="text-gray-600">Ver y gestionar recursos prestados.</p>
+        <a href="../library/loans.php" class="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-lg shadow-lg card-hover border-2 border-blue-200">
+            <div class="flex items-center mb-4">
+                <div class="text-4xl text-blue-600 mr-4">
+                    <i class="fas fa-hand-holding"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold text-blue-800 mb-1">Mis Préstamos</h3>
+                    <p class="text-blue-600 font-medium">Gestionar recursos prestados</p>
+                </div>
+            </div>
+            <p class="text-gray-700 mb-4">Ver y devolver recursos prestados. Controla tus fechas de entrega y evita multas.</p>
+            <div class="flex items-center text-blue-700 font-semibold">
+                <i class="fas fa-arrow-right mr-2"></i>
+                <span>Administrar préstamos</span>
+            </div>
         </a>
         <a href="../schedules/view.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
             <h3 class="text-xl font-semibold text-primary mb-2">Horarios de Aulas</h3>
