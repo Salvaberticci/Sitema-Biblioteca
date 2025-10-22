@@ -99,6 +99,70 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $stmt->execute([$book_id]);
                 $success = "Libro eliminado exitosamente.";
             }
+        } elseif (isset($_POST['admin_loan_book'])) {
+            $book_id = (int)$_POST['book_id'];
+            $user_id = (int)$_POST['user_id'];
+            $due_date = $_POST['due_date'];
+            $notes = sanitize($_POST['notes']);
+
+            // Check if book is available
+            $book_stmt = $pdo->prepare("SELECT available_copies, title FROM physical_books WHERE id = ? AND status = 'available'");
+            $book_stmt->execute([$book_id]);
+            $book = $book_stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$book || $book['available_copies'] <= 0) {
+                $error = "Este libro no está disponible";
+            } else {
+                // Check if user already has this book loaned
+                $check_stmt = $pdo->prepare("SELECT id FROM book_loans WHERE book_id = ? AND user_id = ? AND status IN ('active', 'overdue')");
+                $check_stmt->execute([$book_id, $user_id]);
+                if ($check_stmt->fetch()) {
+                    $error = "Este usuario ya tiene este libro prestado";
+                } else {
+                    // Check loan limit (max 3 active loans per student)
+                    $count_stmt = $pdo->prepare("SELECT COUNT(*) FROM book_loans WHERE user_id = ? AND status IN ('active', 'overdue')");
+                    $count_stmt->execute([$user_id]);
+                    if ($count_stmt->fetchColumn() >= 3) {
+                        $error = "Este usuario ha alcanzado el límite máximo de préstamos (3)";
+                    } else {
+                        // Create loan
+                        $stmt = $pdo->prepare("INSERT INTO book_loans (book_id, user_id, due_date, notes) VALUES (?, ?, ?, ?)");
+                        $stmt->execute([$book_id, $user_id, $due_date, $notes]);
+
+                        // Update available copies
+                        $pdo->prepare("UPDATE physical_books SET available_copies = available_copies - 1 WHERE id = ?")->execute([$book_id]);
+
+                        $success = "Préstamo registrado exitosamente para el libro: " . $book['title'];
+                    }
+                }
+            }
+        } elseif (isset($_POST['edit_book'])) {
+            $book_id = (int)$_POST['book_id'];
+            $title = sanitize($_POST['title']);
+            $author = sanitize($_POST['author']);
+            $isbn = sanitize($_POST['isbn']);
+            $category = sanitize($_POST['category']);
+            $description = sanitize($_POST['description']);
+            $total_copies = (int)$_POST['total_copies'];
+            $location = sanitize($_POST['location']);
+            $status = sanitize($_POST['status']);
+
+            // Get current available copies
+            $current_stmt = $pdo->prepare("SELECT available_copies FROM physical_books WHERE id = ?");
+            $current_stmt->execute([$book_id]);
+            $current = $current_stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Calculate new available copies (if total increased, add difference)
+            $new_available = $current['available_copies'];
+            if ($total_copies > ($current['available_copies'] + ($total_copies - $current['available_copies']))) {
+                // If total copies increased, add the difference to available
+                $difference = $total_copies - ($current['available_copies'] + ($total_copies - $current['available_copies']));
+                $new_available = $current['available_copies'] + $difference;
+            }
+
+            $stmt = $pdo->prepare("UPDATE physical_books SET title = ?, author = ?, isbn = ?, category = ?, description = ?, total_copies = ?, available_copies = ?, location = ?, status = ? WHERE id = ?");
+            $stmt->execute([$title, $author, $isbn, $category, $description, $total_copies, $new_available, $location, $status, $book_id]);
+            $success = "Libro actualizado exitosamente.";
         }
     }
 }
@@ -122,6 +186,9 @@ $pdo->exec("UPDATE book_loans SET status = 'overdue' WHERE due_date < NOW() AND 
 
 // Get all physical books
 $books = $pdo->query("SELECT * FROM physical_books ORDER BY title ASC")->fetchAll(PDO::FETCH_ASSOC);
+
+// Get all students for loan modal
+$students = $pdo->query("SELECT id, name, username FROM users WHERE role = 'student' ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
 
 // Get user's loans
 $user_loans = [];
@@ -421,6 +488,10 @@ if (isLoggedIn() && getUserRole() == 'admin') {
                                 </td>
                                 <td class="px-6 py-4 text-sm">
                                     <div class="flex space-x-2">
+                                        <button onclick="openLoanModal(<?php echo $book['id']; ?>, '<?php echo addslashes($book['title']); ?>')" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200" title="Prestar libro">
+                                            <i class="fas fa-hand-holding mr-1"></i>
+                                            Prestar
+                                        </button>
                                         <button onclick="editBook(<?php echo $book['id']; ?>)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200">
                                             <i class="fas fa-edit mr-1"></i>
                                             Editar
@@ -509,16 +580,187 @@ if (isLoggedIn() && getUserRole() == 'admin') {
     <?php endif; ?>
 </main>
 
+<!-- Loan Modal -->
+<div id="loanModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-hand-holding mr-3 text-primary"></i>
+                    Registrar Préstamo
+                </h3>
+                <button onclick="closeLoanModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+
+            <form method="POST" id="loanForm">
+                <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+                <input type="hidden" name="book_id" id="modalBookId">
+
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="modalBookTitle" class="block text-sm font-medium text-gray-700 mb-2">Libro</label>
+                        <input type="text" id="modalBookTitle" readonly class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600">
+                    </div>
+                    <div>
+                        <label for="user_id" class="block text-sm font-medium text-gray-700 mb-2">Estudiante</label>
+                        <select name="user_id" id="user_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                            <option value="">Seleccionar estudiante</option>
+                            <?php foreach ($students as $student): ?>
+                                <option value="<?php echo $student['id']; ?>"><?php echo htmlspecialchars($student['name']); ?> (<?php echo htmlspecialchars($student['username']); ?>)</option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="due_date" class="block text-sm font-medium text-gray-700 mb-2">Fecha de Devolución</label>
+                        <input type="date" name="due_date" id="due_date" required min="<?php echo date('Y-m-d', strtotime('+1 day')); ?>" value="<?php echo date('Y-m-d', strtotime('+14 days')); ?>" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                    </div>
+                    <div>
+                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notas (opcional)</label>
+                        <input type="text" name="notes" id="notes" placeholder="Observaciones del préstamo" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeLoanModal()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition duration-200">
+                        Cancelar
+                    </button>
+                    <button type="submit" name="admin_loan_book" class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300 transform hover:scale-105">
+                        <i class="fas fa-hand-holding mr-2"></i>
+                        Registrar Préstamo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Book Modal -->
+<div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-edit mr-3 text-primary"></i>
+                    Editar Libro
+                </h3>
+                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+
+            <form method="POST" id="editForm">
+                <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+                <input type="hidden" name="book_id" id="editBookId">
+
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="editTitle" class="block text-sm font-medium text-gray-700 mb-2">Título</label>
+                        <input type="text" id="editTitle" name="title" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                    </div>
+                    <div>
+                        <label for="editAuthor" class="block text-sm font-medium text-gray-700 mb-2">Autor</label>
+                        <input type="text" id="editAuthor" name="author" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                    </div>
+                    <div>
+                        <label for="editIsbn" class="block text-sm font-medium text-gray-700 mb-2">ISBN</label>
+                        <input type="text" id="editIsbn" name="isbn" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                    </div>
+                    <div>
+                        <label for="editCategory" class="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
+                        <input type="text" id="editCategory" name="category" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                    </div>
+                    <div>
+                        <label for="editTotalCopies" class="block text-sm font-medium text-gray-700 mb-2">Total de Copias</label>
+                        <input type="number" id="editTotalCopies" name="total_copies" min="1" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                    </div>
+                    <div>
+                        <label for="editLocation" class="block text-sm font-medium text-gray-700 mb-2">Ubicación</label>
+                        <input type="text" id="editLocation" name="location" placeholder="Ej: Estante A-1" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                    </div>
+                    <div>
+                        <label for="editStatus" class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                        <select id="editStatus" name="status" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                            <option value="available">Disponible</option>
+                            <option value="maintenance">Mantenimiento</option>
+                            <option value="lost">Perdido</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <label for="editDescription" class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+                    <textarea id="editDescription" name="description" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeEditModal()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition duration-200">
+                        Cancelar
+                    </button>
+                    <button type="submit" name="edit_book" class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300 transform hover:scale-105">
+                        <i class="fas fa-save mr-2"></i>
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
+function openLoanModal(bookId, bookTitle) {
+    document.getElementById('modalBookId').value = bookId;
+    document.getElementById('modalBookTitle').value = bookTitle;
+    document.getElementById('loanModal').classList.remove('hidden');
+}
+
+function closeLoanModal() {
+    document.getElementById('loanModal').classList.add('hidden');
+    document.getElementById('loanForm').reset();
+}
+
 function editBook(bookId) {
-    // This would open a modal to edit book details
-    alert('Funcionalidad de edición próximamente disponible. ID del libro: ' + bookId);
+    // Find book data
+    const books = <?php echo json_encode($books); ?>;
+    const book = books.find(b => b.id == bookId);
+
+    if (book) {
+        document.getElementById('editBookId').value = book.id;
+        document.getElementById('editTitle').value = book.title;
+        document.getElementById('editAuthor').value = book.author || '';
+        document.getElementById('editIsbn').value = book.isbn || '';
+        document.getElementById('editCategory').value = book.category || '';
+        document.getElementById('editTotalCopies').value = book.total_copies;
+        document.getElementById('editLocation').value = book.location || '';
+        document.getElementById('editStatus').value = book.status;
+        document.getElementById('editDescription').value = book.description || '';
+
+        document.getElementById('editModal').classList.remove('hidden');
+    }
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.add('hidden');
+    document.getElementById('editForm').reset();
 }
 
 function viewLoanDetails(loanId) {
     // This would open a modal with loan details
     alert('Funcionalidad de detalles próximamente disponible. ID del préstamo: ' + loanId);
 }
+
+// Close modals when clicking outside
+document.addEventListener('click', function(event) {
+    const loanModal = document.getElementById('loanModal');
+    const editModal = document.getElementById('editModal');
+
+    if (event.target === loanModal) {
+        closeLoanModal();
+    }
+    if (event.target === editModal) {
+        closeEditModal();
+    }
+});
 </script>
 
 <?php include '../../templates/footer.php'; ?>
