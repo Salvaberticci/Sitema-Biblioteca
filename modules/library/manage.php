@@ -3,55 +3,85 @@
 <?php include '../../templates/header.php'; ?>
 
 <?php
-// Handle form submissions
+// Handle form submissions with CSRF protection
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (isset($_POST['upload_resource'])) {
-        $title = sanitize($_POST['title']);
-        $author = sanitize($_POST['author']);
-        $type = sanitize($_POST['type']);
-        $subject = sanitize($_POST['subject']);
-        $description = sanitize($_POST['description']);
+    // Generate CSRF token if not exists
+    generateCSRFToken();
 
-        // Handle file upload
-        $file_path = '';
-        if (isset($_FILES['file']) && $_FILES['file']['error'] == 0) {
-            $upload_dir = '../../uploads/library/';
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0777, true);
+    // Check CSRF token
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $error = "Error de seguridad. Intente nuevamente.";
+    } else {
+        if (isset($_POST['upload_resource'])) {
+            $title = sanitize($_POST['title']);
+            $author = sanitize($_POST['author']);
+            $type = sanitize($_POST['type']);
+            $subject = sanitize($_POST['subject']);
+            $description = sanitize($_POST['description']);
+
+            // Handle file upload
+            $file_path = '';
+            if (isset($_FILES['file']) && $_FILES['file']['error'] == 0) {
+                $upload_dir = '../../uploads/library/';
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0777, true);
+                }
+
+                $file_name = time() . '_' . basename($_FILES['file']['name']);
+                $file_path = $upload_dir . $file_name;
+
+                if (move_uploaded_file($_FILES['file']['tmp_name'], $file_path)) {
+                    $file_path = 'uploads/library/' . $file_name;
+                } else {
+                    $error = "Error al subir el archivo.";
+                }
             }
 
-            $file_name = time() . '_' . basename($_FILES['file']['name']);
-            $file_path = $upload_dir . $file_name;
-
-            if (move_uploaded_file($_FILES['file']['tmp_name'], $file_path)) {
-                $file_path = 'uploads/library/' . $file_name;
-            } else {
-                $error = "Error al subir el archivo.";
+            if (!isset($error)) {
+                $stmt = $pdo->prepare("INSERT INTO library_resources (title, author, type, subject, description, file_path, uploaded_by) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$title, $author, $type, $subject, $description, $file_path, $_SESSION['user_id']]);
+                $success = "Recurso subido exitosamente.";
+                // Regenerate CSRF token after successful operation
+                regenerateCSRFToken();
+                // Redirect to prevent form resubmission
+                header("Location: " . $_SERVER['PHP_SELF'] . "?success=upload");
+                exit();
             }
-        }
+        } elseif (isset($_POST['delete_resource'])) {
+            $id = (int)$_POST['id'];
 
-        if (!isset($error)) {
-            $stmt = $pdo->prepare("INSERT INTO library_resources (title, author, type, subject, description, file_path, uploaded_by) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$title, $author, $type, $subject, $description, $file_path, $_SESSION['user_id']]);
-            $success = "Recurso subido exitosamente.";
-        }
-    } elseif (isset($_POST['delete_resource'])) {
-        $id = (int)$_POST['id'];
+            // Get file path to delete physical file
+            $stmt = $pdo->prepare("SELECT file_path FROM library_resources WHERE id = ?");
+            $stmt->execute([$id]);
+            $resource = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Get file path to delete physical file
-        $stmt = $pdo->prepare("SELECT file_path FROM library_resources WHERE id = ?");
-        $stmt->execute([$id]);
-        $resource = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($resource && $resource['file_path']) {
-            $full_path = '../../' . $resource['file_path'];
-            if (file_exists($full_path)) {
-                unlink($full_path);
+            if ($resource && $resource['file_path']) {
+                $full_path = '../../' . $resource['file_path'];
+                if (file_exists($full_path)) {
+                    unlink($full_path);
+                }
             }
-        }
 
-        $stmt = $pdo->prepare("DELETE FROM library_resources WHERE id = ?");
-        $stmt->execute([$id]);
+            $stmt = $pdo->prepare("DELETE FROM library_resources WHERE id = ?");
+            $stmt->execute([$id]);
+            $success = "Recurso eliminado exitosamente.";
+            // Regenerate CSRF token after successful operation
+            regenerateCSRFToken();
+            // Redirect to prevent form resubmission
+            header("Location: " . $_SERVER['PHP_SELF'] . "?success=delete");
+            exit();
+        }
+    }
+}
+
+// Generate CSRF token for forms
+generateCSRFToken();
+
+// Handle success messages from redirects
+if (isset($_GET['success'])) {
+    if ($_GET['success'] == 'upload') {
+        $success = "Recurso subido exitosamente.";
+    } elseif ($_GET['success'] == 'delete') {
         $success = "Recurso eliminado exitosamente.";
     }
 }
@@ -85,6 +115,7 @@ $resources = $stmt->fetchAll(PDO::FETCH_ASSOC);
             Subir Nuevo Recurso
         </h3>
         <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
             <div class="grid md:grid-cols-2 gap-6">
                 <div>
                     <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Título</label>
@@ -174,6 +205,7 @@ $resources = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         </a>
                                     <?php endif; ?>
                                     <form method="POST" class="inline" onsubmit="return confirm('¿Está seguro de eliminar este recurso?')">
+                                        <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
                                         <input type="hidden" name="id" value="<?php echo $resource['id']; ?>">
                                         <button type="submit" name="delete_resource" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200 flex items-center" title="Eliminar recurso">
                                             <i class="fas fa-trash mr-1"></i>
