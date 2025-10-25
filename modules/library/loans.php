@@ -330,16 +330,77 @@ if (isLoggedIn() && getUserRole() == 'admin') {
             <?php endif; ?>
         </div>
 
+        <!-- Search Bar for Physical Books -->
+        <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 animate-fade-in-up">
+            <h3 class="text-xl font-semibold mb-6 flex items-center">
+                <i class="fas fa-search mr-2 text-primary"></i>
+                Buscar Libros Físicos
+            </h3>
+            <form method="GET" class="grid md:grid-cols-4 gap-4">
+                <div>
+                    <label for="search_title" class="block text-sm font-medium text-gray-700 mb-2">Título</label>
+                    <input type="text" id="search_title" name="search_title" value="<?php echo htmlspecialchars($_GET['search_title'] ?? ''); ?>" placeholder="Buscar por título..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                </div>
+                <div>
+                    <label for="search_author" class="block text-sm font-medium text-gray-700 mb-2">Autor</label>
+                    <input type="text" id="search_author" name="search_author" value="<?php echo htmlspecialchars($_GET['search_author'] ?? ''); ?>" placeholder="Buscar por autor..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                </div>
+                <div>
+                    <label for="search_category" class="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
+                    <select id="search_category" name="search_category" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                        <option value="">Todas las categorías</option>
+                        <?php
+                        $categories = $pdo->query("SELECT DISTINCT category FROM physical_books WHERE category IS NOT NULL ORDER BY category")->fetchAll(PDO::FETCH_COLUMN);
+                        foreach ($categories as $category): ?>
+                            <option value="<?php echo htmlspecialchars($category); ?>" <?php echo (isset($_GET['search_category']) && $_GET['search_category'] == $category) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($category); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center mr-2">
+                        <i class="fas fa-search mr-2"></i>
+                        Buscar
+                    </button>
+                    <a href="loans.php" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 flex items-center">
+                        <i class="fas fa-times mr-2"></i>
+                        Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    
         <!-- Available Books for Loan -->
         <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up">
             <h3 class="text-xl font-semibold mb-6 flex items-center">
                 <i class="fas fa-book mr-2 text-primary"></i>
                 Libros Disponibles para Préstamo
             </h3>
-
-            <?php if (!empty($books)): ?>
+    
+            <?php
+            // Apply search filters
+            $search_title = isset($_GET['search_title']) ? sanitize($_GET['search_title']) : '';
+            $search_author = isset($_GET['search_author']) ? sanitize($_GET['search_author']) : '';
+            $search_category = isset($_GET['search_category']) ? sanitize($_GET['search_category']) : '';
+    
+            $filtered_books = $books;
+            if ($search_title || $search_author || $search_category) {
+                $filtered_books = array_filter($books, function($book) use ($search_title, $search_author, $search_category) {
+                    $matches_title = !$search_title || stripos($book['title'], $search_title) !== false;
+                    $matches_author = !$search_author || stripos($book['author'] ?? '', $search_author) !== false;
+                    $matches_category = !$search_category || $book['category'] == $search_category;
+                    return $matches_title && $matches_author && $matches_category;
+                });
+            }
+            ?>
+    
+            <?php if (!empty($filtered_books)): ?>
+                <div class="mb-4 text-sm text-gray-600">
+                    Mostrando <?php echo count($filtered_books); ?> de <?php echo count($books); ?> libros
+                </div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <?php foreach ($books as $book): ?>
+                    <?php foreach ($filtered_books as $book): ?>
                         <?php if ($book['available_copies'] > 0 && $book['status'] == 'available'): ?>
                             <div class="bg-gray-50 p-6 rounded-xl border-2 border-gray-200 hover:border-primary transition duration-300">
                                 <div class="flex items-start justify-between mb-4">
@@ -372,11 +433,11 @@ if (isLoggedIn() && getUserRole() == 'admin') {
                                         </div>
                                     </div>
                                 </div>
-
+    
                                 <?php if ($book['description']): ?>
                                     <p class="text-gray-600 text-sm mb-4 line-clamp-2"><?php echo htmlspecialchars($book['description']); ?></p>
                                 <?php endif; ?>
-
+    
                                 <form method="POST" onsubmit="return confirm('¿Solicitar préstamo de este libro? Tendrá 14 días para devolverlo.')">
                                     <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
                                     <input type="hidden" name="book_id" value="<?php echo $book['id']; ?>">
@@ -392,10 +453,14 @@ if (isLoggedIn() && getUserRole() == 'admin') {
             <?php else: ?>
                 <div class="text-center py-8">
                     <div class="text-6xl text-gray-300 mb-4">
-                        <i class="fas fa-books"></i>
+                        <i class="fas fa-search"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">No hay libros disponibles</h3>
-                    <p class="text-gray-600">No hay libros físicos registrados en el sistema.</p>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">No se encontraron libros</h3>
+                    <p class="text-gray-600">No hay libros que coincidan con los criterios de búsqueda.</p>
+                    <a href="loans.php" class="mt-4 inline-block bg-primary hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                        <i class="fas fa-times mr-2"></i>
+                        Limpiar filtros
+                    </a>
                 </div>
             <?php endif; ?>
         </div>

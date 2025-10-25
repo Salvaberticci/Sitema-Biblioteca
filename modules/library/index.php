@@ -185,7 +185,7 @@ $recent_uploads = $pdo->query("SELECT COUNT(*) FROM library_resources WHERE uplo
         <div class="flex justify-between items-center mb-6">
             <h3 class="text-xl font-semibold flex items-center">
                 <i class="fas fa-search mr-2 text-primary"></i>
-                Buscar Recursos
+                Buscar Recursos Digitales
             </h3>
             <button onclick="toggleAdvancedSearch()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center">
                 <i class="fas fa-sliders-h mr-2"></i>
