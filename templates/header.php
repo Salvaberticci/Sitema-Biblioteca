@@ -61,7 +61,7 @@
                             <li><a href="/biblioteca/index.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 transform hover:scale-105"><i class="fas fa-home"></i><span>Inicio</span></a></li>
                         <?php endif; ?>
                         <?php if (isLoggedIn()): ?>
-                            <li><a href="/biblioteca/dashboard.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 transform hover:scale-105"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+                            <li><a href="/biblioteca/dashboard.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 transform hover:scale-105"><i class="fas fa-tachometer-alt"></i><span>Panel de Administración</span></a></li>
                             <li><a href="/biblioteca/logout.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 transform hover:scale-105"><i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></a></li>
                         <?php else: ?>
                             <li><a href="/biblioteca/login.php" class="flex items-center space-x-2 bg-white text-primary px-4 py-2 rounded-full hover:bg-accent transition duration-300 transform hover:scale-105 shadow-lg"><i class="fas fa-sign-in-alt"></i><span>Iniciar Sesión</span></a></li>
@@ -78,7 +78,7 @@
                         <li><a href="/biblioteca/index.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 py-2"><i class="fas fa-home"></i><span>Inicio</span></a></li>
                     <?php endif; ?>
                     <?php if (isLoggedIn()): ?>
-                        <li><a href="/biblioteca/dashboard.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 py-2"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+                        <li><a href="/biblioteca/dashboard.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 py-2"><i class="fas fa-tachometer-alt"></i><span>Panel de Administración</span></a></li>
                         <li><a href="/biblioteca/logout.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 py-2"><i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></a></li>
                     <?php else: ?>
                         <li><a href="/biblioteca/login.php" class="flex items-center space-x-2 bg-white text-primary px-4 py-2 rounded-full hover:bg-accent transition duration-300 shadow-lg"><i class="fas fa-sign-in-alt"></i><span>Iniciar Sesión</span></a></li>
