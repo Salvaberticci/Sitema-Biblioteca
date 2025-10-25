@@ -182,10 +182,6 @@ $disk_usage_percent = round(($disk_used / $disk_total) * 100, 1);
                     <label for="auto_backup" class="ml-2 text-sm text-gray-700">Respaldo automático diario</label>
                 </div>
                 <div class="flex items-center">
-                    <input type="checkbox" id="email_notifications" name="email_notifications" checked class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
-                    <label for="email_notifications" class="ml-2 text-sm text-gray-700">Notificaciones por email</label>
-                </div>
-                <div class="flex items-center">
                     <input type="checkbox" id="late_submissions" name="late_submissions" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
                     <label for="late_submissions" class="ml-2 text-sm text-gray-700">Permitir entregas tardías</label>
                 </div>
