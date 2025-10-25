@@ -303,15 +303,19 @@ if (isLoggedIn() && getUserRole() == 'admin') {
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-sm">
-                                        <?php if ($loan['status'] == 'active' || $loan['status'] == 'overdue'): ?>
-                                            <form method="POST" class="inline" onsubmit="return confirm('¿Está seguro de que desea devolver este libro?')">
-                                                <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
-                                                <input type="hidden" name="loan_id" value="<?php echo $loan['id']; ?>">
-                                                <button type="submit" name="return_book" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200">
-                                                    <i class="fas fa-undo mr-1"></i>
-                                                    Devolver
-                                                </button>
-                                            </form>
+                                        <?php if (isLoggedIn() && getUserRole() != 'student'): ?>
+                                            <?php if ($loan['status'] == 'active' || $loan['status'] == 'overdue'): ?>
+                                                <form method="POST" class="inline" onsubmit="return confirm('¿Está seguro de que desea devolver este libro?')">
+                                                    <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+                                                    <input type="hidden" name="loan_id" value="<?php echo $loan['id']; ?>">
+                                                    <button type="submit" name="return_book" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200">
+                                                        <i class="fas fa-undo mr-1"></i>
+                                                        Devolver
+                                                    </button>
+                                                </form>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <span class="text-gray-500 italic text-sm">Solo personal autorizado puede devolver libros</span>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
