@@ -181,10 +181,6 @@ $disk_usage_percent = round(($disk_used / $disk_total) * 100, 1);
                     <input type="checkbox" id="auto_backup" name="auto_backup" checked class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
                     <label for="auto_backup" class="ml-2 text-sm text-gray-700">Respaldo automático diario</label>
                 </div>
-                <div class="flex items-center">
-                    <input type="checkbox" id="late_submissions" name="late_submissions" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
-                    <label for="late_submissions" class="ml-2 text-sm text-gray-700">Permitir entregas tardías</label>
-                </div>
             </div>
             <div>
                 <button type="submit" name="update_academic_settings" class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center">
