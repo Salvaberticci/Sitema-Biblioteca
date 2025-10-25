@@ -161,6 +161,21 @@ $totalActivities = $pdo->query("SELECT COUNT(*) FROM activities")->fetchColumn()
             </div>
         </a>
 
+        <a href="enrollments.php" class="group bg-gradient-to-br from-purple-500 to-purple-600 p-8 rounded-2xl shadow-xl card-hover text-white relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-20 h-20 bg-white opacity-10 rounded-full -mr-10 -mt-10"></div>
+            <div class="relative z-10">
+                <div class="text-5xl mb-4 group-hover:scale-110 transition duration-300">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-3">Matrículas</h3>
+                <p class="opacity-90">Gestionar matrículas de estudiantes en cursos.</p>
+                <div class="mt-4 flex items-center text-sm">
+                    <i class="fas fa-arrow-right mr-2"></i>
+                    <span>Administrar matrículas</span>
+                </div>
+            </div>
+        </a>
+
         <a href="reports.php" class="group bg-gradient-to-br from-purple-500 to-purple-600 p-8 rounded-2xl shadow-xl card-hover text-white relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-white opacity-10 rounded-full -mr-10 -mt-10"></div>
             <div class="relative z-10">

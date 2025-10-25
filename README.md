@@ -11,6 +11,7 @@ Este proyecto es un sistema de gestión completo diseñado para instituciones ed
 ### 👨‍💼 Panel de Administración
 - **Gestión de Usuarios**: Crear, editar y gestionar usuarios del sistema (estudiantes, docentes, administradores)
 - **Gestión de Cursos**: Administrar programas académicos y asignaturas
+- **Gestión de Matrículas**: Matricular estudiantes en cursos, ver lista completa de matrículas y desmatricular estudiantes
 - **Gestión de Préstamos**: Control completo de préstamos de biblioteca con estadísticas
 - **Reportes Avanzados**: Generar estadísticas y reportes académicos detallados con gráficos
 - **Configuración del Sistema**: Parámetros globales y ajustes institucionales
@@ -26,6 +27,7 @@ Este proyecto es un sistema de gestión completo diseñado para instituciones ed
 - **Horarios de Clases**: Visualización de horarios asignados
 
 ### 👨‍🎓 Portal del Estudiante
+- **Matrícula de Cursos**: Auto-matriculación en cursos disponibles con vista de cursos matriculados
 - **Consulta de Notas**: Ver calificaciones y promedio académico con análisis detallado
 - **Historial Académico**: Historial completo de cursos y notas con GPA
 - **Actividades**: Ver y subir tareas asignadas con estado de calificación
@@ -107,11 +109,13 @@ biblioteca/
 │   │   ├── dashboard.php     # Dashboard con estadísticas
 │   │   ├── users.php         # Gestión completa de usuarios
 │   │   ├── courses.php       # Administración de cursos
+│   │   ├── enrollments.php   # Gestión completa de matrículas
 │   │   ├── reports.php       # Reportes avanzados con gráficos
 │   │   ├── settings.php      # Configuración del sistema
 │   │   └── profile.php       # Perfil de administrador
 │   ├── student/              # Portal completo del estudiante
 │   │   ├── dashboard.php     # Dashboard del estudiante
+│   │   ├── enroll.php        # Sistema de matrícula de cursos
 │   │   ├── grades.php        # Consulta de calificaciones
 │   │   ├── activities.php    # Gestión de actividades
 │   │   ├── history.php       # Historial académico completo
@@ -257,6 +261,15 @@ Para soporte técnico o consultas:
   - ✅ Funcionalidades completas de gestión académica
   - ✅ Sistema de biblioteca virtual avanzado
   - ✅ Control inteligente de horarios y aulas
+- **v1.2.0**: 🎓 Sistema de Matrículas Implementado
+  - ✅ Gestión completa de matrículas para administradores
+  - ✅ Auto-matriculación para estudiantes con interfaz intuitiva
+  - ✅ Validaciones robustas contra matrículas duplicadas
+  - ✅ Vista integrada de cursos matriculados y disponibles
+  - ✅ Control de acceso granular por roles
+  - ✅ Integración completa con módulos de docentes (notas, asistencia)
+  - ✅ Estadísticas actualizadas en dashboards administrativos
+  - ✅ Interfaz responsiva con animaciones y diseño moderno
 
 ---
 
