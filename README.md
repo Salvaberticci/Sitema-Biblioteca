@@ -19,6 +19,7 @@ Este proyecto es un sistema de gestión completo diseñado para instituciones ed
 - **Mantenimiento del Sistema**: Respaldos, limpieza de caché y operaciones de sistema
 
 ### 👨‍🏫 Panel del Docente
+- **Gestión de Matrículas**: Matricular y desmatricular estudiantes en cursos asignados
 - **Gestión de Notas**: Registrar y modificar calificaciones de estudiantes con estadísticas detalladas
 - **Control de Asistencia**: Marcar asistencia en clases con reportes visuales
 - **Actividades y Tareas**: Crear, asignar y calificar actividades académicas
@@ -122,6 +123,7 @@ biblioteca/
 │   │   └── profile.php       # Perfil personal del estudiante
 │   ├── teacher/              # Panel completo del docente
 │   │   ├── dashboard.php     # Dashboard del docente
+│   │   ├── enrollments.php   # Gestión de matrículas
 │   │   ├── grades.php        # Gestión de calificaciones
 │   │   ├── activities.php    # Gestión de actividades
 │   │   ├── attendance.php    # Control de asistencia
