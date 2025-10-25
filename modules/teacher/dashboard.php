@@ -6,21 +6,9 @@
     <h2 class="text-3xl font-bold text-gray-800 mb-6">Panel del Docente</h2>
 
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <a href="enrollments.php" class="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-lg shadow-lg card-hover border-2 border-purple-200">
-            <div class="flex items-center mb-4">
-                <div class="text-4xl text-purple-600 mr-4">
-                    <i class="fas fa-user-plus"></i>
-                </div>
-                <div>
-                    <h3 class="text-2xl font-bold text-purple-800 mb-1">Matrículas</h3>
-                    <p class="text-purple-600 font-medium">Gestionar estudiantes</p>
-                </div>
-            </div>
-            <p class="text-gray-700 mb-4">Matricular y desmatricular estudiantes en tus cursos.</p>
-            <div class="flex items-center text-purple-700 font-semibold">
-                <i class="fas fa-arrow-right mr-2"></i>
-                <span>Gestionar matrículas</span>
-            </div>
+        <a href="enrollments.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
+            <h3 class="text-xl font-semibold text-primary mb-2">Gestión de Matrículas</h3>
+            <p class="text-gray-600">Matricular y desmatricular estudiantes en tus cursos.</p>
         </a>
         <a href="grades.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
             <h3 class="text-xl font-semibold text-primary mb-2">Gestión de Notas</h3>
