@@ -197,6 +197,36 @@ El sistema incluye usuarios de prueba preconfigurados:
 - **Docente**: teacher1 / password
 - **Estudiante**: student1 / password
 
+### 📊 Base de Datos de Prueba
+
+Para pruebas exhaustivas, se incluye un script `test_data.sql` con datos completos:
+
+```bash
+# Crear base de datos de prueba
+mysql -u root -p -e "CREATE DATABASE biblioteca_test;"
+
+# Ejecutar esquema base
+mysql -u root -p biblioteca_test < biblioteca.sql
+
+# Cargar datos de prueba
+mysql -u root -p biblioteca_test < test_data.sql
+```
+
+**Datos incluidos:**
+- **25 estudiantes** con nombres realistas venezolanos
+- **5 profesores adicionales** con especialidades variadas
+- **16 cursos** de diferentes asignaturas
+- **Horarios completos** para todo el semestre
+- **Matrículas activas** con calificaciones variadas
+- **Actividades y tareas** con entregas de estudiantes
+- **Recursos de biblioteca** físicos y digitales
+- **Préstamos activos** con diferentes estados
+- **Asistencia registrada** para múltiples clases
+
+**Usuarios de prueba adicionales:**
+- **Profesores**: maria.gonzalez.prof, carlos.rodriguez.prof, ana.lopez.prof, pedro.martinez.prof, laura.sanchez.prof
+- **Estudiantes**: juan.perez.alumno, maria.garcia.alumna, carlos.sanchez, ana.torres, luis.ramirez, etc.
+
 ## 🎨 Características de Interfaz
 
 - **Diseño Responsivo**: Compatible con dispositivos móviles y desktop
@@ -263,6 +293,16 @@ Para soporte técnico o consultas:
   - ✅ Funcionalidades completas de gestión académica
   - ✅ Sistema de biblioteca virtual avanzado
   - ✅ Control inteligente de horarios y aulas
+- **v1.2.0**: 🚀 Sistema de matrículas completo y mejoras de seguridad
+  - ✅ Sistema completo de matrículas para estudiantes y administradores
+  - ✅ Auto-matriculación de estudiantes en cursos disponibles
+  - ✅ Gestión administrativa de matrículas con validaciones
+  - ✅ Vista de matrículas para profesores con control de acceso
+  - ✅ Mejoras de seguridad: eliminación de opciones peligrosas
+  - ✅ Interfaz de configuración simplificada y segura
+  - ✅ Datos de prueba exhaustivos con nombres realistas
+  - ✅ Búsqueda avanzada en biblioteca física y digital
+  - ✅ Control de acceso restringido para devoluciones de libros
 - **v1.2.0**: 🎓 Sistema de Matrículas Implementado
   - ✅ Gestión completa de matrículas para administradores
   - ✅ Auto-matriculación para estudiantes con interfaz intuitiva
