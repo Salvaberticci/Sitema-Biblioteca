@@ -14,7 +14,7 @@ INSERT INTO users (username, password, email, name, role, created_at) VALUES
 ('pedro.martinez.prof', '$2y$10$mH6D7lUIGNLxGI2rvwQrLONflA/dS0modlsu8qcQBHmOHyLUOChju', 'pedro.martinez@etc.edu', 'Pedro Martínez García', 'teacher', '2025-10-20 10:45:00'),
 ('laura.sanchez.prof', '$2y$10$mH6D7lUIGNLxGI2rvwQrLONflA/dS0modlsu8qcQBHmOHyLUOChju', 'laura.sanchez@etc.edu', 'Laura Sánchez Torres', 'teacher', '2025-10-20 11:00:00');
 
--- Additional Students (25 students with realistic Venezuelan names)
+-- Additional Students (25 students with realistic Venezuelan names and proper UTF-8 encoding)
 INSERT INTO users (username, password, email, name, role, created_at) VALUES
 ('juan.perez.alumno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'juan.perez@etc.edu', 'Juan Carlos Pérez González', 'student', '2025-10-20 11:00:00'),
 ('maria.garcia.alumna', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'maria.garcia@etc.edu', 'María José García Rodríguez', 'student', '2025-10-20 11:15:00'),
