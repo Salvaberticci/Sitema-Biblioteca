@@ -222,16 +222,8 @@ $disk_usage_percent = round(($disk_used / $disk_total) * 100, 1);
             </div>
             <div class="space-y-4">
                 <div class="flex items-center">
-                    <input type="checkbox" id="two_factor" name="two_factor" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
-                    <label for="two_factor" class="ml-2 text-sm text-gray-700">Autenticación de dos factores</label>
-                </div>
-                <div class="flex items-center">
                     <input type="checkbox" id="force_https" name="force_https" checked class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
                     <label for="force_https" class="ml-2 text-sm text-gray-700">Forzar conexión HTTPS</label>
-                </div>
-                <div class="flex items-center">
-                    <input type="checkbox" id="ip_whitelist" name="ip_whitelist" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
-                    <label for="ip_whitelist" class="ml-2 text-sm text-gray-700">Lista blanca de IPs</label>
                 </div>
             </div>
             <div>
@@ -280,25 +272,6 @@ $disk_usage_percent = round(($disk_used / $disk_total) * 100, 1);
             </div>
         </div>
 
-        <div class="bg-gradient-to-r from-red-50 to-red-100 p-6 rounded-lg border-l-4 border-red-500">
-            <h4 class="font-semibold text-red-800 mb-3 flex items-center">
-                <i class="fas fa-exclamation-triangle mr-2"></i>
-                Operaciones de Alto Riesgo
-            </h4>
-            <p class="text-sm text-red-600 mb-4">Estas operaciones pueden causar pérdida permanente de datos. Use solo en casos extremos.</p>
-            <div class="flex space-x-4">
-                <form method="POST" onsubmit="return confirm('¿Está completamente seguro? Esta acción eliminará TODOS los datos del sistema y no se puede deshacer.')">
-                    <button type="submit" name="reset_system" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-200 flex items-center">
-                        <i class="fas fa-trash-alt mr-2"></i>
-                        Resetear Sistema
-                    </button>
-                </form>
-                <button onclick="alert('Esta funcionalidad estará disponible en futuras versiones.')" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-200 flex items-center">
-                    <i class="fas fa-file-import mr-2"></i>
-                    Importar Datos
-                </button>
-            </div>
-        </div>
     </div>
 </main>
 
