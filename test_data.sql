@@ -1,12 +1,12 @@
 -- Test Data Script for Sistema de Gestión ETC "Pedro García Leal"
 -- This script provides comprehensive test data for all system modules
 -- Run this after the main database.sql to populate with test data
+-- UTF-8 Support: All data includes proper Spanish characters with accents and ñ
 
 -- =====================================================
--- USERS DATA
+-- USERS DATA - Profesores Adicionales
 -- =====================================================
 
--- Additional Teachers
 INSERT INTO users (username, password, email, name, role, created_at) VALUES
 ('maria.gonzalez.prof', '$2y$10$mH6D7lUIGNLxGI2rvwQrLONflA/dS0modlsu8qcQBHmOHyLUOChju', 'maria.gonzalez@etc.edu', 'María González Pérez', 'teacher', '2025-10-20 10:00:00'),
 ('carlos.rodriguez.prof', '$2y$10$mH6D7lUIGNLxGI2rvwQrLONflA/dS0modlsu8qcQBHmOHyLUOChju', 'carlos.rodriguez@etc.edu', 'Carlos Rodríguez Silva', 'teacher', '2025-10-20 10:15:00'),
@@ -14,33 +14,36 @@ INSERT INTO users (username, password, email, name, role, created_at) VALUES
 ('pedro.martinez.prof', '$2y$10$mH6D7lUIGNLxGI2rvwQrLONflA/dS0modlsu8qcQBHmOHyLUOChju', 'pedro.martinez@etc.edu', 'Pedro Martínez García', 'teacher', '2025-10-20 10:45:00'),
 ('laura.sanchez.prof', '$2y$10$mH6D7lUIGNLxGI2rvwQrLONflA/dS0modlsu8qcQBHmOHyLUOChju', 'laura.sanchez@etc.edu', 'Laura Sánchez Torres', 'teacher', '2025-10-20 11:00:00');
 
--- Additional Students (25 students with realistic Venezuelan names and proper UTF-8 encoding)
+-- =====================================================
+-- USERS DATA - Estudiantes con Nombres Venezolanos Reales
+-- =====================================================
+
 INSERT INTO users (username, password, email, name, role, created_at) VALUES
 ('juan.perez.alumno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'juan.perez@etc.edu', 'Juan Carlos Pérez González', 'student', '2025-10-20 11:00:00'),
 ('maria.garcia.alumna', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'maria.garcia@etc.edu', 'María José García Rodríguez', 'student', '2025-10-20 11:15:00'),
-('carlos.sanchez', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'carlos.sanchez@etc.edu', 'Carlos Alberto Sánchez López', 'student', '2025-10-20 11:30:00'),
-('ana.torres', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'ana.torres@etc.edu', 'Ana María Torres Martínez', 'student', '2025-10-20 11:45:00'),
-('luis.ramirez', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'luis.ramirez@etc.edu', 'Luis Fernando Ramírez Silva', 'student', '2025-10-20 12:00:00'),
-('carmen.flores', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'carmen.flores@etc.edu', 'Carmen Rosa Flores Díaz', 'student', '2025-10-20 12:15:00'),
-('miguel.herrera', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'miguel.herrera@etc.edu', 'Miguel Ángel Herrera Morales', 'student', '2025-10-20 12:30:00'),
-('isabel.morales', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'isabel.morales@etc.edu', 'Isabel Cristina Morales Ruiz', 'student', '2025-10-20 12:45:00'),
-('roberto.diaz', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'roberto.diaz@etc.edu', 'Roberto José Díaz Gómez', 'student', '2025-10-20 13:00:00'),
-('patricia.ruiz', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'patricia.ruiz@etc.edu', 'Patricia Andrea Ruiz Vargas', 'student', '2025-10-20 13:15:00'),
-('fernando.gomez', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'fernando.gomez@etc.edu', 'Fernando Antonio Gómez Castro', 'student', '2025-10-20 13:30:00'),
-('gabriela.silva', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'gabriela.silva@etc.edu', 'Gabriela Isabel Silva Mendoza', 'student', '2025-10-20 13:45:00'),
-('diego.vargas', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'diego.vargas@etc.edu', 'Diego Alejandro Vargas Ortega', 'student', '2025-10-20 14:00:00'),
-('valentina.castro', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'valentina.castro@etc.edu', 'Valentina Sofía Castro Luna', 'student', '2025-10-20 14:15:00'),
-('andres.mendoza', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'andres.mendoza@etc.edu', 'Andrés Felipe Mendoza Ríos', 'student', '2025-10-20 14:30:00'),
-('camila.ortega', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'camila.ortega@etc.edu', 'Camila Andrea Ortega Aguilar', 'student', '2025-10-20 14:45:00'),
-('sebastian.luna', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'sebastian.luna@etc.edu', 'Sebastián David Luna Navarro', 'student', '2025-10-20 15:00:00'),
-('daniela.rios', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'daniela.rios@etc.edu', 'Daniela Valentina Ríos Peña', 'student', '2025-10-20 15:15:00'),
-('mateo.aguilar', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'mateo.aguilar@etc.edu', 'Mateo Alejandro Aguilar Blanco', 'student', '2025-10-20 15:30:00'),
-('sofia.navarro', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'sofia.navarro@etc.edu', 'Sofía Carolina Navarro Moreno', 'student', '2025-10-20 15:45:00'),
-('alejandro.moreno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'alejandro.moreno@etc.edu', 'Alejandro José Moreno Peña', 'student', '2025-10-20 16:00:00'),
-('valeria.blanco', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'valeria.blanco@etc.edu', 'Valeria Isabel Blanco Romero', 'student', '2025-10-20 16:15:00'),
-('emmanuel.peña', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'emmanuel.peña@etc.edu', 'Emmanuel David Peña Castillo', 'student', '2025-10-20 16:30:00'),
-('mariana.romero', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'mariana.romero@etc.edu', 'Mariana Sofía Romero Castillo', 'student', '2025-10-20 16:45:00'),
-('samuel.castillo', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'samuel.castillo@etc.edu', 'Samuel Andrés Castillo Medina', 'student', '2025-10-20 17:00:00');
+('carlos.sanchez.alumno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'carlos.sanchez@etc.edu', 'Carlos Alberto Sánchez López', 'student', '2025-10-20 11:30:00'),
+('ana.torres.alumna', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'ana.torres@etc.edu', 'Ana María Torres Martínez', 'student', '2025-10-20 11:45:00'),
+('luis.ramirez.alumno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'luis.ramirez@etc.edu', 'Luis Fernando Ramírez Silva', 'student', '2025-10-20 12:00:00'),
+('carmen.flores.alumna', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'carmen.flores@etc.edu', 'Carmen Rosa Flores Díaz', 'student', '2025-10-20 12:15:00'),
+('miguel.herrera.alumno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'miguel.herrera@etc.edu', 'Miguel Ángel Herrera Morales', 'student', '2025-10-20 12:30:00'),
+('isabel.morales.alumna', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'isabel.morales@etc.edu', 'Isabel Cristina Morales Ruiz', 'student', '2025-10-20 12:45:00'),
+('roberto.diaz.alumno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'roberto.diaz@etc.edu', 'Roberto José Díaz Gómez', 'student', '2025-10-20 13:00:00'),
+('patricia.ruiz.alumna', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'patricia.ruiz@etc.edu', 'Patricia Andrea Ruiz Vargas', 'student', '2025-10-20 13:15:00'),
+('fernando.gomez.alumno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'fernando.gomez@etc.edu', 'Fernando Antonio Gómez Castro', 'student', '2025-10-20 13:30:00'),
+('gabriela.silva.alumna', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'gabriela.silva@etc.edu', 'Gabriela Isabel Silva Mendoza', 'student', '2025-10-20 13:45:00'),
+('diego.vargas.alumno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'diego.vargas@etc.edu', 'Diego Alejandro Vargas Ortega', 'student', '2025-10-20 14:00:00'),
+('valentina.castro.alumna', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'valentina.castro@etc.edu', 'Valentina Sofía Castro Luna', 'student', '2025-10-20 14:15:00'),
+('andres.mendoza.alumno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'andres.mendoza@etc.edu', 'Andrés Felipe Mendoza Ríos', 'student', '2025-10-20 14:30:00'),
+('camila.ortega.alumna', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'camila.ortega@etc.edu', 'Camila Andrea Ortega Aguilar', 'student', '2025-10-20 14:45:00'),
+('sebastian.luna.alumno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'sebastian.luna@etc.edu', 'Sebastián David Luna Navarro', 'student', '2025-10-20 15:00:00'),
+('daniela.rios.alumna', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'daniela.rios@etc.edu', 'Daniela Valentina Ríos Peña', 'student', '2025-10-20 15:15:00'),
+('mateo.aguilar.alumno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'mateo.aguilar@etc.edu', 'Mateo Alejandro Aguilar Blanco', 'student', '2025-10-20 15:30:00'),
+('sofia.navarro.alumna', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'sofia.navarro@etc.edu', 'Sofía Carolina Navarro Moreno', 'student', '2025-10-20 15:45:00'),
+('alejandro.moreno.alumno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'alejandro.moreno@etc.edu', 'Alejandro José Moreno Peña', 'student', '2025-10-20 16:00:00'),
+('valeria.blanco.alumna', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'valeria.blanco@etc.edu', 'Valeria Isabel Blanco Romero', 'student', '2025-10-20 16:15:00'),
+('emmanuel.pena.alumno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'emmanuel.pena@etc.edu', 'Emmanuel David Peña Castillo', 'student', '2025-10-20 16:30:00'),
+('mariana.romero.alumna', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'mariana.romero@etc.edu', 'Mariana Sofía Romero Castillo', 'student', '2025-10-20 16:45:00'),
+('samuel.castillo.alumno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'samuel.castillo@etc.edu', 'Samuel Andrés Castillo Medina', 'student', '2025-10-20 17:00:00');
 
 -- =====================================================
 -- COURSES DATA
