@@ -57,7 +57,9 @@
                 </div>
                 <nav class="hidden md:block">
                     <ul class="flex space-x-8">
-                        <li><a href="/biblioteca/index.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 transform hover:scale-105"><i class="fas fa-home"></i><span>Inicio</span></a></li>
+                        <?php if (!isLoggedIn()): ?>
+                            <li><a href="/biblioteca/index.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 transform hover:scale-105"><i class="fas fa-home"></i><span>Inicio</span></a></li>
+                        <?php endif; ?>
                         <?php if (isLoggedIn()): ?>
                             <li><a href="/biblioteca/dashboard.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 transform hover:scale-105"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
                             <li><a href="/biblioteca/logout.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 transform hover:scale-105"><i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></a></li>
@@ -72,7 +74,9 @@
             </div>
             <nav class="md:hidden mt-4 hidden" id="mobile-menu">
                 <ul class="flex flex-col space-y-2">
-                    <li><a href="/biblioteca/index.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 py-2"><i class="fas fa-home"></i><span>Inicio</span></a></li>
+                    <?php if (!isLoggedIn()): ?>
+                        <li><a href="/biblioteca/index.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 py-2"><i class="fas fa-home"></i><span>Inicio</span></a></li>
+                    <?php endif; ?>
                     <?php if (isLoggedIn()): ?>
                         <li><a href="/biblioteca/dashboard.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 py-2"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
                         <li><a href="/biblioteca/logout.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 py-2"><i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></a></li>
