@@ -6,21 +6,9 @@
     <h2 class="text-3xl font-bold text-gray-800 mb-6">Portal del Estudiante</h2>
 
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <a href="enroll.php" class="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-lg shadow-lg card-hover border-2 border-green-200">
-            <div class="flex items-center mb-4">
-                <div class="text-4xl text-green-600 mr-4">
-                    <i class="fas fa-graduation-cap"></i>
-                </div>
-                <div>
-                    <h3 class="text-2xl font-bold text-green-800 mb-1">Matrícula de Cursos</h3>
-                    <p class="text-green-600 font-medium">Matricularme en cursos disponibles</p>
-                </div>
-            </div>
-            <p class="text-gray-700 mb-4">Explora y matricúlate en los cursos disponibles. Gestiona tus matrículas académicas.</p>
-            <div class="flex items-center text-green-700 font-semibold">
-                <i class="fas fa-arrow-right mr-2"></i>
-                <span>Ver cursos disponibles</span>
-            </div>
+        <a href="enroll.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
+            <h3 class="text-xl font-semibold text-primary mb-2">Matrícula de Cursos</h3>
+            <p class="text-gray-600">Matricularme en cursos disponibles y gestionar mis matrículas académicas.</p>
         </a>
         <a href="grades.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
             <h3 class="text-xl font-semibold text-primary mb-2">Mis Notas</h3>
