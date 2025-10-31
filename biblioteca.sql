@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 22-10-2025 a las 20:05:01
+-- Tiempo de generación: 31-10-2025 a las 02:25:58
 -- Versión del servidor: 10.4.28-MariaDB
 -- Versión de PHP: 8.2.4
 
@@ -38,6 +38,13 @@ CREATE TABLE `activities` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `activities`
+--
+
+INSERT INTO `activities` (`id`, `title`, `description`, `course_id`, `teacher_id`, `due_date`, `file_path`, `created_at`) VALUES
+(1, 'Mapa mental', 'Hacer un mapa mental sobre la computadora', 2, 2, '2025-11-05 20:46:00', 'uploads/activities/1761871624_Opera Captura de pantalla_2025-09-17_144729_127.0.0.1.png', '2025-10-31 00:47:04');
+
 -- --------------------------------------------------------
 
 --
@@ -50,6 +57,31 @@ CREATE TABLE `attendance` (
   `student_id` int(11) NOT NULL,
   `date` date NOT NULL,
   `status` enum('present','absent','late','excused') NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `attendance`
+--
+
+INSERT INTO `attendance` (`id`, `course_id`, `student_id`, `date`, `status`) VALUES
+(1, 2, 29, '2025-10-31', 'present'),
+(2, 2, 29, '2025-10-31', 'absent');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `book_loans`
+--
+
+CREATE TABLE `book_loans` (
+  `id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `loan_date` datetime NOT NULL DEFAULT current_timestamp(),
+  `due_date` datetime NOT NULL,
+  `return_date` datetime DEFAULT NULL,
+  `status` enum('active','returned','overdue') NOT NULL DEFAULT 'active',
+  `notes` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -132,6 +164,14 @@ CREATE TABLE `enrollments` (
   `status` enum('enrolled','completed','failed') DEFAULT 'enrolled'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `enrollments`
+--
+
+INSERT INTO `enrollments` (`id`, `student_id`, `course_id`, `period`, `grade`, `status`) VALUES
+(1, 29, 2, '2025-1', 9.00, 'enrolled'),
+(3, 3, 2, '2025-1', 16.00, 'enrolled');
+
 -- --------------------------------------------------------
 
 --
@@ -151,6 +191,7 @@ CREATE TABLE `library_resources` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
+
 --
 -- Estructura de tabla para la tabla `physical_books`
 --
@@ -167,22 +208,6 @@ CREATE TABLE `physical_books` (
   `location` varchar(100) DEFAULT NULL,
   `added_date` timestamp NOT NULL DEFAULT current_timestamp(),
   `status` enum('available','maintenance','lost') NOT NULL DEFAULT 'available'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
---
--- Estructura de tabla para la tabla `book_loans`
---
-
-CREATE TABLE `book_loans` (
-  `id` int(11) NOT NULL,
-  `book_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `loan_date` datetime NOT NULL DEFAULT current_timestamp(),
-  `due_date` datetime NOT NULL,
-  `return_date` datetime DEFAULT NULL,
-  `status` enum('active','returned','overdue') NOT NULL DEFAULT 'active',
-  `notes` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -260,6 +285,13 @@ CREATE TABLE `submissions` (
   `submitted_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `submissions`
+--
+
+INSERT INTO `submissions` (`id`, `activity_id`, `student_id`, `file_path`, `grade`, `comments`, `submitted_at`) VALUES
+(1, 1, 3, 'uploads/submissions/1761872447_3_Opera Captura de pantalla_2025-09-17_144729_127.0.0.1.png', 18.00, '', '2025-10-31 01:00:47');
+
 -- --------------------------------------------------------
 
 --
@@ -336,6 +368,14 @@ ALTER TABLE `attendance`
   ADD KEY `student_id` (`student_id`);
 
 --
+-- Indices de la tabla `book_loans`
+--
+ALTER TABLE `book_loans`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `book_id` (`book_id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
 -- Indices de la tabla `classrooms`
 --
 ALTER TABLE `classrooms`
@@ -369,14 +409,6 @@ ALTER TABLE `library_resources`
 ALTER TABLE `physical_books`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `isbn` (`isbn`);
-
---
--- Indices de la tabla `book_loans`
---
-ALTER TABLE `book_loans`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `book_id` (`book_id`),
-  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indices de la tabla `schedules`
@@ -418,31 +450,37 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT de la tabla `activities`
 --
 ALTER TABLE `activities`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `attendance`
 --
 ALTER TABLE `attendance`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `book_loans`
+--
+ALTER TABLE `book_loans`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `classrooms`
 --
 ALTER TABLE `classrooms`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `enrollments`
 --
 ALTER TABLE `enrollments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `library_resources`
@@ -457,16 +495,10 @@ ALTER TABLE `physical_books`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de la tabla `book_loans`
---
-ALTER TABLE `book_loans`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT de la tabla `schedules`
 --
 ALTER TABLE `schedules`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de la tabla `schedule_conflicts`
@@ -478,13 +510,13 @@ ALTER TABLE `schedule_conflicts`
 -- AUTO_INCREMENT de la tabla `submissions`
 --
 ALTER TABLE `submissions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- Restricciones para tablas volcadas
@@ -505,6 +537,13 @@ ALTER TABLE `attendance`
   ADD CONSTRAINT `attendance_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`);
 
 --
+-- Filtros para la tabla `book_loans`
+--
+ALTER TABLE `book_loans`
+  ADD CONSTRAINT `book_loans_ibfk_1` FOREIGN KEY (`book_id`) REFERENCES `physical_books` (`id`),
+  ADD CONSTRAINT `book_loans_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
 -- Filtros para la tabla `enrollments`
 --
 ALTER TABLE `enrollments`
@@ -516,13 +555,6 @@ ALTER TABLE `enrollments`
 --
 ALTER TABLE `library_resources`
   ADD CONSTRAINT `library_resources_ibfk_1` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`id`);
-
---
--- Filtros para la tabla `book_loans`
---
-ALTER TABLE `book_loans`
-  ADD CONSTRAINT `book_loans_ibfk_1` FOREIGN KEY (`book_id`) REFERENCES `physical_books` (`id`),
-  ADD CONSTRAINT `book_loans_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
 -- Filtros para la tabla `schedules`
