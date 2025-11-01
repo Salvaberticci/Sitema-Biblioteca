@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Sistema de Gestión ETC Pedro García Leal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script>
         tailwind.config = {
             theme: {
@@ -44,6 +44,7 @@
         }
     </script>
     <link rel="stylesheet" href="assets/css/style.css">
+    <script src="assets/js/chatbot.js" defer></script>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-accent min-h-screen flex flex-col">
     <header class="bg-gradient-to-r from-primary to-secondary text-white shadow-2xl sticky top-0 z-50">
@@ -87,5 +88,8 @@
                 </ul>
             </nav>
         </div>
-    <div class="flex-grow">
-    </header>
+        <div class="flex-grow">
+        </header>
+
+        <!-- Include Chatbot Component -->
+        <?php include __DIR__ . '/chatbot.php'; ?>
