@@ -1,9 +1,8 @@
 <?php require_once '../../includes/config.php'; ?>
 <?php requireRole('admin'); ?>
-<?php include '../../templates/header.php'; ?>
 
 <?php
-// Handle form submissions with CSRF protection
+// Handle form submissions with CSRF protection BEFORE including header
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Generate CSRF token if not exists
     generateCSRFToken();
@@ -85,6 +84,8 @@ if (isset($_GET['success'])) {
         $success = "Recurso eliminado exitosamente.";
     }
 }
+
+include '../../templates/header.php';
 
 // Fetch all resources
 $stmt = $pdo->query("SELECT lr.*, u.name as uploader_name FROM library_resources lr LEFT JOIN users u ON lr.uploaded_by = u.id ORDER BY lr.upload_date DESC");

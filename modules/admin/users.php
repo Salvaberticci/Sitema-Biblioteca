@@ -27,9 +27,53 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $success = "Usuario actualizado exitosamente.";
     } elseif (isset($_POST['delete_user'])) {
         $id = (int)$_POST['id'];
-        $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
-        $stmt->execute([$id]);
-        $success = "Usuario eliminado exitosamente.";
+
+        // Start transaction to ensure atomicity
+        $pdo->beginTransaction();
+
+        try {
+            // Delete related records first to avoid foreign key constraints
+
+            // Delete attendance records for this student
+            $stmt = $pdo->prepare("DELETE FROM attendance WHERE student_id = ?");
+            $stmt->execute([$id]);
+
+            // Delete enrollments for this student
+            $stmt = $pdo->prepare("DELETE FROM enrollments WHERE student_id = ?");
+            $stmt->execute([$id]);
+
+            // Delete submissions for this student
+            $stmt = $pdo->prepare("DELETE FROM submissions WHERE student_id = ?");
+            $stmt->execute([$id]);
+
+            // Delete activities created by this teacher
+            $stmt = $pdo->prepare("DELETE FROM activities WHERE teacher_id = ?");
+            $stmt->execute([$id]);
+
+            // Delete schedules for this teacher
+            $stmt = $pdo->prepare("DELETE FROM schedules WHERE teacher_id = ?");
+            $stmt->execute([$id]);
+
+            // Delete book loans for this user
+            $stmt = $pdo->prepare("DELETE FROM book_loans WHERE user_id = ?");
+            $stmt->execute([$id]);
+
+            // Delete library resources uploaded by this user
+            $stmt = $pdo->prepare("DELETE FROM library_resources WHERE uploaded_by = ?");
+            $stmt->execute([$id]);
+
+            // Finally, delete the user
+            $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+            $stmt->execute([$id]);
+
+            // Commit the transaction
+            $pdo->commit();
+            $success = "Usuario eliminado exitosamente junto con todos sus registros relacionados.";
+        } catch (Exception $e) {
+            // Rollback on error
+            $pdo->rollBack();
+            $error = "Error al eliminar el usuario: " . $e->getMessage();
+        }
     }
 }
 
@@ -44,6 +88,12 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <?php if (isset($success)): ?>
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
             <?php echo $success; ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($error)): ?>
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <?php echo $error; ?>
         </div>
     <?php endif; ?>
 

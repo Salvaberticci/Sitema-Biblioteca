@@ -1,12 +1,14 @@
 <!-- Chatbot Component for ETC Pedro García Leal -->
 <div id="chatbot-container" class="fixed bottom-6 right-6 z-50" style="z-index: 9999;">
+<!-- Debug: Chatbot HTML loaded -->
+<script>console.log('Chatbot HTML template loaded on page:', window.location.pathname);</script>
     <!-- Chat Button -->
-    <div id="chatbot-button" class="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full shadow-2xl cursor-pointer flex items-center justify-center text-white hover:shadow-xl transition-all duration-300 animate-bounce-in border-4 border-white">
+    <div id="chatbot-button" class="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full shadow-2xl cursor-pointer flex items-center justify-center text-white hover:shadow-xl transition-all duration-300 animate-bounce-in border-4 border-white" style="position: fixed; bottom: 24px; right: 24px; z-index: 10000;" onclick="console.log('Chatbot button clicked directly');">
         <i class="fas fa-robot text-4xl"></i>
     </div>
 
     <!-- Chat Window -->
-    <div id="chatbot-window" class="hidden absolute bottom-24 right-0 w-80 h-96 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden" style="z-index: 10000;">
+    <div id="chatbot-window" class="hidden absolute bottom-24 right-0 w-80 h-96 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden" style="z-index: 10001; position: fixed;">
         <!-- Chat Header -->
         <div class="bg-gradient-to-r from-primary to-secondary text-white p-4 rounded-t-2xl">
             <div class="flex items-center justify-between">

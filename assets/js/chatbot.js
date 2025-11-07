@@ -12,6 +12,15 @@ class ChatbotManager {
     }
 
     init() {
+        // Wait for DOM to be fully loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.initializeElements());
+        } else {
+            this.initializeElements();
+        }
+    }
+
+    initializeElements() {
         // Get DOM elements
         this.chatbotButton = document.getElementById('chatbot-button');
         this.chatbotWindow = document.getElementById('chatbot-window');
@@ -21,62 +30,127 @@ class ChatbotManager {
         this.chatbotMessages = document.getElementById('chatbot-messages');
         this.typingIndicator = document.getElementById('typing-indicator');
 
+        // Debug: Check if elements exist
+        console.log('Chatbot initialization - elements found:', {
+            button: !!this.chatbotButton,
+            window: !!this.chatbotWindow,
+            close: !!this.chatbotClose,
+            input: !!this.chatbotInput,
+            send: !!this.chatbotSend,
+            messages: !!this.chatbotMessages,
+            typing: !!this.typingIndicator
+        });
+
+        // If button doesn't exist, try again in a moment (for dynamically loaded content)
+        if (!this.chatbotButton) {
+            console.log('Chatbot button not found, retrying in 100ms...');
+            setTimeout(() => this.initializeElements(), 100);
+            return;
+        }
+
         // Bind events
         this.bindEvents();
 
         // Always start fresh - no message history loading
         // Add initial welcome message
         this.addWelcomeMessage();
+
+        console.log('Chatbot fully initialized');
     }
 
     bindEvents() {
+        // Check if elements exist before binding events
+        if (!this.chatbotButton) {
+            console.error('Chatbot button not found!');
+            return;
+        }
+
         // Toggle chat window
-        this.chatbotButton.addEventListener('click', () => this.toggleChat());
+        this.chatbotButton.addEventListener('click', (e) => {
+            console.log('Chatbot button clicked');
+            e.preventDefault();
+            e.stopPropagation();
+            this.toggleChat();
+        });
 
         // Close chat window
-        this.chatbotClose.addEventListener('click', () => this.closeChat());
+        if (this.chatbotClose) {
+            this.chatbotClose.addEventListener('click', (e) => {
+                console.log('Chatbot close clicked');
+                e.preventDefault();
+                this.closeChat();
+            });
+        }
 
         // Send message on button click
-        this.chatbotSend.addEventListener('click', () => this.sendMessage());
+        if (this.chatbotSend) {
+            this.chatbotSend.addEventListener('click', () => this.sendMessage());
+        }
 
         // Send message on Enter key
-        this.chatbotInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                this.sendMessage();
-            }
-        });
+        if (this.chatbotInput) {
+            this.chatbotInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    this.sendMessage();
+                }
+            });
 
-        // Enable/disable send button based on input
-        this.chatbotInput.addEventListener('input', () => {
-            this.toggleSendButton();
-        });
+            // Enable/disable send button based on input
+            this.chatbotInput.addEventListener('input', () => {
+                this.toggleSendButton();
+            });
+        }
 
         // Close chat when clicking outside
         document.addEventListener('click', (e) => {
-            if (!this.chatbotWindow.contains(e.target) && !this.chatbotButton.contains(e.target)) {
+            if (this.chatbotWindow && this.chatbotButton &&
+                !this.chatbotWindow.contains(e.target) &&
+                !this.chatbotButton.contains(e.target)) {
                 this.closeChat();
             }
         });
     }
 
     toggleChat() {
+        console.log('Toggling chat, current state:', this.isOpen, 'Window element:', this.chatbotWindow);
         this.isOpen = !this.isOpen;
 
         if (this.isOpen) {
-            this.chatbotWindow.classList.remove('hidden');
-            this.chatbotButton.classList.add('scale-110');
-            this.chatbotInput.focus();
+            console.log('Opening chat window');
+            if (this.chatbotWindow) {
+                this.chatbotWindow.classList.remove('hidden');
+                this.chatbotWindow.style.display = 'flex';
+                this.chatbotWindow.style.position = 'fixed';
+                this.chatbotWindow.style.bottom = '96px'; // 24px * 4 (bottom-24)
+                this.chatbotWindow.style.right = '24px';
+                console.log('Chat window should now be visible');
+            } else {
+                console.error('Chatbot window element not found!');
+            }
+            if (this.chatbotButton) {
+                this.chatbotButton.classList.add('scale-110');
+            }
+            if (this.chatbotInput) {
+                this.chatbotInput.focus();
+            }
             this.scrollToBottom();
         } else {
+            console.log('Closing chat window');
             this.closeChat();
         }
     }
 
     closeChat() {
+        console.log('Closing chat');
         this.isOpen = false;
-        this.chatbotWindow.classList.add('hidden');
-        this.chatbotButton.classList.remove('scale-110');
+        if (this.chatbotWindow) {
+            this.chatbotWindow.classList.add('hidden');
+            this.chatbotWindow.style.display = 'none';
+        }
+        if (this.chatbotButton) {
+            this.chatbotButton.classList.remove('scale-110');
+        }
     }
 
     toggleSendButton() {
@@ -232,7 +306,17 @@ class ChatbotManager {
 
 // Initialize chatbot when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing chatbot...');
     window.chatbotManager = new ChatbotManager();
+});
+
+// Also try to initialize on window load as fallback
+window.addEventListener('load', function() {
+    console.log('Window loaded, checking chatbot...');
+    if (!window.chatbotManager || !window.chatbotManager.chatbotButton) {
+        console.log('Re-initializing chatbot on window load...');
+        window.chatbotManager = new ChatbotManager();
+    }
 });
 
 // Export for global access

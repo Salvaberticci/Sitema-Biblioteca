@@ -43,8 +43,9 @@
             }
         }
     </script>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <script src="assets/js/chatbot.js" defer></script>
+    <link rel="stylesheet" href="/biblioteca/assets/css/style.css">
+    <script src="/biblioteca/assets/js/chatbot.js" defer></script>
+    <script>console.log('Header template loaded, chatbot.js should be loading...');</script>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-accent min-h-screen flex flex-col">
     <header class="bg-gradient-to-r from-primary to-secondary text-white shadow-2xl sticky top-0 z-50">
