@@ -232,6 +232,121 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
         Gestión Completa de Horarios
     </h2>
 
+    <!-- Navigation Tabs -->
+    <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 animate-fade-in-up">
+        <div class="flex flex-wrap gap-4 mb-6">
+            <button onclick="showTab('schedules')" id="schedules-tab"
+                    class="px-6 py-3 rounded-lg font-medium transition duration-300 bg-primary text-white">
+                <i class="fas fa-calendar-week mr-2"></i>
+                Gestión de Horarios
+            </button>
+            <button onclick="showTab('availability')" id="availability-tab"
+                    class="px-6 py-3 rounded-lg font-medium transition duration-300 bg-gray-200 text-gray-700 hover:bg-gray-300">
+                <i class="fas fa-building mr-2"></i>
+                Disponibilidad de Aulas
+            </button>
+        </div>
+
+        <!-- Filters for Schedules Tab -->
+        <div id="schedules-filters" class="border-t pt-6">
+            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                <i class="fas fa-filter mr-2 text-primary"></i>
+                Filtros de Horarios
+            </h3>
+            <form method="GET" class="grid md:grid-cols-4 gap-4">
+                <div>
+                    <label for="semester" class="block text-sm font-medium text-gray-700 mb-2">Semestre</label>
+                    <select id="semester" name="semester" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                        <option value="">Todos los semestres</option>
+                        <?php foreach ($semesters as $semester): ?>
+                            <option value="<?php echo $semester; ?>" <?php echo $filter_semester == $semester ? 'selected' : ''; ?>><?php echo $semester; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label for="year" class="block text-sm font-medium text-gray-700 mb-2">Año Académico</label>
+                    <select id="year" name="year" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                        <option value="">Todos los años</option>
+                        <?php foreach ($years as $year): ?>
+                            <option value="<?php echo $year; ?>" <?php echo $filter_year == $year ? 'selected' : ''; ?>><?php echo $year; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                    <select id="status" name="status" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                        <option value="all">Todos los estados</option>
+                        <option value="active" <?php echo $filter_status == 'active' ? 'selected' : ''; ?>>Activo</option>
+                        <option value="cancelled" <?php echo $filter_status == 'cancelled' ? 'selected' : ''; ?>>Cancelado</option>
+                        <option value="completed" <?php echo $filter_status == 'completed' ? 'selected' : ''; ?>>Completado</option>
+                    </select>
+                </div>
+                <div class="flex items-end space-x-2">
+                    <button type="submit" class="bg-primary hover:bg-yellow-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200 flex items-center">
+                        <i class="fas fa-search mr-2"></i>
+                        Filtrar
+                    </button>
+                    <a href="manage.php" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 flex items-center">
+                        <i class="fas fa-times mr-2"></i>
+                        Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Availability Filters -->
+        <div id="availability-filters" class="border-t pt-6 hidden">
+            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                <i class="fas fa-search mr-2 text-primary"></i>
+                Filtros de Disponibilidad
+            </h3>
+            <div class="grid md:grid-cols-4 gap-4">
+                <div>
+                    <label for="filter_classroom" class="block text-sm font-medium text-gray-700 mb-2">Aula</label>
+                    <select id="filter_classroom" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <option value="all">Todas las aulas</option>
+                        <?php foreach ($classrooms as $classroom): ?>
+                            <option value="<?php echo $classroom['id']; ?>"><?php echo htmlspecialchars($classroom['name']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label for="filter_day" class="block text-sm font-medium text-gray-700 mb-2">Día</label>
+                    <select id="filter_day" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <option value="all">Todos los días</option>
+                        <option value="monday">Lunes</option>
+                        <option value="tuesday">Martes</option>
+                        <option value="wednesday">Miércoles</option>
+                        <option value="thursday">Jueves</option>
+                        <option value="friday">Viernes</option>
+                        <option value="saturday">Sábado</option>
+                        <option value="sunday">Domingo</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filter_start_time" class="block text-sm font-medium text-gray-700 mb-2">Hora Inicio</label>
+                    <input type="time" id="filter_start_time" value="08:00"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+                <div>
+                    <label for="filter_end_time" class="block text-sm font-medium text-gray-700 mb-2">Hora Fin</label>
+                    <input type="time" id="filter_end_time" value="18:00"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+            </div>
+            <div class="mt-4 flex gap-4">
+                <button onclick="loadAvailability()" class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
+                    <i class="fas fa-search mr-2"></i>
+                    Buscar Disponibilidad
+                </button>
+                <button onclick="resetFilters()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
+                    <i class="fas fa-times mr-2"></i>
+                    Limpiar Filtros
+                </button>
+            </div>
+        </div>
+    </div>
+
     <?php if (isset($success)): ?>
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 animate-fade-in-up">
             <i class="fas fa-check-circle mr-2"></i><?php echo $success; ?>
@@ -279,6 +394,78 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
                 </div>
             </div>
         </div>
+    
+        <!-- Availability Content -->
+        <div id="availability-content" class="hidden">
+            <div id="availability-results" class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up">
+                <div class="text-center py-12">
+                    <div class="text-6xl text-gray-300 mb-4">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-600 mb-2">Disponibilidad de Aulas</h3>
+                    <p class="text-gray-500">Selecciona los filtros y haz clic en "Buscar Disponibilidad"</p>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Schedule Modification Modal -->
+        <div id="scheduleModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+            <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+                <div class="mt-3">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-edit mr-2 text-primary"></i>
+                        Cambiar Horario de Clase
+                    </h3>
+                    <form id="scheduleForm" class="space-y-4">
+                        <input type="hidden" id="modal_schedule_id" name="schedule_id">
+                        <input type="hidden" id="modal_course_id" name="course_id">
+    
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="modal_day" class="block text-sm font-medium text-gray-700 mb-2">Día</label>
+                                <select id="modal_day" name="day" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <option value="monday">Lunes</option>
+                                    <option value="tuesday">Martes</option>
+                                    <option value="wednesday">Miércoles</option>
+                                    <option value="thursday">Jueves</option>
+                                    <option value="friday">Viernes</option>
+                                    <option value="saturday">Sábado</option>
+                                    <option value="sunday">Domingo</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="modal_classroom" class="block text-sm font-medium text-gray-700 mb-2">Aula</label>
+                                <select id="modal_classroom" name="classroom_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <?php foreach ($classrooms as $classroom): ?>
+                                        <option value="<?php echo $classroom['id']; ?>"><?php echo htmlspecialchars($classroom['name']); ?> (<?php echo $classroom['capacity']; ?> personas)</option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="modal_start_time" class="block text-sm font-medium text-gray-700 mb-2">Hora de Inicio</label>
+                                <input type="time" id="modal_start_time" name="start_time" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                            <div>
+                                <label for="modal_end_time" class="block text-sm font-medium text-gray-700 mb-2">Hora de Fin</label>
+                                <input type="time" id="modal_end_time" name="end_time" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                        </div>
+    
+                        <div id="availability-preview" class="mt-4 p-4 bg-gray-50 rounded-lg">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2">Disponibilidad del aula seleccionada:</h4>
+                            <div id="availability-status" class="text-sm text-gray-600">
+                                Selecciona día, aula y horario para verificar disponibilidad...
+                            </div>
+                        </div>
+    
+                        <div class="flex justify-end space-x-3 pt-4">
+                            <button type="button" onclick="closeScheduleModal()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-200">Cancelar</button>
+                            <button type="submit" class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-200">Actualizar Horario</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
         <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up" style="animation-delay: 0.3s">
             <div class="flex items-center justify-between">
                 <div>
@@ -292,175 +479,132 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 animate-fade-in-up">
-        <h3 class="text-xl font-semibold mb-4 flex items-center">
-            <i class="fas fa-filter mr-2 text-primary"></i>
-            Filtros de Horarios
-        </h3>
-        <form method="GET" class="grid md:grid-cols-4 gap-4">
-            <div>
-                <label for="semester" class="block text-sm font-medium text-gray-700 mb-2">Semestre</label>
-                <select id="semester" name="semester" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
-                    <option value="">Todos los semestres</option>
-                    <?php foreach ($semesters as $semester): ?>
-                        <option value="<?php echo $semester; ?>" <?php echo $filter_semester == $semester ? 'selected' : ''; ?>><?php echo $semester; ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div>
-                <label for="year" class="block text-sm font-medium text-gray-700 mb-2">Año Académico</label>
-                <select id="year" name="year" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
-                    <option value="">Todos los años</option>
-                    <?php foreach ($years as $year): ?>
-                        <option value="<?php echo $year; ?>" <?php echo $filter_year == $year ? 'selected' : ''; ?>><?php echo $year; ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div>
-                <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
-                <select id="status" name="status" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
-                    <option value="all">Todos los estados</option>
-                    <option value="active" <?php echo $filter_status == 'active' ? 'selected' : ''; ?>>Activo</option>
-                    <option value="cancelled" <?php echo $filter_status == 'cancelled' ? 'selected' : ''; ?>>Cancelado</option>
-                    <option value="completed" <?php echo $filter_status == 'completed' ? 'selected' : ''; ?>>Completado</option>
-                </select>
-            </div>
-            <div class="flex items-end space-x-2">
-                <button type="submit" class="bg-primary hover:bg-yellow-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200 flex items-center">
-                    <i class="fas fa-search mr-2"></i>
-                    Filtrar
-                </button>
-                <a href="manage.php" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 flex items-center">
-                    <i class="fas fa-times mr-2"></i>
-                    Limpiar
-                </a>
-            </div>
-        </form>
-    </div>
 
-    <!-- Create Schedule Form -->
-    <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 animate-fade-in-up">
-        <h3 class="text-xl font-semibold mb-4 flex items-center">
-            <i class="fas fa-plus-circle mr-2 text-primary"></i>
-            Crear Nuevo Horario
-        </h3>
-        <form method="POST" class="space-y-6">
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div>
-                    <label for="classroom_id" class="block text-sm font-medium text-gray-700 mb-2">Aula</label>
-                    <select id="classroom_id" name="classroom_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
-                        <option value="">Seleccionar aula</option>
-                        <?php foreach ($classrooms as $classroom): ?>
-                            <option value="<?php echo $classroom['id']; ?>"><?php echo htmlspecialchars($classroom['name']); ?> (<?php echo $classroom['capacity']; ?> personas)</option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div>
-                    <label for="course_id" class="block text-sm font-medium text-gray-700 mb-2">Mención</label>
-                    <select id="course_id" name="course_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
-                        <option value="">Seleccionar mención</option>
-                        <?php foreach ($courses as $course): ?>
-                            <option value="<?php echo $course['id']; ?>"><?php echo htmlspecialchars($course['name']); ?> (<?php echo htmlspecialchars($course['code']); ?>)</option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div>
-                    <label for="teacher_id" class="block text-sm font-medium text-gray-700 mb-2">Docente</label>
-                    <select id="teacher_id" name="teacher_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
-                        <option value="">Seleccionar docente</option>
-                        <?php foreach ($teachers as $teacher): ?>
-                            <option value="<?php echo $teacher['id']; ?>"><?php echo htmlspecialchars($teacher['name']); ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div>
-                    <label for="day_of_week" class="block text-sm font-medium text-gray-700 mb-2">Día de la Semana</label>
-                    <select id="day_of_week" name="day_of_week" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
-                        <option value="monday">Lunes</option>
-                        <option value="tuesday">Martes</option>
-                        <option value="wednesday">Miércoles</option>
-                        <option value="thursday">Jueves</option>
-                        <option value="friday">Viernes</option>
-                        <option value="saturday">Sábado</option>
-                        <option value="sunday">Domingo</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="start_time" class="block text-sm font-medium text-gray-700 mb-2">Hora de Inicio</label>
-                    <input type="time" id="start_time" name="start_time" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
-                </div>
-                <div>
-                    <label for="end_time" class="block text-sm font-medium text-gray-700 mb-2">Hora de Fin</label>
-                    <input type="time" id="end_time" name="end_time" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
-                </div>
-                <div>
-                    <label for="semester" class="block text-sm font-medium text-gray-700 mb-2">Semestre</label>
-                    <select id="semester" name="semester" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
-                        <option value="2025-1">2025-1</option>
-                        <option value="2025-2">2025-2</option>
-                        <option value="2026-1">2026-1</option>
-                        <option value="2026-2">2026-2</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="academic_year" class="block text-sm font-medium text-gray-700 mb-2">Año Académico</label>
-                    <select id="academic_year" name="academic_year" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
-                        <option value="2025">2025</option>
-                        <option value="2026">2026</option>
-                        <option value="2027">2027</option>
-                    </select>
-                </div>
-                <div class="md:col-span-2 lg:col-span-3">
-                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notas Adicionales</label>
-                    <textarea id="notes" name="notes" rows="2" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200" placeholder="Información adicional sobre el horario..."></textarea>
-                </div>
-            </div>
-            <div class="flex justify-end">
-                <button type="submit" name="create_schedule" class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center">
-                    <i class="fas fa-calendar-plus mr-2"></i>
-                    Crear Horario
-                </button>
-            </div>
-        </form>
-    </div>
 
-    <!-- Bulk Actions -->
-    <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 animate-fade-in-up">
-        <h3 class="text-xl font-semibold mb-4 flex items-center">
-            <i class="fas fa-tasks mr-2 text-primary"></i>
-            Acciones Masivas
-        </h3>
-        <form method="POST" id="bulkForm" class="flex flex-wrap items-center gap-4">
-            <div class="flex items-center space-x-2">
-                <input type="checkbox" id="selectAll" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
-                <label for="selectAll" class="text-sm font-medium text-gray-700">Seleccionar Todos</label>
-            </div>
-            <select name="bulk_action" required class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                <option value="">Seleccionar acción</option>
-                <option value="activate">Activar Horarios</option>
-                <option value="cancel">Cancelar Horarios</option>
-                <option value="complete">Marcar como Completado</option>
-                <option value="delete">Eliminar Horarios</option>
-            </select>
-            <button type="submit" name="bulk_update" class="bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold py-2 px-4 rounded-lg hover:shadow-lg transition duration-300 flex items-center">
-                <i class="fas fa-bolt mr-2"></i>
-                Ejecutar Acción
-            </button>
-        </form>
-    </div>
-
-    <!-- Schedules Display -->
-    <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="text-xl font-semibold flex items-center">
-                <i class="fas fa-calendar-week mr-2 text-primary"></i>
-                Horarios Programados (<?php echo $total_schedules; ?>)
+    <!-- Schedules Content -->
+    <div id="schedules-content">
+        <!-- Create Schedule Form -->
+        <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 animate-fade-in-up">
+            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                <i class="fas fa-plus-circle mr-2 text-primary"></i>
+                Crear Nuevo Horario
             </h3>
-            <div class="text-sm text-gray-600">
-                Mostrando <?php echo count($schedules); ?> horarios
-            </div>
+            <form method="POST" class="space-y-6">
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <label for="classroom_id" class="block text-sm font-medium text-gray-700 mb-2">Aula</label>
+                        <select id="classroom_id" name="classroom_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                            <option value="">Seleccionar aula</option>
+                            <?php foreach ($classrooms as $classroom): ?>
+                                <option value="<?php echo $classroom['id']; ?>"><?php echo htmlspecialchars($classroom['name']); ?> (<?php echo $classroom['capacity']; ?> personas)</option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="course_id" class="block text-sm font-medium text-gray-700 mb-2">Mención</label>
+                        <select id="course_id" name="course_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                            <option value="">Seleccionar mención</option>
+                            <?php foreach ($courses as $course): ?>
+                                <option value="<?php echo $course['id']; ?>"><?php echo htmlspecialchars($course['name']); ?> (<?php echo htmlspecialchars($course['code']); ?>)</option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="teacher_id" class="block text-sm font-medium text-gray-700 mb-2">Docente</label>
+                        <select id="teacher_id" name="teacher_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                            <option value="">Seleccionar docente</option>
+                            <?php foreach ($teachers as $teacher): ?>
+                                <option value="<?php echo $teacher['id']; ?>"><?php echo htmlspecialchars($teacher['name']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="day_of_week" class="block text-sm font-medium text-gray-700 mb-2">Día de la Semana</label>
+                        <select id="day_of_week" name="day_of_week" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                            <option value="monday">Lunes</option>
+                            <option value="tuesday">Martes</option>
+                            <option value="wednesday">Miércoles</option>
+                            <option value="thursday">Jueves</option>
+                            <option value="friday">Viernes</option>
+                            <option value="saturday">Sábado</option>
+                            <option value="sunday">Domingo</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="start_time" class="block text-sm font-medium text-gray-700 mb-2">Hora de Inicio</label>
+                        <input type="time" id="start_time" name="start_time" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                    </div>
+                    <div>
+                        <label for="end_time" class="block text-sm font-medium text-gray-700 mb-2">Hora de Fin</label>
+                        <input type="time" id="end_time" name="end_time" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                    </div>
+                    <div>
+                        <label for="semester" class="block text-sm font-medium text-gray-700 mb-2">Semestre</label>
+                        <select id="semester" name="semester" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                            <option value="2025-1">2025-1</option>
+                            <option value="2025-2">2025-2</option>
+                            <option value="2026-1">2026-1</option>
+                            <option value="2026-2">2026-2</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="academic_year" class="block text-sm font-medium text-gray-700 mb-2">Año Académico</label>
+                        <select id="academic_year" name="academic_year" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                            <option value="2027">2027</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2 lg:col-span-3">
+                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notas Adicionales</label>
+                        <textarea id="notes" name="notes" rows="2" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200" placeholder="Información adicional sobre el horario..."></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit" name="create_schedule" class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center">
+                        <i class="fas fa-calendar-plus mr-2"></i>
+                        Crear Horario
+                    </button>
+                </div>
+            </form>
         </div>
+
+        <!-- Bulk Actions -->
+        <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 animate-fade-in-up">
+            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                <i class="fas fa-tasks mr-2 text-primary"></i>
+                Acciones Masivas
+            </h3>
+            <form method="POST" id="bulkForm" class="flex flex-wrap items-center gap-4">
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="selectAll" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+                    <label for="selectAll" class="text-sm font-medium text-gray-700">Seleccionar Todos</label>
+                </div>
+                <select name="bulk_action" required class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="">Seleccionar acción</option>
+                    <option value="activate">Activar Horarios</option>
+                    <option value="cancel">Cancelar Horarios</option>
+                    <option value="complete">Marcar como Completado</option>
+                    <option value="delete">Eliminar Horarios</option>
+                </select>
+                <button type="submit" name="bulk_update" class="bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold py-2 px-4 rounded-lg hover:shadow-lg transition duration-300 flex items-center">
+                    <i class="fas fa-bolt mr-2"></i>
+                    Ejecutar Acción
+                </button>
+            </form>
+        </div>
+
+        <!-- Schedules Display -->
+        <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold flex items-center">
+                    <i class="fas fa-calendar-week mr-2 text-primary"></i>
+                    Horarios Programados (<?php echo $total_schedules; ?>)
+                </h3>
+                <div class="text-sm text-gray-600">
+                    Mostrando <?php echo count($schedules); ?> horarios
+                </div>
+            </div>
 
         <div class="grid md:grid-cols-1 gap-6">
             <?php
@@ -537,9 +681,9 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
                                             </div>
                                         </div>
                                         <div class="flex space-x-2 ml-4">
-                                            <button onclick="editSchedule(<?php echo $schedule['id']; ?>, '<?php echo htmlspecialchars($schedule['classroom_id']); ?>', '<?php echo htmlspecialchars($schedule['course_id']); ?>', '<?php echo htmlspecialchars($schedule['teacher_id']); ?>', '<?php echo $schedule['day_of_week']; ?>', '<?php echo $schedule['start_time']; ?>', '<?php echo $schedule['end_time']; ?>', '<?php echo $schedule['semester']; ?>', '<?php echo $schedule['academic_year']; ?>', '<?php echo $schedule['status']; ?>', '<?php echo htmlspecialchars($schedule['notes'] ?? ''); ?>')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200 flex items-center" title="Editar horario">
+                                            <button onclick="openScheduleModal(<?php echo $schedule['id']; ?>, '<?php echo $schedule['day_of_week']; ?>', '<?php echo $schedule['start_time']; ?>', '<?php echo $schedule['end_time']; ?>', <?php echo $schedule['classroom_id']; ?>, <?php echo $schedule['course_id']; ?>, '<?php echo htmlspecialchars($schedule['course_name']); ?>')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200 flex items-center" title="Cambiar horario">
                                                 <i class="fas fa-edit mr-1"></i>
-                                                <span class="hidden sm:inline">Editar</span>
+                                                <span class="hidden sm:inline">Cambiar</span>
                                             </button>
                                             <form method="POST" class="inline" onsubmit="return confirm('¿Está seguro de eliminar este horario?')">
                                                 <input type="hidden" name="id" value="<?php echo $schedule['id']; ?>">
@@ -664,37 +808,294 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
 
 <?php include '../../templates/footer.php'; ?>
 <script>
+// Tab switching functionality
+function showTab(tabName) {
+    const schedulesTab = document.getElementById('schedules-tab');
+    const availabilityTab = document.getElementById('availability-tab');
+    const schedulesContent = document.getElementById('schedules-content');
+    const availabilityContent = document.getElementById('availability-content');
+    const schedulesFilters = document.getElementById('schedules-filters');
+    const availabilityFilters = document.getElementById('availability-filters');
+
+    if (tabName === 'schedules') {
+        schedulesTab.className = 'px-6 py-3 rounded-lg font-medium transition duration-300 bg-primary text-white';
+        availabilityTab.className = 'px-6 py-3 rounded-lg font-medium transition duration-300 bg-gray-200 text-gray-700 hover:bg-gray-300';
+        schedulesContent.classList.remove('hidden');
+        availabilityContent.classList.add('hidden');
+        schedulesFilters.classList.remove('hidden');
+        availabilityFilters.classList.add('hidden');
+    } else {
+        availabilityTab.className = 'px-6 py-3 rounded-lg font-medium transition duration-300 bg-primary text-white';
+        schedulesTab.className = 'px-6 py-3 rounded-lg font-medium transition duration-300 bg-gray-200 text-gray-700 hover:bg-gray-300';
+        availabilityContent.classList.remove('hidden');
+        schedulesContent.classList.add('hidden');
+        availabilityFilters.classList.remove('hidden');
+        schedulesFilters.classList.add('hidden');
+    }
+}
+
+// Load classroom availability
+function loadAvailability() {
+    const classroomId = document.getElementById('filter_classroom').value;
+    const day = document.getElementById('filter_day').value;
+    const startTime = document.getElementById('filter_start_time').value;
+    const endTime = document.getElementById('filter_end_time').value;
+
+    const resultsDiv = document.getElementById('availability-results');
+
+    // Show loading
+    resultsDiv.innerHTML = `
+        <div class="text-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p class="text-gray-600">Cargando disponibilidad...</p>
+        </div>
+    `;
+
+    // AJAX request
+    fetch('../teacher/get_availability.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            classroom_id: classroomId,
+            day: day,
+            start_time: startTime,
+            end_time: endTime
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        displayAvailability(data, classroomId, day, startTime, endTime);
+    })
+    .catch(error => {
+        console.error('Error loading availability:', error);
+        resultsDiv.innerHTML = `
+            <div class="text-center py-12">
+                <div class="text-red-500 mb-4">
+                    <i class="fas fa-exclamation-triangle text-4xl"></i>
+                </div>
+                <p class="text-gray-600">Error al cargar la disponibilidad</p>
+            </div>
+        `;
+    });
+}
+
+// Display availability results
+function displayAvailability(data, classroomId, day, startTime, endTime) {
+    const resultsDiv = document.getElementById('availability-results');
+
+    let html = `
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                <i class="fas fa-building mr-2 text-primary"></i>
+                Disponibilidad de Aulas
+            </h3>
+            <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                <p class="text-sm text-gray-600">
+                    <strong>Filtros aplicados:</strong>
+                    Aula: ${data.classroom_name || 'Todas'},
+                    Día: ${day === 'all' ? 'Todos' : getDayName(day)},
+                    Horario: ${startTime} - ${endTime}
+                </p>
+            </div>
+        </div>
+    `;
+
+    if (data.availability && data.availability.length > 0) {
+        html += '<div class="space-y-4">';
+
+        data.availability.forEach(item => {
+            const statusClass = item.available ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200';
+            const statusIcon = item.available ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-500';
+            const statusText = item.available ? 'Disponible' : 'Ocupado';
+
+            html += `
+                <div class="border rounded-lg p-4 ${statusClass}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="text-2xl ${statusIcon}"></div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">${item.classroom_name}</h4>
+                                <p class="text-sm text-gray-600">
+                                    ${getDayName(item.day_of_week)} - ${item.start_time} a ${item.end_time}
+                                </p>
+                                ${item.available ? '' : `<p class="text-sm text-red-600 mt-1">Ocupado por: ${item.course_name} (${item.teacher_name})</p>`}
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="px-3 py-1 rounded-full text-sm font-medium ${item.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                ${statusText}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+    } else {
+        html += `
+            <div class="text-center py-12">
+                <div class="text-6xl text-gray-300 mb-4">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">No se encontraron resultados</h3>
+                <p class="text-gray-500">Intenta ajustar los filtros de búsqueda</p>
+            </div>
+        `;
+    }
+
+    resultsDiv.innerHTML = html;
+}
+
+// Reset filters
+function resetFilters() {
+    document.getElementById('filter_classroom').value = 'all';
+    document.getElementById('filter_day').value = 'all';
+    document.getElementById('filter_start_time').value = '08:00';
+    document.getElementById('filter_end_time').value = '18:00';
+
+    const resultsDiv = document.getElementById('availability-results');
+    resultsDiv.innerHTML = `
+        <div class="text-center py-12">
+            <div class="text-6xl text-gray-300 mb-4">
+                <i class="fas fa-building"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">Disponibilidad de Aulas</h3>
+            <p class="text-gray-500">Selecciona los filtros y haz clic en "Buscar Disponibilidad"</p>
+        </div>
+    `;
+}
+
+// Helper function to get day names
+function getDayName(dayKey) {
+    const days = {
+        'monday': 'Lunes',
+        'tuesday': 'Martes',
+        'wednesday': 'Miércoles',
+        'thursday': 'Jueves',
+        'friday': 'Viernes',
+        'saturday': 'Sábado',
+        'sunday': 'Domingo'
+    };
+    return days[dayKey] || dayKey;
+}
+
 // Select all checkboxes functionality
 document.getElementById('selectAll').addEventListener('change', function() {
     const checkboxes = document.querySelectorAll('input[name="schedule_ids[]"]');
     checkboxes.forEach(checkbox => checkbox.checked = this.checked);
 });
 
-// Edit schedule modal functions
-function editSchedule(id, classroom_id, course_id, teacher_id, day_of_week, start_time, end_time, semester, academic_year, status, notes) {
-    document.getElementById('edit_id').value = id;
-    document.getElementById('edit_classroom_id').value = classroom_id;
-    document.getElementById('edit_course_id').value = course_id;
-    document.getElementById('edit_teacher_id').value = teacher_id;
-    document.getElementById('edit_day_of_week').value = day_of_week;
-    document.getElementById('edit_start_time').value = start_time;
-    document.getElementById('edit_end_time').value = end_time;
-    document.getElementById('edit_semester').value = semester;
-    document.getElementById('edit_academic_year').value = academic_year;
-    document.getElementById('edit_status').value = status;
-    document.getElementById('edit_notes').value = notes;
-    document.getElementById('editModal').classList.remove('hidden');
+// Schedule modification modal functions
+function openScheduleModal(scheduleId, currentDay, currentStartTime, currentEndTime, currentClassroomId, courseId) {
+    document.getElementById('modal_schedule_id').value = scheduleId;
+    document.getElementById('modal_course_id').value = courseId;
+    document.getElementById('modal_day').value = currentDay;
+    document.getElementById('modal_start_time').value = currentStartTime;
+    document.getElementById('modal_end_time').value = currentEndTime;
+    document.getElementById('modal_classroom').value = currentClassroomId;
+
+    document.getElementById('scheduleModal').classList.remove('hidden');
+
+    // Check initial availability
+    checkAvailability();
 }
 
-function closeEditModal() {
-    document.getElementById('editModal').classList.add('hidden');
+function closeScheduleModal() {
+    document.getElementById('scheduleModal').classList.add('hidden');
 }
+
+// Check classroom availability for selected time
+function checkAvailability() {
+    const classroomId = document.getElementById('modal_classroom').value;
+    const day = document.getElementById('modal_day').value;
+    const startTime = document.getElementById('modal_start_time').value;
+    const endTime = document.getElementById('modal_end_time').value;
+    const scheduleId = document.getElementById('modal_schedule_id').value;
+
+    if (!classroomId || !day || !startTime || !endTime) {
+        document.getElementById('availability-status').innerHTML = 'Selecciona día, aula y horario para verificar disponibilidad...';
+        return;
+    }
+
+    // AJAX request to check availability
+    fetch('../teacher/check_availability.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            classroom_id: classroomId,
+            day: day,
+            start_time: startTime,
+            end_time: endTime,
+            exclude_schedule_id: scheduleId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const statusDiv = document.getElementById('availability-status');
+        if (data.available) {
+            statusDiv.innerHTML = '<span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>Aula disponible para el horario seleccionado</span>';
+        } else {
+            statusDiv.innerHTML = '<span class="text-red-600"><i class="fas fa-times-circle mr-1"></i>Aula ocupada. Conflicto con: ' + data.conflict_info + '</span>';
+        }
+    })
+    .catch(error => {
+        console.error('Error checking availability:', error);
+        document.getElementById('availability-status').innerHTML = '<span class="text-yellow-600"><i class="fas fa-exclamation-triangle mr-1"></i>Error al verificar disponibilidad</span>';
+    });
+}
+
+// Event listeners for availability checking
+document.getElementById('modal_classroom').addEventListener('change', checkAvailability);
+document.getElementById('modal_day').addEventListener('change', checkAvailability);
+document.getElementById('modal_start_time').addEventListener('change', checkAvailability);
+document.getElementById('modal_end_time').addEventListener('change', checkAvailability);
+
+// Handle schedule form submission
+document.getElementById('scheduleForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    // Show loading
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Actualizando...';
+    submitBtn.disabled = true;
+
+    fetch('../teacher/update_schedule.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeScheduleModal();
+            // Reload the page to show updated schedules
+            window.location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error updating schedule:', error);
+        alert('Error al actualizar el horario');
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
 
 // Close modal when clicking outside
 document.addEventListener('click', function(event) {
-    const modal = document.getElementById('editModal');
+    const modal = document.getElementById('scheduleModal');
     if (event.target === modal) {
-        closeEditModal();
+        closeScheduleModal();
     }
 });
 
@@ -706,17 +1107,6 @@ document.getElementById('start_time').addEventListener('change', function() {
         const endHour = (parseInt(hours) + 1) % 24;
         const endTime = `${endHour.toString().padStart(2, '0')}:${minutes}`;
         document.getElementById('end_time').value = endTime;
-    }
-});
-
-// Same for edit modal
-document.getElementById('edit_start_time').addEventListener('change', function() {
-    const startTime = this.value;
-    if (startTime) {
-        const [hours, minutes] = startTime.split(':');
-        const endHour = (parseInt(hours) + 1) % 24;
-        const endTime = `${endHour.toString().padStart(2, '0')}:${minutes}`;
-        document.getElementById('edit_end_time').value = endTime;
     }
 });
 </script>
