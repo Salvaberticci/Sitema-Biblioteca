@@ -387,8 +387,6 @@ $recent_uploads = $pdo->query("SELECT COUNT(*) FROM library_resources WHERE uplo
                 <?php endif; ?>
             </div>
         </div>
-<!-- Resource Details Modal -->
-<div id="resource-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 animate-fade-in">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-slide-in-up">
             <!-- Modal Header -->
@@ -513,88 +511,219 @@ function toggleAdvancedSearch() {
 }
 
 function showResourceDetails(resourceId) {
-    const modal = document.getElementById('resource-modal');
-    const loading = document.getElementById('modal-loading');
-    const details = document.getElementById('resource-details');
-    const error = document.getElementById('modal-error');
+    console.log('showResourceDetails called with resourceId:', resourceId);
 
-    // Show modal and loading state
-    modal.classList.remove('hidden');
-    loading.classList.remove('hidden');
-    details.classList.add('hidden');
-    error.classList.add('hidden');
+    // Create modal dynamically
+    const modal = document.createElement('div');
+    modal.id = 'resource-modal';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-slide-in-up">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <h3 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-info-circle mr-3 text-primary"></i>
+                    Detalles del Recurso
+                </h3>
+                <button onclick="closeResourceModal()" class="text-gray-400 hover:text-gray-600 transition duration-200">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div id="modal-content" class="p-6">
+                <!-- Loading State -->
+                <div id="modal-loading" class="text-center py-8">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    <p class="mt-4 text-gray-600">Cargando detalles...</p>
+                </div>
+
+                <!-- Resource Details -->
+                <div id="resource-details" class="hidden">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Left Column -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Título</label>
+                                <p id="modal-title" class="text-lg font-semibold text-gray-800"></p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Autor</label>
+                                <p id="modal-author" class="text-gray-700"></p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
+                                <div class="flex items-center">
+                                    <span id="modal-type-icon" class="mr-2"></span>
+                                    <span id="modal-type" class="text-gray-700"></span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Asignatura</label>
+                                <p id="modal-subject" class="text-gray-700"></p>
+                            </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Subida</label>
+                                <p id="modal-upload-date" class="text-gray-700"></p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Subido por</label>
+                                <p id="modal-uploader" class="text-gray-700"></p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Archivo</label>
+                                <p id="modal-file-path" class="text-gray-700 break-all"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mt-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+                        <p id="modal-description" class="text-gray-700 leading-relaxed"></p>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="mt-8 flex justify-end space-x-4">
+                        <button onclick="closeResourceModal()" class="px-6 py-2 bg-gray-500 hover:bg-gray-700 text-white font-medium rounded-lg transition duration-300">
+                            Cerrar
+                        </button>
+                        <a id="modal-download-btn" href="#" class="px-6 py-2 bg-gradient-to-r from-primary to-secondary text-white font-medium rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center">
+                            <i class="fas fa-download mr-2"></i>
+                            Descargar
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Error State -->
+                <div id="modal-error" class="hidden text-center py-8">
+                    <div class="text-red-500 mb-4">
+                        <i class="fas fa-exclamation-triangle text-4xl"></i>
+                    </div>
+                    <p class="text-red-600 font-medium">Error al cargar los detalles del recurso</p>
+                    <button onclick="closeResourceModal()" class="mt-4 px-6 py-2 bg-red-500 hover:bg-red-700 text-white font-medium rounded-lg transition duration-300">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Add modal to body
+    document.body.appendChild(modal);
+
+    // Add click outside to close
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeResourceModal();
+        }
+    });
+
+    const loading = modal.querySelector('#modal-loading');
+    const details = modal.querySelector('#resource-details');
+    const error = modal.querySelector('#modal-error');
+
+    console.log('Modal elements found:', { modal: !!modal, loading: !!loading, details: !!details, error: !!error });
+
+    // Show loading state
+    if (loading) loading.classList.remove('hidden');
+    if (details) details.classList.add('hidden');
+    if (error) error.classList.add('hidden');
+
+    console.log('Modal shown, starting fetch request to:', `../../api/library.php?id=${resourceId}`);
 
     // Fetch resource details
     fetch(`../../api/library.php?id=${resourceId}`)
         .then(response => {
+            console.log('Fetch response received:', response);
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
+            console.log('API response data:', data);
             if (data.error) {
                 throw new Error(data.error);
             }
 
             // Populate modal with data
-            document.getElementById('modal-title').textContent = data.title || 'N/A';
-            document.getElementById('modal-author').textContent = data.author || 'N/A';
-            document.getElementById('modal-type').textContent = data.type ? data.type.charAt(0).toUpperCase() + data.type.slice(1) : 'N/A';
-            document.getElementById('modal-subject').textContent = data.subject || 'N/A';
-            document.getElementById('modal-upload-date').textContent = data.upload_date ? new Date(data.upload_date).toLocaleDateString('es-ES') : 'N/A';
-            document.getElementById('modal-uploader').textContent = data.uploader_name || 'N/A';
-            document.getElementById('modal-file-path').textContent = data.file_path || 'No disponible';
-            document.getElementById('modal-description').textContent = data.description || 'Sin descripción';
+            const titleEl = modal.querySelector('#modal-title');
+            const authorEl = modal.querySelector('#modal-author');
+            const typeEl = modal.querySelector('#modal-type');
+            const subjectEl = modal.querySelector('#modal-subject');
+            const uploadDateEl = modal.querySelector('#modal-upload-date');
+            const uploaderEl = modal.querySelector('#modal-uploader');
+            const filePathEl = modal.querySelector('#modal-file-path');
+            const descriptionEl = modal.querySelector('#modal-description');
+
+            if (titleEl) titleEl.textContent = data.title || 'N/A';
+            if (authorEl) authorEl.textContent = data.author || 'N/A';
+            if (typeEl) typeEl.textContent = data.type ? data.type.charAt(0).toUpperCase() + data.type.slice(1) : 'N/A';
+            if (subjectEl) subjectEl.textContent = data.subject || 'N/A';
+            if (uploadDateEl) uploadDateEl.textContent = data.upload_date ? new Date(data.upload_date).toLocaleDateString('es-ES') : 'N/A';
+            if (uploaderEl) uploaderEl.textContent = data.uploader_name || 'N/A';
+            if (filePathEl) filePathEl.textContent = data.file_path || 'No disponible';
+            if (descriptionEl) descriptionEl.textContent = data.description || 'Sin descripción';
 
             // Set type icon
-            const typeIcon = document.getElementById('modal-type-icon');
-            let iconClass = 'fas fa-file';
-            switch(data.type) {
-                case 'book': iconClass = 'fas fa-book'; break;
-                case 'article': iconClass = 'fas fa-file-alt'; break;
-                case 'video': iconClass = 'fas fa-video'; break;
-                case 'document': iconClass = 'fas fa-file-pdf'; break;
+            const typeIcon = modal.querySelector('#modal-type-icon');
+            if (typeIcon) {
+                let iconClass = 'fas fa-file';
+                switch(data.type) {
+                    case 'book': iconClass = 'fas fa-book'; break;
+                    case 'article': iconClass = 'fas fa-file-alt'; break;
+                    case 'video': iconClass = 'fas fa-video'; break;
+                    case 'document': iconClass = 'fas fa-file-pdf'; break;
+                }
+                typeIcon.className = iconClass + ' text-primary';
             }
-            typeIcon.className = iconClass + ' text-primary';
 
             // Handle download button
-            const downloadBtn = document.getElementById('modal-download-btn');
-            if (data.file_path) {
-                downloadBtn.href = `download.php?id=${data.id}`;
-                downloadBtn.classList.remove('hidden');
-            } else {
-                downloadBtn.classList.add('hidden');
+            const downloadBtn = modal.querySelector('#modal-download-btn');
+            if (downloadBtn) {
+                if (data.file_path) {
+                    downloadBtn.href = `download.php?id=${data.id}`;
+                    downloadBtn.classList.remove('hidden');
+                } else {
+                    downloadBtn.classList.add('hidden');
+                }
             }
 
             // Show details, hide loading
-            loading.classList.add('hidden');
-            details.classList.remove('hidden');
+            if (loading) loading.classList.add('hidden');
+            if (details) details.classList.remove('hidden');
+            console.log('Modal populated and shown successfully');
         })
         .catch(error => {
             console.error('Error fetching resource details:', error);
-            loading.classList.add('hidden');
-            error.classList.remove('hidden');
+            if (loading) loading.classList.add('hidden');
+            if (error) error.classList.remove('hidden');
         });
 }
 
 function closeResourceModal() {
     const modal = document.getElementById('resource-modal');
-    modal.classList.add('hidden');
+    if (modal) {
+        modal.remove();
+    }
 }
 
-// Close modal when clicking outside
-document.getElementById('resource-modal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeResourceModal();
-    }
-});
-
+// Close modal when clicking outside (will be added when modal is created)
 // Close modal with Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         const modal = document.getElementById('resource-modal');
-        if (!modal.classList.contains('hidden')) {
+        if (modal) {
             closeResourceModal();
         }
     }

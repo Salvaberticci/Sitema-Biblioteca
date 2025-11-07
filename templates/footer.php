@@ -43,7 +43,7 @@
             </div>
         </div>
     </footer>
-    <script src="assets/js/main.js"></script>
+    <script src="/biblioteca/assets/js/main.js"></script>
     <script>
         // Mobile menu toggle
         document.getElementById('menu-toggle').addEventListener('click', function() {

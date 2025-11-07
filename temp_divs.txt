@@ -1,0 +1,131 @@
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        'slide-in-left': 'slideInLeft 0.5s ease-out',
+                        slideInLeft: {
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4 animate-slide-in-left">
+                    <div>
+                        <h1 class="text-2xl font-bold tracking-wide">Sistema de Gestión</h1>
+                <nav class="hidden md:block">
+                <button class="md:hidden text-white focus:outline-none" id="menu-toggle">
+            <nav class="md:hidden mt-4 hidden" id="mobile-menu">
+        <div class="flex-grow">
+<div id="chatbot-container" class="fixed bottom-6 right-6 z-50" style="z-index: 9999;">
+    <div id="chatbot-button" class="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full shadow-2xl cursor-pointer flex items-center justify-center text-white hover:shadow-xl transition-all duration-300 animate-bounce-in border-4 border-white" style="position: fixed; bottom: 24px; right: 24px; z-index: 10000;" onclick="console.log('Chatbot button clicked directly');">
+    <div id="chatbot-window" class="hidden absolute bottom-24 right-0 w-80 h-96 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden" style="z-index: 10001; position: fixed;">
+        <div class="bg-gradient-to-r from-primary to-secondary text-white p-4 rounded-t-2xl">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center overflow-hidden">
+                    <div>
+                <button id="chatbot-close" class="text-white hover:text-accent transition-colors">
+        <div id="chatbot-messages" class="flex-1 p-4 overflow-y-auto bg-gray-50">
+            <div class="space-y-3" id="chatbot-messages-container">
+        <div id="typing-indicator" class="hidden px-4 py-2">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center text-white text-xs">
+                <div class="bg-white rounded-2xl rounded-tl-md px-4 py-2 shadow-sm">
+                    <div class="flex space-x-1">
+                        <div class="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+                        <div class="w-2 h-2 bg-primary rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                        <div class="w-2 h-2 bg-primary rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+        <div class="p-4 bg-white border-t border-gray-200">
+            <div class="flex space-x-2">
+                    id="chatbot-input"
+                    id="chatbot-send"
+    animation: slide-in-message 0.3s ease-out;
+@keyframes slide-in-message {
+    width: 4px;
+    <h2 class="text-3xl font-bold text-gray-800 mb-6 animate-slide-in-left flex items-center">
+    <div class="grid md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up">
+            <div class="flex items-center justify-between">
+                <div>
+                <div class="text-4xl text-primary opacity-70">
+        <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up" style="animation-delay: 0.1s">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm font-medium">Subidas Recientes</p>
+                <div class="text-4xl text-green-500 opacity-70">
+        <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up" style="animation-delay: 0.2s">
+            <div class="flex items-center justify-between">
+                <div>
+                <div class="text-4xl text-blue-500 opacity-70">
+        <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up" style="animation-delay: 0.3s">
+            <div class="flex items-center justify-between">
+                <div>
+                <div class="text-4xl text-purple-500 opacity-70">
+    <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 animate-fade-in-up">
+        <div class="flex justify-between items-center mb-6">
+                <i class="fas fa-sliders-h mr-2"></i>
+            <div class="grid md:grid-cols-5 gap-4">
+                <div class="md:col-span-2">
+                    <input type="text" id="search" name="search" value="" placeholder="Título, autor, descripción, asignatura..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                <div>
+                    <select id="type" name="type" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                <div>
+                    <select id="subject" name="subject" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                <div>
+                    <select id="sort" name="sort" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+            <!-- Advanced Search (Hidden by default) -->
+            <div id="advanced-search" class="hidden border-t pt-6">
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div>
+                        <input type="text" id="author" name="author" value="" placeholder="Nombre del autor" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                    <div>
+                        <input type="date" id="date_from" name="date_from" value="" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                    <div>
+                        <input type="date" id="date_to" name="date_to" value="" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                <input type="hidden" name="advanced" value="1">
+            <div class="flex justify-between items-center">
+                <div class="text-sm text-gray-600">
+                <div class="flex space-x-3">
+    <!-- Resources Grid -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                            <div class="bg-white p-6 rounded-2xl shadow-xl card-hover animate-fade-in-up">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center text-sm text-gray-600 mb-2">
+                            <div class="flex items-center text-sm text-gray-600 mb-2">
+                                                            <div class="flex items-center text-sm text-gray-600 mb-3">
+                        <div class="ml-3">
+                    <div class="flex items-center justify-between text-xs text-gray-500 mb-4">
+                    <div class="flex space-x-2">
+                                                    <a href="download.php?id=5" class="flex-1 bg-gradient-to-r from-primary to-secondary text-white font-bold py-2 px-4 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center justify-center" onclick="console.log('Download attempted for resource ID: 5, file: uploads/library/1762488639_certificado curso python.pdf')">
+        <div class="text-center">
+    <footer class="bg-gradient-to-r from-dark to-secondary text-white py-12 mt-8 relative overflow-hidden">
+        <div class="absolute inset-0 bg-black opacity-10"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div class="animate-fade-in-up">
+                <div class="animate-fade-in-up" style="animation-delay: 0.2s">
+                    <h4 class="text-lg font-semibold mb-4 flex items-center"><i class="fas fa-link mr-2"></i>Enlaces Rápidos</h4>
+                <div class="animate-fade-in-up" style="animation-delay: 0.4s">
+                <div class="animate-fade-in-up" style="animation-delay: 0.6s">
+                    <div class="flex space-x-4 mt-4">
+            <div class="border-t border-accent mt-8 pt-8 text-center">
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+    if (advancedSearch.classList.contains('hidden')) {
+        advancedSearch.classList.remove('hidden');
+        advancedSearch.classList.add('hidden');
+        button.innerHTML = '<i class="fas fa-sliders-h mr-2"></i>Búsqueda Avanzada';
+    if (loading) loading.classList.remove('hidden');
+    if (details) details.classList.add('hidden');
+    if (error) error.classList.add('hidden');
+    console.log('Modal shown, starting fetch request to:', `../../api/library.php?id=${resourceId}`);
+    fetch(`../../api/library.php?id=${resourceId}`)
+                    case 'video': iconClass = 'fas fa-video'; break;
+                    downloadBtn.href = `download.php?id=${data.id}`;
+                    downloadBtn.classList.remove('hidden');
+                    downloadBtn.classList.add('hidden');
+            // Show details, hide loading
+            if (loading) loading.classList.add('hidden');
+            if (details) details.classList.remove('hidden');
+            if (loading) loading.classList.add('hidden');
+            if (error) error.classList.remove('hidden');
+// Close modal when clicking outside
+        if (!modal.classList.contains('hidden')) {
+            body: 'action=loan&resource_id=' + resourceId
+            body: 'action=return&loan_id=' + loanId
+    overflow: hidden;
+    overflow: hidden;
