@@ -1027,6 +1027,12 @@ function showAjaxMessage(message, type) {
     const successText = document.getElementById('ajax-success-text');
     const errorText = document.getElementById('ajax-error-text');
 
+    // Check if elements exist
+    if (!successDiv || !errorDiv || !successText || !errorText) {
+        console.error('AJAX message elements not found');
+        return;
+    }
+
     // Hide both messages first
     successDiv.classList.add('hidden');
     errorDiv.classList.add('hidden');
@@ -1037,14 +1043,14 @@ function showAjaxMessage(message, type) {
         successDiv.classList.remove('hidden');
         // Auto-hide after 3 seconds
         setTimeout(() => {
-            successDiv.classList.add('hidden');
+            if (successDiv) successDiv.classList.add('hidden');
         }, 3000);
     } else {
         errorText.textContent = message;
         errorDiv.classList.remove('hidden');
         // Auto-hide after 5 seconds for errors
         setTimeout(() => {
-            errorDiv.classList.add('hidden');
+            if (errorDiv) errorDiv.classList.add('hidden');
         }, 5000);
     }
 
