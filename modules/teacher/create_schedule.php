@@ -1,0 +1,97 @@
+<?php
+require_once '../../includes/config.php';
+
+header('Content-Type: application/json');
+
+// Get POST data
+$course_id = $_POST['course_id'] ?? null;
+$day = $_POST['day'] ?? null;
+$classroom_id = $_POST['classroom_id'] ?? null;
+$start_time = $_POST['start_time'] ?? null;
+$end_time = $_POST['end_time'] ?? null;
+
+if (!$course_id || !$day || !$classroom_id || !$start_time || !$end_time) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Datos incompletos'
+    ]);
+    exit;
+}
+
+try {
+    // Verify the course belongs to the current teacher
+    $teacher_id = $_SESSION['user_id'];
+    $stmt = $pdo->prepare("
+        SELECT tc.id FROM teacher_courses tc
+        WHERE tc.course_id = ? AND tc.teacher_id = ? AND tc.status = 'active'
+    ");
+    $stmt->execute([$course_id, $teacher_id]);
+
+    if ($stmt->rowCount() == 0) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'No tienes permisos para crear horarios para esta mención'
+        ]);
+        exit;
+    }
+
+    // Check for conflicts
+    $conflict_query = "
+        SELECT s.*, c.name as classroom_name, co.name as course_name, u.name as teacher_name
+        FROM schedules s
+        JOIN classrooms c ON s.classroom_id = c.id
+        JOIN courses co ON s.course_id = co.id
+        JOIN users u ON s.teacher_id = u.id
+        WHERE s.classroom_id = ?
+        AND s.day_of_week = ?
+        AND s.status = 'active'
+        AND (
+            (s.start_time <= ? AND s.end_time > ?) OR
+            (s.start_time < ? AND s.end_time >= ?) OR
+            (s.start_time >= ? AND s.end_time <= ?)
+        )
+    ";
+
+    $stmt = $pdo->prepare($conflict_query);
+    $stmt->execute([$classroom_id, $day, $start_time, $start_time, $end_time, $end_time, $start_time, $end_time]);
+    $conflicts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!empty($conflicts)) {
+        $conflict = $conflicts[0];
+        $conflict_info = "Conflicto con {$conflict['course_name']} de {$conflict['teacher_name']} ({$conflict['start_time']}-{$conflict['end_time']})";
+
+        echo json_encode([
+            'success' => false,
+            'message' => 'Conflicto de horario detectado: ' . $conflict_info
+        ]);
+        exit;
+    }
+
+    // Create the schedule
+    $insert_query = "
+        INSERT INTO schedules (course_id, teacher_id, classroom_id, day_of_week, start_time, end_time, semester, academic_year, status)
+        VALUES (?, ?, ?, ?, ?, ?, '2025-1', '2025', 'active')
+    ";
+
+    $stmt = $pdo->prepare($insert_query);
+    $result = $stmt->execute([$course_id, $teacher_id, $classroom_id, $day, $start_time, $end_time]);
+
+    if ($result) {
+        echo json_encode([
+            'success' => true,
+            'message' => 'Horario creado exitosamente'
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error al crear el horario'
+        ]);
+    }
+
+} catch (Exception $e) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Error del servidor: ' . $e->getMessage()
+    ]);
+}
+?>

@@ -83,12 +83,18 @@ $days = [
             </button>
         </div>
 
-        <!-- Course Filter for Schedules Tab -->
+        <!-- Course Filter and Actions for Schedules Tab -->
         <div id="schedules-filters" class="border-t pt-6">
-            <h3 class="text-xl font-semibold mb-4 flex items-center">
-                <i class="fas fa-filter mr-2 text-primary"></i>
-                Filtrar por Mención
-            </h3>
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold flex items-center">
+                    <i class="fas fa-filter mr-2 text-primary"></i>
+                    Filtrar por Mención
+                </h3>
+                <button onclick="openCreateScheduleModal()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 flex items-center">
+                    <i class="fas fa-plus mr-2"></i>
+                    Agregar Horario
+                </button>
+            </div>
             <form method="GET" class="flex flex-wrap items-center gap-4">
                 <div class="flex items-center space-x-4">
                     <label for="course" class="text-sm font-medium text-gray-700">Seleccionar Mención:</label>
@@ -163,229 +169,6 @@ $days = [
         </div>
     </div>
 
-    <?php if ($selected_course === 'all'): ?>
-        <!-- Show all courses -->
-        <?php foreach ($teacher_courses as $course): ?>
-            <?php
-            $course_schedules = $schedules_by_course[$course['id']] ?? [];
-            if (empty($course_schedules)) continue;
-            ?>
-            <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 animate-fade-in-up">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-xl font-semibold flex items-center">
-                        <i class="fas fa-graduation-cap mr-3 text-primary"></i>
-                        <?php echo htmlspecialchars($course['name']); ?>
-                        <span class="ml-2 text-sm text-gray-600">(<?php echo htmlspecialchars($course['code']); ?>)</span>
-                    </h3>
-                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                        <?php echo $course['assignment_type']; ?>
-                    </span>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full table-auto border-collapse">
-                        <thead>
-                            <tr class="bg-gray-50">
-                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Día</th>
-                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Horario</th>
-                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Aula</th>
-                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Profesor</th>
-                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            <?php
-                            $day_schedules = [];
-                            foreach ($course_schedules as $schedule) {
-                                $day_schedules[$schedule['day_of_week']][] = $schedule;
-                            }
-
-                            foreach ($days as $day_key => $day_name):
-                                $day_course_schedules = $day_schedules[$day_key] ?? [];
-                            ?>
-                                <tr class="hover:bg-gray-50 transition duration-200">
-                                    <td class="px-4 py-4 text-sm font-medium text-gray-900 border-b">
-                                        <?php echo $day_name; ?>
-                                    </td>
-                                    <td class="px-4 py-4 text-sm text-gray-600 border-b">
-                                        <?php if (!empty($day_course_schedules)): ?>
-                                            <?php foreach ($day_course_schedules as $schedule): ?>
-                                                <div class="mb-2 last:mb-0">
-                                                    <div class="font-medium">
-                                                        <?php echo date('H:i', strtotime($schedule['start_time'])); ?> -
-                                                        <?php echo date('H:i', strtotime($schedule['end_time'])); ?>
-                                                    </div>
-                                                </div>
-                                            <?php endforeach; ?>
-                                        <?php else: ?>
-                                            <span class="text-gray-400 italic">Sin clases</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="px-4 py-4 text-sm text-gray-600 border-b">
-                                        <?php if (!empty($day_course_schedules)): ?>
-                                            <?php foreach ($day_course_schedules as $schedule): ?>
-                                                <div class="mb-2 last:mb-0">
-                                                    <i class="fas fa-map-marker-alt mr-1 text-green-500"></i>
-                                                    <?php echo htmlspecialchars($schedule['classroom_name']); ?>
-                                                </div>
-                                            <?php endforeach; ?>
-                                        <?php else: ?>
-                                            -
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="px-4 py-4 text-sm text-gray-600 border-b">
-                                        <?php if (!empty($day_course_schedules)): ?>
-                                            <?php foreach ($day_course_schedules as $schedule): ?>
-                                                <div class="mb-2 last:mb-0">
-                                                    <i class="fas fa-user mr-1 text-blue-500"></i>
-                                                    <?php echo htmlspecialchars($schedule['teacher_name']); ?>
-                                                </div>
-                                            <?php endforeach; ?>
-                                        <?php else: ?>
-                                            -
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="px-4 py-4 text-sm border-b">
-                                        <?php if (!empty($day_course_schedules)): ?>
-                                            <?php foreach ($day_course_schedules as $schedule): ?>
-                                                <div class="mb-2 last:mb-0">
-                                                    <span class="px-2 py-1 text-xs rounded-full
-                                                        <?php
-                                                        echo $schedule['status'] == 'active' ? 'bg-green-100 text-green-800' :
-                                                             ($schedule['status'] == 'cancelled' ? 'bg-red-100 text-red-800' :
-                                                              ($schedule['status'] == 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'));
-                                                        ?>">
-                                                        <?php echo ucfirst($schedule['status']); ?>
-                                                    </span>
-                                                </div>
-                                            <?php endforeach; ?>
-                                        <?php else: ?>
-                                            -
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        <?php endforeach; ?>
-
-    <?php else: ?>
-        <!-- Show specific course -->
-        <?php
-        $selected_course_data = null;
-        foreach ($teacher_courses as $course) {
-            if ($course['id'] == $selected_course) {
-                $selected_course_data = $course;
-                break;
-            }
-        }
-        $course_schedules = $schedules_by_course[$selected_course] ?? [];
-        ?>
-
-        <?php if ($selected_course_data): ?>
-            <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-xl font-semibold flex items-center">
-                        <i class="fas fa-graduation-cap mr-3 text-primary"></i>
-                        <?php echo htmlspecialchars($selected_course_data['name']); ?>
-                        <span class="ml-2 text-sm text-gray-600">(<?php echo htmlspecialchars($selected_course_data['code']); ?>)</span>
-                    </h3>
-                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                        <?php echo $selected_course_data['assignment_type']; ?>
-                    </span>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full table-auto border-collapse">
-                        <thead>
-                            <tr class="bg-gray-50">
-                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Día</th>
-                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Horario</th>
-                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Aula</th>
-                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Profesor</th>
-                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            <?php
-                            $day_schedules = [];
-                            foreach ($course_schedules as $schedule) {
-                                $day_schedules[$schedule['day_of_week']][] = $schedule;
-                            }
-
-                            foreach ($days as $day_key => $day_name):
-                                $day_course_schedules = $day_schedules[$day_key] ?? [];
-                            ?>
-                                <tr class="hover:bg-gray-50 transition duration-200">
-                                    <td class="px-4 py-4 text-sm font-medium text-gray-900 border-b">
-                                        <?php echo $day_name; ?>
-                                    </td>
-                                    <td class="px-4 py-4 text-sm text-gray-600 border-b">
-                                        <?php if (!empty($day_course_schedules)): ?>
-                                            <?php foreach ($day_course_schedules as $schedule): ?>
-                                                <div class="mb-2 last:mb-0">
-                                                    <div class="font-medium">
-                                                        <?php echo date('H:i', strtotime($schedule['start_time'])); ?> -
-                                                        <?php echo date('H:i', strtotime($schedule['end_time'])); ?>
-                                                    </div>
-                                                </div>
-                                            <?php endforeach; ?>
-                                        <?php else: ?>
-                                            <span class="text-gray-400 italic">Sin clases</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="px-4 py-4 text-sm text-gray-600 border-b">
-                                        <?php if (!empty($day_course_schedules)): ?>
-                                            <?php foreach ($day_course_schedules as $schedule): ?>
-                                                <div class="mb-2 last:mb-0">
-                                                    <i class="fas fa-map-marker-alt mr-1 text-green-500"></i>
-                                                    <?php echo htmlspecialchars($schedule['classroom_name']); ?>
-                                                </div>
-                                            <?php endforeach; ?>
-                                        <?php else: ?>
-                                            -
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="px-4 py-4 text-sm text-gray-600 border-b">
-                                        <?php if (!empty($day_course_schedules)): ?>
-                                            <?php foreach ($day_course_schedules as $schedule): ?>
-                                                <div class="mb-2 last:mb-0">
-                                                    <i class="fas fa-user mr-1 text-blue-500"></i>
-                                                    <?php echo htmlspecialchars($schedule['teacher_name']); ?>
-                                                </div>
-                                            <?php endforeach; ?>
-                                        <?php else: ?>
-                                            -
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="px-4 py-4 text-sm border-b">
-                                        <?php if (!empty($day_course_schedules)): ?>
-                                            <?php foreach ($day_course_schedules as $schedule): ?>
-                                                <div class="mb-2 last:mb-0">
-                                                    <span class="px-2 py-1 text-xs rounded-full
-                                                        <?php
-                                                        echo $schedule['status'] == 'active' ? 'bg-green-100 text-green-800' :
-                                                             ($schedule['status'] == 'cancelled' ? 'bg-red-100 text-red-800' :
-                                                              ($schedule['status'] == 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'));
-                                                        ?>">
-                                                        <?php echo ucfirst($schedule['status']); ?>
-                                                    </span>
-                                                </div>
-                                            <?php endforeach; ?>
-                                        <?php else: ?>
-                                            -
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        <?php endif; ?>
-    <?php endif; ?>
 
     <!-- Schedules Content -->
     <div id="schedules-content">
@@ -678,6 +461,72 @@ $days = [
         </div>
     </div>
 
+    <!-- Create Schedule Modal -->
+    <div id="createScheduleModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-plus mr-2 text-primary"></i>
+                    Agregar Nuevo Horario
+                </h3>
+                <form id="createScheduleForm" class="space-y-4">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="create_course_id" class="block text-sm font-medium text-gray-700 mb-2">Mención</label>
+                            <select id="create_course_id" name="course_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="">Seleccionar mención</option>
+                                <?php foreach ($teacher_courses as $course): ?>
+                                    <option value="<?php echo $course['id']; ?>"><?php echo htmlspecialchars($course['name']); ?> (<?php echo htmlspecialchars($course['code']); ?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="create_day" class="block text-sm font-medium text-gray-700 mb-2">Día</label>
+                            <select id="create_day" name="day" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="monday">Lunes</option>
+                                <option value="tuesday">Martes</option>
+                                <option value="wednesday">Miércoles</option>
+                                <option value="thursday">Jueves</option>
+                                <option value="friday">Viernes</option>
+                                <option value="saturday">Sábado</option>
+                                <option value="sunday">Domingo</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="create_classroom" class="block text-sm font-medium text-gray-700 mb-2">Aula</label>
+                            <select id="create_classroom" name="classroom_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="">Seleccionar aula</option>
+                                <?php foreach ($classrooms as $classroom): ?>
+                                    <option value="<?php echo $classroom['id']; ?>"><?php echo htmlspecialchars($classroom['name']); ?> (<?php echo $classroom['capacity']; ?> personas)</option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="create_start_time" class="block text-sm font-medium text-gray-700 mb-2">Hora de Inicio</label>
+                            <input type="time" id="create_start_time" name="start_time" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="create_end_time" class="block text-sm font-medium text-gray-700 mb-2">Hora de Fin</label>
+                            <input type="time" id="create_end_time" name="end_time" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                    </div>
+
+                    <div id="create-availability-preview" class="mt-4 p-4 bg-gray-50 rounded-lg">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Disponibilidad del aula seleccionada:</h4>
+                        <div id="create-availability-status" class="text-sm text-gray-600">
+                            Selecciona mención, día, aula y horario para verificar disponibilidad...
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" onclick="closeCreateScheduleModal()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-200">Cancelar</button>
+                        <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-200">Crear Horario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Schedule Modification Modal -->
     <div id="scheduleModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
         <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
@@ -913,6 +762,103 @@ function getDayName(dayKey) {
     return days[dayKey] || dayKey;
 }
 
+// Create schedule modal functions
+function openCreateScheduleModal() {
+    document.getElementById('createScheduleModal').classList.remove('hidden');
+
+    // Reset form
+    document.getElementById('createScheduleForm').reset();
+    document.getElementById('create-availability-status').innerHTML = 'Selecciona mención, día, aula y horario para verificar disponibilidad...';
+}
+
+function closeCreateScheduleModal() {
+    document.getElementById('createScheduleModal').classList.add('hidden');
+}
+
+// Check availability for create schedule form
+function checkCreateAvailability() {
+    const courseId = document.getElementById('create_course_id').value;
+    const classroomId = document.getElementById('create_classroom').value;
+    const day = document.getElementById('create_day').value;
+    const startTime = document.getElementById('create_start_time').value;
+    const endTime = document.getElementById('create_end_time').value;
+
+    if (!courseId || !classroomId || !day || !startTime || !endTime) {
+        document.getElementById('create-availability-status').innerHTML = 'Selecciona mención, día, aula y horario para verificar disponibilidad...';
+        return;
+    }
+
+    // AJAX request to check availability
+    fetch('check_availability.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            classroom_id: classroomId,
+            day: day,
+            start_time: startTime,
+            end_time: endTime
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const statusDiv = document.getElementById('create-availability-status');
+        if (data.available) {
+            statusDiv.innerHTML = '<span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>Aula disponible para el horario seleccionado</span>';
+        } else {
+            statusDiv.innerHTML = '<span class="text-red-600"><i class="fas fa-times-circle mr-1"></i>Aula ocupada. Conflicto con: ' + data.conflict_info + '</span>';
+        }
+    })
+    .catch(error => {
+        console.error('Error checking availability:', error);
+        document.getElementById('create-availability-status').innerHTML = '<span class="text-yellow-600"><i class="fas fa-exclamation-triangle mr-1"></i>Error al verificar disponibilidad</span>';
+    });
+}
+
+// Event listeners for create schedule availability checking
+document.getElementById('create_course_id').addEventListener('change', checkCreateAvailability);
+document.getElementById('create_classroom').addEventListener('change', checkCreateAvailability);
+document.getElementById('create_day').addEventListener('change', checkCreateAvailability);
+document.getElementById('create_start_time').addEventListener('change', checkCreateAvailability);
+document.getElementById('create_end_time').addEventListener('change', checkCreateAvailability);
+
+// Handle create schedule form submission
+document.getElementById('createScheduleForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    // Show loading
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creando...';
+    submitBtn.disabled = true;
+
+    fetch('create_schedule.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeCreateScheduleModal();
+            // Reload the page to show updated schedules
+            window.location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error creating schedule:', error);
+        alert('Error al crear el horario');
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
 // Schedule modification modal functions
 function openScheduleModal(scheduleId, currentDay, currentStartTime, currentEndTime, currentClassroomId, courseId) {
     document.getElementById('modal_schedule_id').value = scheduleId;
@@ -1016,10 +962,15 @@ document.getElementById('scheduleForm').addEventListener('submit', function(e) {
     });
 });
 
-// Close modal when clicking outside
+// Close modals when clicking outside
 document.addEventListener('click', function(event) {
-    const modal = document.getElementById('scheduleModal');
-    if (event.target === modal) {
+    const createModal = document.getElementById('createScheduleModal');
+    const editModal = document.getElementById('scheduleModal');
+
+    if (event.target === createModal) {
+        closeCreateScheduleModal();
+    }
+    if (event.target === editModal) {
         closeScheduleModal();
     }
 });
