@@ -14,11 +14,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['enroll_course'])) {
     $stmt = $pdo->prepare("SELECT id FROM enrollments WHERE student_id = ? AND course_id = ?");
     $stmt->execute([$user_id, $course_id]);
     if ($stmt->fetch()) {
-        $error = "Ya estás matriculado en este curso.";
+        $error = "Ya estás matriculado en esta mención.";
     } else {
         $stmt = $pdo->prepare("INSERT INTO enrollments (student_id, course_id, period, status) VALUES (?, ?, ?, 'enrolled')");
         $stmt->execute([$user_id, $course_id, $period]);
-        $success = "Te has matriculado exitosamente en el curso.";
+        $success = "Te has matriculado exitosamente en la mención.";
     }
 }
 
@@ -49,7 +49,7 @@ $current_enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <main class="container mx-auto px-6 py-8">
     <h2 class="text-3xl font-bold text-gray-800 mb-6 animate-slide-in-left flex items-center">
         <i class="fas fa-graduation-cap mr-4 text-primary"></i>
-        Matrícula de Cursos
+        Matrícula de Menciones
     </h2>
 
     <?php if (isset($success)): ?>
@@ -69,7 +69,7 @@ $current_enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 animate-fade-in-up">
             <h3 class="text-xl font-semibold mb-6 flex items-center">
                 <i class="fas fa-book mr-2 text-primary"></i>
-                Mis Cursos Matriculados
+                Mis Menciones Matriculadas
             </h3>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <?php foreach ($current_enrollments as $enrollment): ?>
@@ -126,7 +126,7 @@ $current_enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up">
         <h3 class="text-xl font-semibold mb-6 flex items-center">
             <i class="fas fa-plus-circle mr-2 text-primary"></i>
-            Cursos Disponibles para Matricular
+            Menciones Disponibles para Matricular
         </h3>
 
         <?php if (!empty($available_courses)): ?>
@@ -166,7 +166,7 @@ $current_enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="text-center py-12 text-gray-500">
                 <i class="fas fa-check-circle text-6xl mb-4 text-green-400"></i>
                 <h4 class="text-xl font-semibold mb-2">¡Felicitaciones!</h4>
-                <p>Ya estás matriculado en todos los cursos disponibles.</p>
+                <p>Ya estás matriculado en todas las menciones disponibles.</p>
             </div>
         <?php endif; ?>
     </div>

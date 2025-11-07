@@ -8,7 +8,7 @@
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         <a href="enrollments.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
             <h3 class="text-xl font-semibold text-primary mb-2">Gestión de Matrículas</h3>
-            <p class="text-gray-600">Matricular y desmatricular estudiantes en tus cursos.</p>
+            <p class="text-gray-600">Matricular y desmatricular estudiantes en tus menciones.</p>
         </a>
         <a href="grades.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
             <h3 class="text-xl font-semibold text-primary mb-2">Gestión de Notas</h3>
@@ -21,6 +21,10 @@
         <a href="activities.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
             <h3 class="text-xl font-semibold text-primary mb-2">Actividades y Tareas</h3>
             <p class="text-gray-600">Crear, asignar y calificar actividades.</p>
+        </a>
+        <a href="assignments.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
+            <h3 class="text-xl font-semibold text-primary mb-2">Asignación de Menciones</h3>
+            <p class="text-gray-600">Asignarte menciones disponibles de manera autónoma.</p>
         </a>
         <a href="../library/manage.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
             <h3 class="text-xl font-semibold text-primary mb-2">Biblioteca Virtual</h3>

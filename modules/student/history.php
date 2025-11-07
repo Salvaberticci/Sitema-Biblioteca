@@ -74,7 +74,7 @@ if (!empty($graded_courses)) {
         <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up" style="animation-delay: 0.1s">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-sm font-medium">Cursos Aprobados</p>
+                    <p class="text-gray-600 text-sm font-medium">Menciones Aprobadas</p>
                     <p class="text-3xl font-bold text-green-500"><?php echo $approved_courses; ?></p>
                     <p class="text-xs text-gray-500 mt-1"><?php echo $total_credits_earned; ?> créditos</p>
                 </div>
@@ -86,7 +86,7 @@ if (!empty($graded_courses)) {
         <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up" style="animation-delay: 0.2s">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-sm font-medium">Cursos Reprobados</p>
+                    <p class="text-gray-600 text-sm font-medium">Menciones Reprobadas</p>
                     <p class="text-3xl font-bold text-red-500"><?php echo $failed_courses; ?></p>
                 </div>
                 <div class="text-4xl text-red-500 opacity-70">
@@ -97,7 +97,7 @@ if (!empty($graded_courses)) {
         <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up" style="animation-delay: 0.3s">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-sm font-medium">Total de Cursos</p>
+                    <p class="text-gray-600 text-sm font-medium">Total de Menciones</p>
                     <p class="text-3xl font-bold text-blue-500"><?php echo $total_courses; ?></p>
                     <p class="text-xs text-gray-500 mt-1"><?php echo $total_credits_attempted; ?> créditos intentados</p>
                 </div>
@@ -175,7 +175,7 @@ if (!empty($graded_courses)) {
                     <i class="fas fa-calendar-alt mr-2 text-primary"></i>
                     Período: <?php echo htmlspecialchars($period); ?>
                     <span class="ml-4 bg-primary text-white px-3 py-1 rounded-full text-sm">
-                        <?php echo count($courses); ?> cursos
+                        <?php echo count($courses); ?> menciones
                     </span>
                 </h3>
 
@@ -274,7 +274,7 @@ if (!empty($graded_courses)) {
                 <i class="fas fa-book-open"></i>
             </div>
             <h3 class="text-2xl font-bold text-gray-800 mb-4">No hay historial académico</h3>
-            <p class="text-gray-600">Aún no tienes cursos registrados en tu historial académico.</p>
+            <p class="text-gray-600">Aún no tienes menciones registradas en tu historial académico.</p>
         </div>
     <?php endif; ?>
 </main>

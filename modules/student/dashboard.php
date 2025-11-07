@@ -7,8 +7,8 @@
 
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         <a href="enroll.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
-            <h3 class="text-xl font-semibold text-primary mb-2">Matrícula de Cursos</h3>
-            <p class="text-gray-600">Matricularme en cursos disponibles y gestionar mis matrículas académicas.</p>
+            <h3 class="text-xl font-semibold text-primary mb-2">Matrícula de Menciones</h3>
+            <p class="text-gray-600">Matricularme en menciones disponibles y gestionar mis matrículas académicas.</p>
         </a>
         <a href="grades.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
             <h3 class="text-xl font-semibold text-primary mb-2">Mis Notas</h3>
@@ -16,7 +16,7 @@
         </a>
         <a href="history.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
             <h3 class="text-xl font-semibold text-primary mb-2">Historial Académico</h3>
-            <p class="text-gray-600">Ver historial completo de cursos y notas.</p>
+            <p class="text-gray-600">Ver historial completo de menciones y notas.</p>
         </a>
         <a href="activities.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
             <h3 class="text-xl font-semibold text-primary mb-2">Actividades y Tareas</h3>

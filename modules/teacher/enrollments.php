@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt = $pdo->prepare("SELECT id FROM enrollments WHERE student_id = ? AND course_id = ?");
         $stmt->execute([$student_id, $course_id]);
         if ($stmt->fetch()) {
-            $error = "El estudiante ya está matriculado en este curso.";
+            $error = "El estudiante ya está matriculado en esta mención.";
         } else {
             $stmt = $pdo->prepare("INSERT INTO enrollments (student_id, course_id, period, status) VALUES (?, ?, ?, 'enrolled')");
             $stmt->execute([$student_id, $course_id, $period]);
@@ -106,7 +106,7 @@ $students = $pdo->query("SELECT id, name, username FROM users WHERE role = 'stud
         <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 animate-fade-in-up">
             <h3 class="text-xl font-semibold mb-4 flex items-center">
                 <i class="fas fa-plus-circle mr-2 text-primary"></i>
-                Matricular Estudiante en Mis Cursos
+                Matricular Estudiante en Mis Menciones
             </h3>
             <form method="POST" class="grid md:grid-cols-4 gap-6">
                 <div>
@@ -121,9 +121,9 @@ $students = $pdo->query("SELECT id, name, username FROM users WHERE role = 'stud
                     </select>
                 </div>
                 <div>
-                    <label for="course_id" class="block text-sm font-medium text-gray-700 mb-2">Mis Cursos</label>
+                    <label for="course_id" class="block text-sm font-medium text-gray-700 mb-2">Mis Menciones</label>
                     <select id="course_id" name="course_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
-                        <option value="">Seleccionar curso</option>
+                        <option value="">Seleccionar mención</option>
                         <?php foreach ($teacher_courses as $course): ?>
                             <option value="<?php echo $course['id']; ?>">
                                 <?php echo htmlspecialchars($course['name']); ?> (<?php echo htmlspecialchars($course['code']); ?>)
@@ -149,7 +149,7 @@ $students = $pdo->query("SELECT id, name, username FROM users WHERE role = 'stud
     <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up">
         <h3 class="text-xl font-semibold mb-6 flex items-center">
             <i class="fas fa-list mr-2 text-primary"></i>
-            Estudiantes Matriculados en Mis Cursos
+            Estudiantes Matriculados en Mis Menciones
         </h3>
 
         <?php if (!empty($teacher_courses)): ?>
@@ -218,15 +218,15 @@ $students = $pdo->query("SELECT id, name, username FROM users WHERE role = 'stud
         <?php else: ?>
             <div class="text-center py-8 text-gray-500">
                 <i class="fas fa-chalkboard-teacher text-4xl mb-4"></i>
-                <h4 class="text-xl font-semibold mb-2">No tienes cursos asignados</h4>
-                <p>No se encontraron cursos a tu cargo para gestionar matrículas.</p>
+                <h4 class="text-xl font-semibold mb-2">No tienes menciones asignadas</h4>
+                <p>No se encontraron menciones a tu cargo para gestionar matrículas.</p>
             </div>
         <?php endif; ?>
 
         <?php if (empty($enrollments) && !empty($teacher_courses)): ?>
             <div class="text-center py-8 text-gray-500">
                 <i class="fas fa-users text-4xl mb-4"></i>
-                <p>No hay estudiantes matriculados en tus cursos actualmente.</p>
+                <p>No hay estudiantes matriculados en tus menciones actualmente.</p>
             </div>
         <?php endif; ?>
     </div>
@@ -236,7 +236,7 @@ $students = $pdo->query("SELECT id, name, username FROM users WHERE role = 'stud
         <div class="bg-white p-6 rounded-2xl shadow-xl mt-8 animate-fade-in-up">
             <h3 class="text-xl font-semibold mb-6 flex items-center">
                 <i class="fas fa-chart-bar mr-2 text-primary"></i>
-                Estadísticas de Matrículas por Curso
+                Estadísticas de Matrículas por Mención
             </h3>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <?php foreach ($teacher_courses as $course): ?>

@@ -49,7 +49,7 @@ $totalActivities = $pdo->query("SELECT COUNT(*) FROM activities")->fetchColumn()
         <div class="bg-white p-6 rounded-2xl shadow-xl card-hover animate-fade-in-up" style="animation-delay: 0.1s">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-sm font-medium">Cursos Activos</p>
+                    <p class="text-gray-600 text-sm font-medium">Menciones Activas</p>
                     <p class="text-3xl font-bold text-secondary"><?php echo number_format($totalCourses); ?></p>
                     <p class="text-xs text-gray-500 mt-1">Programas académicos</p>
                 </div>
@@ -152,11 +152,11 @@ $totalActivities = $pdo->query("SELECT COUNT(*) FROM activities")->fetchColumn()
                 <div class="text-5xl mb-4 group-hover:scale-110 transition duration-300">
                     <i class="fas fa-graduation-cap"></i>
                 </div>
-                <h3 class="text-2xl font-bold mb-3">Gestión de Cursos</h3>
-                <p class="opacity-90">Administrar cursos, asignaturas y programas académicos.</p>
+                <h3 class="text-2xl font-bold mb-3">Gestión de Menciones</h3>
+                <p class="opacity-90">Administrar menciones, asignaturas y programas académicos.</p>
                 <div class="mt-4 flex items-center text-sm">
                     <i class="fas fa-arrow-right mr-2"></i>
-                    <span>Configurar cursos</span>
+                    <span>Configurar menciones</span>
                 </div>
             </div>
         </a>
@@ -297,7 +297,7 @@ $totalActivities = $pdo->query("SELECT COUNT(*) FROM activities")->fetchColumn()
                     <div class="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-lg text-center">
                         <div class="text-4xl text-green-600 mb-2"><i class="fas fa-graduation-cap"></i></div>
                         <div class="text-3xl font-bold text-green-800"><?php echo number_format($totalCourses); ?></div>
-                        <div class="text-sm text-green-600">Cursos Activos</div>
+                        <div class="text-sm text-green-600">Menciones Activas</div>
                     </div>
                     <div class="bg-gradient-to-r from-purple-50 to-purple-100 p-6 rounded-lg text-center">
                         <div class="text-4xl text-purple-600 mb-2"><i class="fas fa-book"></i></div>

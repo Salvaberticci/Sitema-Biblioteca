@@ -64,7 +64,7 @@ if ($graded_courses > 0) {
         <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up" style="animation-delay: 0.1s">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-sm font-medium">Cursos Calificados</p>
+                    <p class="text-gray-600 text-sm font-medium">Menciones Calificadas</p>
                     <p class="text-3xl font-bold text-blue-500"><?php echo $graded_courses; ?>/<?php echo $total_courses; ?></p>
                 </div>
                 <div class="text-4xl text-blue-500 opacity-70">
@@ -75,7 +75,7 @@ if ($graded_courses > 0) {
         <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up" style="animation-delay: 0.2s">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-sm font-medium">Cursos Aprobados</p>
+                    <p class="text-gray-600 text-sm font-medium">Menciones Aprobadas</p>
                     <p class="text-3xl font-bold text-green-500"><?php echo $approved_courses; ?></p>
                 </div>
                 <div class="text-4xl text-green-500 opacity-70">
@@ -86,7 +86,7 @@ if ($graded_courses > 0) {
         <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up" style="animation-delay: 0.3s">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-sm font-medium">Cursos Reprobados</p>
+                    <p class="text-gray-600 text-sm font-medium">Menciones Reprobadas</p>
                     <p class="text-3xl font-bold text-red-500"><?php echo $failed_courses; ?></p>
                 </div>
                 <div class="text-4xl text-red-500 opacity-70">
@@ -157,7 +157,7 @@ if ($graded_courses > 0) {
                     <i class="fas fa-graduation-cap"></i>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-800 mb-4">No hay calificaciones disponibles</h3>
-                <p class="text-gray-600">Aún no tienes cursos matriculados o calificaciones registradas.</p>
+                <p class="text-gray-600">Aún no tienes menciones matriculadas o calificaciones registradas.</p>
             </div>
         <?php endif; ?>
     </div>

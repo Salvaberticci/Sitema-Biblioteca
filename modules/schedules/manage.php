@@ -357,9 +357,9 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
                     </select>
                 </div>
                 <div>
-                    <label for="course_id" class="block text-sm font-medium text-gray-700 mb-2">Curso</label>
+                    <label for="course_id" class="block text-sm font-medium text-gray-700 mb-2">Mención</label>
                     <select id="course_id" name="course_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
-                        <option value="">Seleccionar curso</option>
+                        <option value="">Seleccionar mención</option>
                         <?php foreach ($courses as $course): ?>
                             <option value="<?php echo $course['id']; ?>"><?php echo htmlspecialchars($course['name']); ?> (<?php echo htmlspecialchars($course['code']); ?>)</option>
                         <?php endforeach; ?>
@@ -585,9 +585,9 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
                             </select>
                         </div>
                         <div>
-                            <label for="edit_course_id" class="block text-sm font-medium text-gray-700 mb-2">Curso</label>
+                            <label for="edit_course_id" class="block text-sm font-medium text-gray-700 mb-2">Mención</label>
                             <select id="edit_course_id" name="course_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
-                                <option value="">Seleccionar curso</option>
+                                <option value="">Seleccionar mención</option>
                                 <?php foreach ($courses as $course): ?>
                                     <option value="<?php echo $course['id']; ?>"><?php echo htmlspecialchars($course['name']); ?> (<?php echo htmlspecialchars($course['code']); ?>)</option>
                                 <?php endforeach; ?>

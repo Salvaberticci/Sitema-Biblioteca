@@ -268,7 +268,7 @@ foreach ($activities as $activity) {
                 <i class="fas fa-clipboard-list"></i>
             </div>
             <h3 class="text-2xl font-bold text-gray-800 mb-4">No hay actividades disponibles</h3>
-            <p class="text-gray-600">En este momento no tienes actividades asignadas en tus cursos matriculados.</p>
+            <p class="text-gray-600">En este momento no tienes actividades asignadas en tus menciones matriculadas.</p>
         </div>
     <?php endif; ?>
 </main>

@@ -80,16 +80,21 @@ $stmt = $pdo->prepare("
 $stmt->execute([$user_id]);
 $recent_activities = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Get courses taught
+// Get courses taught (both scheduled and self-assigned)
 $stmt = $pdo->prepare("
-    SELECT DISTINCT c.name, c.code, COUNT(e.student_id) as enrolled_students
+    SELECT DISTINCT c.name, c.code,
+           COUNT(DISTINCT e.student_id) as enrolled_students,
+           CASE WHEN tc.id IS NOT NULL THEN 'Auto-asignado' ELSE 'Programado' END as assignment_type,
+           COALESCE(tc.assigned_at, s.created_at) as assignment_date
     FROM courses c
-    JOIN schedules s ON c.id = s.course_id
+    LEFT JOIN schedules s ON c.id = s.course_id AND s.teacher_id = ?
+    LEFT JOIN teacher_courses tc ON c.id = tc.course_id AND tc.teacher_id = ? AND tc.status = 'active'
     LEFT JOIN enrollments e ON c.id = e.course_id AND e.status = 'enrolled'
-    WHERE s.teacher_id = ?
-    GROUP BY c.id, c.name, c.code
+    WHERE (s.teacher_id = ? OR tc.teacher_id = ?)
+    GROUP BY c.id, c.name, c.code, tc.id, tc.assigned_at, s.created_at
+    ORDER BY assignment_date DESC
 ");
-$stmt->execute([$user_id]);
+$stmt->execute([$user_id, $user_id, $user_id, $user_id]);
 $courses_taught = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -190,7 +195,7 @@ $courses_taught = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </h3>
                 <div class="space-y-4">
                     <div class="flex justify-between items-center">
-                        <span class="text-gray-600">Cursos Impartidos</span>
+                        <span class="text-gray-600">Menciones Impartidas</span>
                         <span class="font-bold text-primary"><?php echo $stats['total_courses']; ?></span>
                     </div>
                     <div class="flex justify-between items-center">
@@ -216,15 +221,21 @@ $courses_taught = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up">
                 <h3 class="text-xl font-semibold mb-6 flex items-center">
                     <i class="fas fa-graduation-cap mr-2 text-primary"></i>
-                    Cursos Impartidos
+                    Menciones Impartidas
                 </h3>
                 <?php if (!empty($courses_taught)): ?>
                     <div class="space-y-3">
                         <?php foreach ($courses_taught as $course): ?>
                             <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                <div>
+                                <div class="flex-1">
                                     <div class="font-medium text-gray-800"><?php echo htmlspecialchars($course['name']); ?></div>
                                     <div class="text-sm text-gray-600"><?php echo htmlspecialchars($course['code']); ?></div>
+                                    <div class="text-xs text-blue-600 mt-1">
+                                        <i class="fas fa-tag mr-1"></i><?php echo $course['assignment_type']; ?>
+                                        <?php if ($course['assignment_type'] == 'Auto-asignado'): ?>
+                                            <span class="text-green-600">(<?php echo date('d/m/Y', strtotime($course['assignment_date'])); ?>)</span>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                                 <div class="text-right">
                                     <div class="text-sm font-medium text-primary"><?php echo $course['enrolled_students']; ?> estudiantes</div>

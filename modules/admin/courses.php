@@ -72,7 +72,7 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <main class="container mx-auto px-6 py-8">
     <h2 class="text-3xl font-bold text-gray-800 mb-6 animate-slide-in-left flex items-center">
         <i class="fas fa-graduation-cap mr-4 text-primary"></i>
-        Gestión de Cursos
+        Gestión de Menciones
     </h2>
 
     <?php if (isset($success)): ?>
@@ -90,15 +90,15 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 animate-fade-in-up">
         <h3 class="text-xl font-semibold mb-4 flex items-center">
             <i class="fas fa-plus-circle mr-2 text-primary"></i>
-            Crear Nuevo Curso
+            Crear Nueva Mención
         </h3>
         <form method="POST" class="grid md:grid-cols-2 gap-6">
             <div>
-                <label for="code" class="block text-sm font-medium text-gray-700 mb-2">Código del Curso</label>
+                <label for="code" class="block text-sm font-medium text-gray-700 mb-2">Código de la Mención</label>
                 <input type="text" id="code" name="code" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
             </div>
             <div>
-                <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Nombre del Curso</label>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Nombre de la Mención</label>
                 <input type="text" id="name" name="name" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
             </div>
             <div>
@@ -112,7 +112,7 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="md:col-span-2">
                 <button type="submit" name="create_course" class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center">
                     <i class="fas fa-save mr-2"></i>
-                    Crear Curso
+                    Crear Mención
                 </button>
             </div>
         </form>
@@ -121,7 +121,7 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up">
         <h3 class="text-xl font-semibold mb-6 flex items-center">
             <i class="fas fa-list mr-2 text-primary"></i>
-            Lista de Cursos
+            Lista de Menciones
         </h3>
         <div class="overflow-x-auto">
             <table class="min-w-full table-auto">
@@ -143,13 +143,13 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td class="px-6 py-4 text-sm text-gray-600"><?php echo htmlspecialchars(substr($course['description'] ?? '', 0, 50)); ?>...</td>
                             <td class="px-6 py-4 text-sm">
                                 <div class="flex space-x-2">
-                                    <button onclick="editCourse(<?php echo $course['id']; ?>, '<?php echo htmlspecialchars($course['code']); ?>', '<?php echo htmlspecialchars($course['name']); ?>', <?php echo $course['credits']; ?>, '<?php echo htmlspecialchars($course['description'] ?? ''); ?>')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200 flex items-center" title="Editar curso">
+                                    <button onclick="editCourse(<?php echo $course['id']; ?>, '<?php echo htmlspecialchars($course['code']); ?>', '<?php echo htmlspecialchars($course['name']); ?>', <?php echo $course['credits']; ?>, '<?php echo htmlspecialchars($course['description'] ?? ''); ?>')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200 flex items-center" title="Editar mención">
                                         <i class="fas fa-edit mr-1"></i>
                                         <span class="hidden sm:inline">Editar</span>
                                     </button>
                                     <form method="POST" class="inline" onsubmit="return confirm('¿Está seguro de eliminar este curso?')">
                                         <input type="hidden" name="id" value="<?php echo $course['id']; ?>">
-                                        <button type="submit" name="delete_course" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200 flex items-center" title="Eliminar curso">
+                                        <button type="submit" name="delete_course" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200 flex items-center" title="Eliminar mención">
                                             <i class="fas fa-trash mr-1"></i>
                                             <span class="hidden sm:inline">Eliminar</span>
                                         </button>
@@ -170,17 +170,17 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="mt-3">
             <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
                 <i class="fas fa-edit mr-2 text-primary"></i>
-                Editar Curso
+                Editar Mención
             </h3>
             <form method="POST" class="space-y-4">
                 <input type="hidden" id="edit_id" name="id">
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>
-                        <label for="edit_code" class="block text-sm font-medium text-gray-700 mb-2">Código del Curso</label>
+                        <label for="edit_code" class="block text-sm font-medium text-gray-700 mb-2">Código de la Mención</label>
                         <input type="text" id="edit_code" name="code" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
                     </div>
                     <div>
-                        <label for="edit_name" class="block text-sm font-medium text-gray-700 mb-2">Nombre del Curso</label>
+                        <label for="edit_name" class="block text-sm font-medium text-gray-700 mb-2">Nombre de la Mención</label>
                         <input type="text" id="edit_name" name="name" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
                     </div>
                     <div>

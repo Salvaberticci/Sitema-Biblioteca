@@ -83,9 +83,9 @@ if ($selected_course) {
         </h3>
         <form method="GET" class="grid md:grid-cols-3 gap-6">
             <div>
-                <label for="course" class="block text-sm font-medium text-gray-700 mb-2">Curso</label>
+                <label for="course" class="block text-sm font-medium text-gray-700 mb-2">Mención</label>
                 <select id="course" name="course" onchange="this.form.submit()" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
-                    <option value="">Seleccionar curso</option>
+                    <option value="">Seleccionar mención</option>
                     <?php foreach ($courses as $course): ?>
                         <option value="<?php echo $course['id']; ?>" <?php echo $selected_course == $course['id'] ? 'selected' : ''; ?>>
                             <?php echo htmlspecialchars($course['name']); ?> (<?php echo htmlspecialchars($course['code']); ?>)
@@ -248,7 +248,7 @@ if ($selected_course) {
         </div>
     <?php elseif ($selected_course): ?>
         <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded animate-fade-in-up">
-            No hay estudiantes matriculados en este curso.
+            No hay estudiantes matriculados en esta mención.
         </div>
     <?php endif; ?>
 </main>
