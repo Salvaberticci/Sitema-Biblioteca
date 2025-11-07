@@ -294,11 +294,16 @@ $days = [
                                             <td class="px-4 py-4 text-sm border-b">
                                                 <?php if (!empty($day_course_schedules)): ?>
                                                     <?php foreach ($day_course_schedules as $schedule): ?>
-                                                        <div class="mb-2 last:mb-0">
+                                                        <div class="mb-2 last:mb-0 flex space-x-1">
                                                             <button onclick="openScheduleModal(<?php echo $schedule['id']; ?>, '<?php echo $day_key; ?>', '<?php echo $schedule['start_time']; ?>', '<?php echo $schedule['end_time']; ?>', <?php echo $schedule['classroom_id']; ?>, <?php echo $course['id']; ?>)"
-                                                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-xs transition duration-200">
+                                                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs transition duration-200">
                                                                 <i class="fas fa-edit mr-1"></i>
                                                                 Cambiar
+                                                            </button>
+                                                            <button onclick="deleteSchedule(<?php echo $schedule['id']; ?>, '<?php echo htmlspecialchars($schedule['course_name']); ?>', '<?php echo $day_name; ?>')"
+                                                                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-xs transition duration-200">
+                                                                <i class="fas fa-trash mr-1"></i>
+                                                                Eliminar
                                                             </button>
                                                         </div>
                                                     <?php endforeach; ?>
@@ -1082,6 +1087,50 @@ function selectAvailableClassroom(classroomId, classroomName) {
             }
         }
     }
+}
+
+// Function to delete a schedule
+function deleteSchedule(scheduleId, courseName, dayName) {
+    const confirmMessage = `¿Está seguro de eliminar el horario de "${courseName}" para ${dayName}?\n\nEsta acción no se puede deshacer.`;
+
+    if (!confirm(confirmMessage)) {
+        return;
+    }
+
+    // Show loading state
+    const deleteBtn = event.target.closest('button');
+    const originalText = deleteBtn.innerHTML;
+    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Eliminando...';
+    deleteBtn.disabled = true;
+
+    // AJAX request to delete schedule
+    fetch('delete_schedule.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `schedule_id=${scheduleId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAjaxMessage('Horario eliminado exitosamente', 'success');
+            // Reload the page after a short delay to show the message
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            showAjaxMessage('Error: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting schedule:', error);
+        showAjaxMessage('Error al eliminar el horario', 'error');
+    })
+    .finally(() => {
+        deleteBtn.innerHTML = originalText;
+        deleteBtn.disabled = false;
+    });
 }
 
 // Close modals when clicking outside
