@@ -1,4 +1,0 @@
-    const modal = document.getElementById('resource-modal');
-    const modal = document.getElementById('resource-modal');
-document.getElementById('resource-modal').addEventListener('click', function(e) {
-        const modal = document.getElementById('resource-modal');
