@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 31-10-2025 a las 02:25:58
+-- Tiempo de generación: 07-11-2025 a las 05:25:36
 -- Versión del servidor: 10.4.28-MariaDB
 -- Versión de PHP: 8.2.4
 
@@ -59,30 +59,7 @@ CREATE TABLE `attendance` (
   `status` enum('present','absent','late','excused') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `attendance`
---
-
-INSERT INTO `attendance` (`id`, `course_id`, `student_id`, `date`, `status`) VALUES
-(1, 2, 29, '2025-10-31', 'present'),
-(2, 2, 29, '2025-10-31', 'absent');
-
 -- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `loans`
---
-
-CREATE TABLE `loans` (
-  `id` int(11) NOT NULL,
-  `resource_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `loan_date` datetime NOT NULL DEFAULT current_timestamp(),
-  `due_date` datetime NOT NULL,
-  `return_date` datetime DEFAULT NULL,
-  `status` enum('active','returned','overdue') NOT NULL DEFAULT 'active',
-  `notes` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Estructura de tabla para la tabla `book_loans`
@@ -151,7 +128,6 @@ INSERT INTO `courses` (`id`, `code`, `name`, `credits`, `description`) VALUES
 (3, 'MAT101', 'Matemáticas Básicas', 4, 'Fundamentos de matemáticas para estudiantes de secundaria'),
 (4, 'FIS101', 'Física General', 4, 'Principios fundamentales de la física'),
 (5, 'QUI101', 'Química General', 4, 'Introducción a la química y sus aplicaciones'),
-(6, 'BIO101', 'Biología General', 4, 'Estudio de los seres vivos y sus procesos'),
 (7, 'HIS101', 'Historia Universal', 3, 'Historia de la humanidad desde la antigüedad'),
 (8, 'GEO101', 'Geografía General', 3, 'Estudio del planeta Tierra y sus características'),
 (9, 'LEN101', 'Lengua y Literatura', 3, 'Desarrollo de habilidades lingüísticas y literarias'),
@@ -160,7 +136,7 @@ INSERT INTO `courses` (`id`, `code`, `name`, `credits`, `description`) VALUES
 (12, 'EDF101', 'Educación Física', 2, 'Actividades físicas y deportivas'),
 (13, 'ELE101', 'Electrónica Básica', 4, 'Introducción a circuitos y componentes electrónicos'),
 (14, 'MEC101', 'Mecánica Industrial', 4, 'Principios de máquinas y mecanismos'),
-(15, 'CON101', 'Contabilidad Básica', 3, 'Fundamentos de contabilidad y finanzas'),
+(15, 'CON101', 'Contabilidad Básica', 3, 'Fundamentos de contabilidad y finanzass'),
 (16, 'ADM101', 'Administración General', 3, 'Principios de administración y gestión'),
 (17, 'CTA101', 'Contabilidad Avanzada', 4, 'Técnicas contables para empresas');
 
@@ -184,7 +160,6 @@ CREATE TABLE `enrollments` (
 --
 
 INSERT INTO `enrollments` (`id`, `student_id`, `course_id`, `period`, `grade`, `status`) VALUES
-(1, 29, 2, '2025-1', 9.00, 'enrolled'),
 (3, 3, 2, '2025-1', 16.00, 'enrolled');
 
 -- --------------------------------------------------------
@@ -204,6 +179,13 @@ CREATE TABLE `library_resources` (
   `uploaded_by` int(11) NOT NULL,
   `upload_date` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `library_resources`
+--
+
+INSERT INTO `library_resources` (`id`, `title`, `author`, `type`, `subject`, `file_path`, `description`, `uploaded_by`, `upload_date`) VALUES
+(5, 'prueba', 'prueba', 'book', 'programacion', 'uploads/library/1762488639_certificado curso python.pdf', 'prueba', 1, '2025-11-07 04:10:39');
 
 -- --------------------------------------------------------
 
@@ -255,17 +237,13 @@ INSERT INTO `schedules` (`id`, `classroom_id`, `course_id`, `teacher_id`, `day_o
 (1, 1, 2, 2, 'monday', '08:00:00', '09:30:00', '2025-1', '2025', 'active', 'Clase de Informática Básica', '2025-10-22 00:14:26', '2025-10-22 00:14:26'),
 (2, 1, 3, 4, 'monday', '09:45:00', '11:15:00', '2025-1', '2025', 'active', 'Matemáticas Básicas', '2025-10-22 00:14:26', '2025-10-22 00:14:26'),
 (3, 2, 4, 5, 'monday', '13:00:00', '14:30:00', '2025-1', '2025', 'active', 'Física General', '2025-10-22 00:19:10', '2025-10-22 00:19:10'),
-(4, 2, 5, 6, 'monday', '14:45:00', '16:15:00', '2025-1', '2025', 'active', 'Química General', '2025-10-22 00:23:56', '2025-10-22 00:23:56'),
-(5, 3, 6, 7, 'tuesday', '08:00:00', '09:30:00', '2025-1', '2025', 'active', 'Biología General', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
 (6, 3, 7, 8, 'tuesday', '09:45:00', '11:15:00', '2025-1', '2025', 'active', 'Historia Universal', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
 (7, 4, 8, 4, 'tuesday', '13:00:00', '14:30:00', '2025-1', '2025', 'active', 'Geografía General', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
 (8, 4, 9, 5, 'tuesday', '14:45:00', '16:15:00', '2025-1', '2025', 'active', 'Lengua y Literatura', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
-(9, 5, 10, 6, 'wednesday', '08:00:00', '09:30:00', '2025-1', '2025', 'active', 'Inglés Básico', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
 (10, 6, 13, 7, 'wednesday', '09:45:00', '11:15:00', '2025-1', '2025', 'active', 'Electrónica Básica', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
 (11, 7, 14, 8, 'wednesday', '13:00:00', '14:30:00', '2025-1', '2025', 'active', 'Mecánica Industrial', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
 (12, 1, 15, 4, 'thursday', '08:00:00', '09:30:00', '2025-1', '2025', 'active', 'Contabilidad Básica', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
 (13, 2, 16, 5, 'thursday', '09:45:00', '11:15:00', '2025-1', '2025', 'active', 'Administración General', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
-(14, 3, 17, 6, 'thursday', '13:00:00', '14:30:00', '2025-1', '2025', 'active', 'Contabilidad Avanzada', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
 (15, 8, 12, 7, 'friday', '08:00:00', '09:30:00', '2025-1', '2025', 'active', 'Educación Física', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
 (16, 9, 11, 8, 'friday', '09:45:00', '11:15:00', '2025-1', '2025', 'active', 'Educación Artística', '2025-10-22 00:25:15', '2025-10-22 00:25:15');
 
@@ -333,7 +311,6 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `name`, `role`, `cre
 (3, 'student1', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'student@etc.edu', 'Estudiante Ejemplo', 'student', '2025-10-15 03:04:03'),
 (4, 'maria.gonzalez.prof', '$2y$10$mH6D7lUIGNLxGI2rvwQrLONflA/dS0modlsu8qcQBHmOHyLUOChju', 'maria.gonzalez@etc.edu', 'María González Pérez', 'teacher', '2025-10-20 10:00:00'),
 (5, 'carlos.rodriguez.prof', '$2y$10$mH6D7lUIGNLxGI2rvwQrLONflA/dS0modlsu8qcQBHmOHyLUOChju', 'carlos.rodriguez@etc.edu', 'Carlos Rodríguez Silva', 'teacher', '2025-10-20 10:15:00'),
-(6, 'ana.lopez.prof', '$2y$10$mH6D7lUIGNLxGI2rvwQrLONflA/dS0modlsu8qcQBHmOHyLUOChju', 'ana.lopez@etc.edu', 'Ana López Martínez', 'teacher', '2025-10-20 10:30:00'),
 (7, 'pedro.martinez.prof', '$2y$10$mH6D7lUIGNLxGI2rvwQrLONflA/dS0modlsu8qcQBHmOHyLUOChju', 'pedro.martinez@etc.edu', 'Pedro Martínez García', 'teacher', '2025-10-20 10:45:00'),
 (8, 'laura.sanchez.prof', '$2y$10$mH6D7lUIGNLxGI2rvwQrLONflA/dS0modlsu8qcQBHmOHyLUOChju', 'laura.sanchez@etc.edu', 'Laura Sánchez Torres', 'teacher', '2025-10-20 11:00:00'),
 (9, 'juan.perez.alumno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'juan.perez@etc.edu', 'Juan Carlos Pérez González', 'student', '2025-10-20 11:00:00'),
@@ -356,7 +333,6 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `name`, `role`, `cre
 (26, 'daniela.rios.alumna', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'daniela.rios@etc.edu', 'Daniela Valentina Ríos Peña', 'student', '2025-10-20 15:15:00'),
 (27, 'mateo.aguilar.alumno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'mateo.aguilar@etc.edu', 'Mateo Alejandro Aguilar Blanco', 'student', '2025-10-20 15:30:00'),
 (28, 'sofia.navarro.alumna', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'sofia.navarro@etc.edu', 'Sofía Carolina Navarro Moreno', 'student', '2025-10-20 15:45:00'),
-(29, 'alejandro.moreno.alumno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'alejandro.moreno@etc.edu', 'Alejandro José Moreno Peña', 'student', '2025-10-20 16:00:00'),
 (30, 'valeria.blanco.alumna', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'valeria.blanco@etc.edu', 'Valeria Isabel Blanco Romero', 'student', '2025-10-20 16:15:00'),
 (31, 'emmanuel.pena.alumno', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'emmanuel.pena@etc.edu', 'Emmanuel David Peña Castillo', 'student', '2025-10-20 16:30:00'),
 (32, 'mariana.romero.alumna', '$2y$10$0ALY30rmlorlQ5warvq3xOg/w3FdCpFEGQUVDPsM6X4w7gwfvWc/W', 'mariana.romero@etc.edu', 'Mariana Sofía Romero Castillo', 'student', '2025-10-20 16:45:00'),
@@ -381,14 +357,6 @@ ALTER TABLE `attendance`
   ADD PRIMARY KEY (`id`),
   ADD KEY `course_id` (`course_id`),
   ADD KEY `student_id` (`student_id`);
-
---
--- Indices de la tabla `loans`
---
-ALTER TABLE `loans`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `resource_id` (`resource_id`),
-  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indices de la tabla `book_loans`
@@ -482,12 +450,6 @@ ALTER TABLE `attendance`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT de la tabla `loans`
---
-ALTER TABLE `loans`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT de la tabla `book_loans`
 --
 ALTER TABLE `book_loans`
@@ -515,7 +477,7 @@ ALTER TABLE `enrollments`
 -- AUTO_INCREMENT de la tabla `library_resources`
 --
 ALTER TABLE `library_resources`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `physical_books`
@@ -564,13 +526,6 @@ ALTER TABLE `activities`
 ALTER TABLE `attendance`
   ADD CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`),
   ADD CONSTRAINT `attendance_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`);
-
---
--- Filtros para la tabla `loans`
---
-ALTER TABLE `loans`
-  ADD CONSTRAINT `loans_ibfk_1` FOREIGN KEY (`resource_id`) REFERENCES `library_resources` (`id`),
-  ADD CONSTRAINT `loans_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
 -- Filtros para la tabla `book_loans`
