@@ -512,10 +512,7 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
                     <div>
                         <label for="teacher_id" class="block text-sm font-medium text-gray-700 mb-2">Docente</label>
                         <select id="teacher_id" name="teacher_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
-                            <option value="">Seleccionar docente</option>
-                            <?php foreach ($teachers as $teacher): ?>
-                                <option value="<?php echo $teacher['id']; ?>"><?php echo htmlspecialchars($teacher['name']); ?></option>
-                            <?php endforeach; ?>
+                            <option value="">Primero selecciona una mención</option>
                         </select>
                     </div>
                     <div>
@@ -1108,5 +1105,39 @@ document.getElementById('start_time').addEventListener('change', function() {
         const endTime = `${endHour.toString().padStart(2, '0')}:${minutes}`;
         document.getElementById('end_time').value = endTime;
     }
+});
+
+// Dynamic teacher filtering based on course selection
+document.getElementById('course_id').addEventListener('change', function() {
+    const courseId = this.value;
+    const teacherSelect = document.getElementById('teacher_id');
+
+    if (!courseId) {
+        teacherSelect.innerHTML = '<option value="">Primero selecciona una mención</option>';
+        return;
+    }
+
+    // Show loading state
+    teacherSelect.innerHTML = '<option value="">Cargando docentes...</option>';
+
+    // AJAX request to get teachers for selected course
+    fetch('get_teachers_by_course.php?course_id=' + courseId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                let options = '<option value="">Seleccionar docente</option>';
+                data.teachers.forEach(teacher => {
+                    options += `<option value="${teacher.id}">${teacher.name}</option>`;
+                });
+                teacherSelect.innerHTML = options;
+            } else {
+                teacherSelect.innerHTML = '<option value="">Error al cargar docentes</option>';
+                console.error('Error:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading teachers:', error);
+            teacherSelect.innerHTML = '<option value="">Error al cargar docentes</option>';
+        });
 });
 </script>
