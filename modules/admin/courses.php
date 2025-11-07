@@ -26,9 +26,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $success = "Curso actualizado exitosamente.";
     } elseif (isset($_POST['delete_course'])) {
         $id = (int)$_POST['id'];
-        $stmt = $pdo->prepare("DELETE FROM courses WHERE id = ?");
-        $stmt->execute([$id]);
-        $success = "Curso eliminado exitosamente.";
+
+        // Start transaction to ensure atomicity
+        $pdo->beginTransaction();
+
+        try {
+            // Delete related records first to avoid foreign key constraints
+
+            // Delete attendance records for this course
+            $stmt = $pdo->prepare("DELETE FROM attendance WHERE course_id = ?");
+            $stmt->execute([$id]);
+
+            // Delete enrollments for this course
+            $stmt = $pdo->prepare("DELETE FROM enrollments WHERE course_id = ?");
+            $stmt->execute([$id]);
+
+            // Delete activities for this course
+            $stmt = $pdo->prepare("DELETE FROM activities WHERE course_id = ?");
+            $stmt->execute([$id]);
+
+            // Delete schedules for this course
+            $stmt = $pdo->prepare("DELETE FROM schedules WHERE course_id = ?");
+            $stmt->execute([$id]);
+
+            // Finally, delete the course
+            $stmt = $pdo->prepare("DELETE FROM courses WHERE id = ?");
+            $stmt->execute([$id]);
+
+            // Commit the transaction
+            $pdo->commit();
+            $success = "Curso eliminado exitosamente junto con todos sus registros relacionados.";
+        } catch (Exception $e) {
+            // Rollback on error
+            $pdo->rollBack();
+            $error = "Error al eliminar el curso: " . $e->getMessage();
+        }
     }
 }
 
@@ -46,6 +78,12 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <?php if (isset($success)): ?>
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 animate-fade-in-up">
             <?php echo $success; ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($error)): ?>
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 animate-fade-in-up">
+            <?php echo $error; ?>
         </div>
     <?php endif; ?>
 
