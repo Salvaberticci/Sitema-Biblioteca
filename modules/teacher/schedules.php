@@ -240,8 +240,8 @@ $days = [
                                                     <?php foreach ($day_course_schedules as $schedule): ?>
                                                         <div class="mb-2 last:mb-0 schedule-item" data-schedule-id="<?php echo $schedule['id']; ?>">
                                                             <div class="font-medium">
-                                                                <?php echo date('H:i', strtotime($schedule['start_time'])); ?> -
-                                                                <?php echo date('H:i', strtotime($schedule['end_time'])); ?>
+                                                                <?php echo date('h:i A', strtotime($schedule['start_time'])); ?> -
+                                                                <?php echo date('h:i A', strtotime($schedule['end_time'])); ?>
                                                             </div>
                                                         </div>
                                                     <?php endforeach; ?>
@@ -376,8 +376,8 @@ $days = [
                                                     <?php foreach ($day_course_schedules as $schedule): ?>
                                                         <div class="mb-2 last:mb-0 schedule-item" data-schedule-id="<?php echo $schedule['id']; ?>">
                                                             <div class="font-medium">
-                                                                <?php echo date('H:i', strtotime($schedule['start_time'])); ?> -
-                                                                <?php echo date('H:i', strtotime($schedule['end_time'])); ?>
+                                                                <?php echo date('h:i A', strtotime($schedule['start_time'])); ?> -
+                                                                <?php echo date('h:i A', strtotime($schedule['end_time'])); ?>
                                                             </div>
                                                         </div>
                                                     <?php endforeach; ?>
