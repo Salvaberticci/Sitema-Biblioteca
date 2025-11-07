@@ -70,6 +70,21 @@ INSERT INTO `attendance` (`id`, `course_id`, `student_id`, `date`, `status`) VAL
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `loans`
+--
+
+CREATE TABLE `loans` (
+  `id` int(11) NOT NULL,
+  `resource_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `loan_date` datetime NOT NULL DEFAULT current_timestamp(),
+  `due_date` datetime NOT NULL,
+  `return_date` datetime DEFAULT NULL,
+  `status` enum('active','returned','overdue') NOT NULL DEFAULT 'active',
+  `notes` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
 -- Estructura de tabla para la tabla `book_loans`
 --
 
@@ -368,6 +383,14 @@ ALTER TABLE `attendance`
   ADD KEY `student_id` (`student_id`);
 
 --
+-- Indices de la tabla `loans`
+--
+ALTER TABLE `loans`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `resource_id` (`resource_id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
 -- Indices de la tabla `book_loans`
 --
 ALTER TABLE `book_loans`
@@ -459,6 +482,12 @@ ALTER TABLE `attendance`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT de la tabla `loans`
+--
+ALTER TABLE `loans`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `book_loans`
 --
 ALTER TABLE `book_loans`
@@ -535,6 +564,13 @@ ALTER TABLE `activities`
 ALTER TABLE `attendance`
   ADD CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`),
   ADD CONSTRAINT `attendance_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`);
+
+--
+-- Filtros para la tabla `loans`
+--
+ALTER TABLE `loans`
+  ADD CONSTRAINT `loans_ibfk_1` FOREIGN KEY (`resource_id`) REFERENCES `library_resources` (`id`),
+  ADD CONSTRAINT `loans_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
 -- Filtros para la tabla `book_loans`

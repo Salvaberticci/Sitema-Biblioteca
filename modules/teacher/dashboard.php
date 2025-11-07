@@ -22,7 +22,7 @@
             <h3 class="text-xl font-semibold text-primary mb-2">Actividades y Tareas</h3>
             <p class="text-gray-600">Crear, asignar y calificar actividades.</p>
         </a>
-        <a href="../library/index.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
+        <a href="../library/manage.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
             <h3 class="text-xl font-semibold text-primary mb-2">Biblioteca Virtual</h3>
             <p class="text-gray-600">Acceder a recursos de la biblioteca.</p>
         </a>

@@ -1,5 +1,4 @@
 <?php require_once '../../includes/config.php'; ?>
-<?php requireRole('admin'); ?>
 
 <?php
 // Handle form submissions with CSRF protection BEFORE including header
