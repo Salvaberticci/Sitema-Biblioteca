@@ -516,6 +516,10 @@ $days = [
                         <div id="create-availability-status" class="text-sm text-gray-600">
                             Selecciona mención, día, aula y horario para verificar disponibilidad...
                         </div>
+                        <div id="create-available-classrooms" class="mt-3 hidden">
+                            <h5 class="text-sm font-medium text-gray-700 mb-2">Aulas disponibles para este horario:</h5>
+                            <div id="create-classrooms-list" class="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto"></div>
+                        </div>
                     </div>
 
                     <div class="flex justify-end space-x-3 pt-4">
@@ -574,6 +578,10 @@ $days = [
                         <h4 class="text-sm font-medium text-gray-700 mb-2">Disponibilidad del aula seleccionada:</h4>
                         <div id="availability-status" class="text-sm text-gray-600">
                             Selecciona día, aula y horario para verificar disponibilidad...
+                        </div>
+                        <div id="available-classrooms" class="mt-3 hidden">
+                            <h5 class="text-sm font-medium text-gray-700 mb-2">Aulas disponibles para este horario:</h5>
+                            <div id="classrooms-list" class="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto"></div>
                         </div>
                     </div>
 
@@ -785,6 +793,7 @@ function checkCreateAvailability() {
 
     if (!courseId || !classroomId || !day || !startTime || !endTime) {
         document.getElementById('create-availability-status').innerHTML = 'Selecciona mención, día, aula y horario para verificar disponibilidad...';
+        document.getElementById('create-available-classrooms').classList.add('hidden');
         return;
     }
 
@@ -804,15 +813,35 @@ function checkCreateAvailability() {
     .then(response => response.json())
     .then(data => {
         const statusDiv = document.getElementById('create-availability-status');
+        const classroomsDiv = document.getElementById('create-available-classrooms');
+        const classroomsList = document.getElementById('create-classrooms-list');
+
         if (data.available) {
             statusDiv.innerHTML = '<span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>Aula disponible para el horario seleccionado</span>';
+            classroomsDiv.classList.add('hidden');
         } else {
             statusDiv.innerHTML = '<span class="text-red-600"><i class="fas fa-times-circle mr-1"></i>Aula ocupada. Conflicto con: ' + data.conflict_info + '</span>';
+
+            // Show available classrooms
+            if (data.available_classrooms && data.available_classrooms.length > 0) {
+                classroomsList.innerHTML = data.available_classrooms.map(classroom =>
+                    `<button type="button" onclick="selectAvailableClassroom('${classroom.id}', '${classroom.name}')"
+                             class="text-left p-2 bg-blue-50 hover:bg-blue-100 rounded border text-sm transition duration-200">
+                        <i class="fas fa-building mr-1 text-blue-500"></i>
+                        ${classroom.name} (${classroom.capacity} personas)
+                    </button>`
+                ).join('');
+                classroomsDiv.classList.remove('hidden');
+            } else {
+                classroomsList.innerHTML = '<p class="text-sm text-gray-500 italic">No hay aulas disponibles para este horario</p>';
+                classroomsDiv.classList.remove('hidden');
+            }
         }
     })
     .catch(error => {
         console.error('Error checking availability:', error);
         document.getElementById('create-availability-status').innerHTML = '<span class="text-yellow-600"><i class="fas fa-exclamation-triangle mr-1"></i>Error al verificar disponibilidad</span>';
+        document.getElementById('create-available-classrooms').classList.add('hidden');
     });
 }
 
@@ -892,6 +921,7 @@ function checkAvailability() {
 
     if (!classroomId || !day || !startTime || !endTime) {
         document.getElementById('availability-status').innerHTML = 'Selecciona día, aula y horario para verificar disponibilidad...';
+        document.getElementById('available-classrooms').classList.add('hidden');
         return;
     }
 
@@ -912,15 +942,35 @@ function checkAvailability() {
     .then(response => response.json())
     .then(data => {
         const statusDiv = document.getElementById('availability-status');
+        const classroomsDiv = document.getElementById('available-classrooms');
+        const classroomsList = document.getElementById('classrooms-list');
+
         if (data.available) {
             statusDiv.innerHTML = '<span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>Aula disponible para el horario seleccionado</span>';
+            classroomsDiv.classList.add('hidden');
         } else {
             statusDiv.innerHTML = '<span class="text-red-600"><i class="fas fa-times-circle mr-1"></i>Aula ocupada. Conflicto con: ' + data.conflict_info + '</span>';
+
+            // Show available classrooms
+            if (data.available_classrooms && data.available_classrooms.length > 0) {
+                classroomsList.innerHTML = data.available_classrooms.map(classroom =>
+                    `<button type="button" onclick="selectAvailableClassroom('${classroom.id}', '${classroom.name}')"
+                             class="text-left p-2 bg-blue-50 hover:bg-blue-100 rounded border text-sm transition duration-200">
+                        <i class="fas fa-building mr-1 text-blue-500"></i>
+                        ${classroom.name} (${classroom.capacity} personas)
+                    </button>`
+                ).join('');
+                classroomsDiv.classList.remove('hidden');
+            } else {
+                classroomsList.innerHTML = '<p class="text-sm text-gray-500 italic">No hay aulas disponibles para este horario</p>';
+                classroomsDiv.classList.remove('hidden');
+            }
         }
     })
     .catch(error => {
         console.error('Error checking availability:', error);
         document.getElementById('availability-status').innerHTML = '<span class="text-yellow-600"><i class="fas fa-exclamation-triangle mr-1"></i>Error al verificar disponibilidad</span>';
+        document.getElementById('available-classrooms').classList.add('hidden');
     });
 }
 
@@ -1000,6 +1050,22 @@ function showAjaxMessage(message, type) {
 
     // Scroll to top to show the message
     window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Function to select an available classroom
+function selectAvailableClassroom(classroomId, classroomName) {
+    // Update the classroom select dropdown
+    const classroomSelect = document.activeElement.closest('.modal').querySelector('select[name="classroom_id"]');
+    if (classroomSelect) {
+        classroomSelect.value = classroomId;
+
+        // Trigger availability check
+        if (document.activeElement.closest('#createScheduleModal')) {
+            checkCreateAvailability();
+        } else {
+            checkAvailability();
+        }
+    }
 }
 
 // Close modals when clicking outside

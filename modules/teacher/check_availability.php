@@ -41,10 +41,39 @@ try {
     $stmt->execute($params);
     $conflicts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // Get all available classrooms for this time slot
+    $available_query = "
+        SELECT c.id, c.name, c.capacity
+        FROM classrooms c
+        WHERE c.id NOT IN (
+            SELECT DISTINCT s.classroom_id
+            FROM schedules s
+            WHERE s.day_of_week = ?
+            AND s.status = 'active'
+            AND (
+                (s.start_time <= ? AND s.end_time > ?) OR
+                (s.start_time < ? AND s.end_time >= ?) OR
+                (s.start_time >= ? AND s.end_time <= ?)
+            )
+            " . ($exclude_schedule_id ? "AND s.id != ?" : "") . "
+        )
+        ORDER BY c.name
+    ";
+
+    $available_params = [$day, $start_time, $start_time, $end_time, $end_time, $start_time, $end_time];
+    if ($exclude_schedule_id) {
+        $available_params[] = $exclude_schedule_id;
+    }
+
+    $stmt = $pdo->prepare($available_query);
+    $stmt->execute($available_params);
+    $available_classrooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
     if (empty($conflicts)) {
         echo json_encode([
             'available' => true,
-            'message' => 'Aula disponible'
+            'message' => 'Aula disponible',
+            'available_classrooms' => $available_classrooms
         ]);
     } else {
         $conflict = $conflicts[0];
@@ -53,7 +82,8 @@ try {
         echo json_encode([
             'available' => false,
             'conflict_info' => $conflict_info,
-            'message' => 'Conflicto detectado'
+            'message' => 'Conflicto detectado',
+            'available_classrooms' => $available_classrooms
         ]);
     }
 
