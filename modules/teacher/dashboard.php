@@ -30,9 +30,9 @@
             <h3 class="text-xl font-semibold text-primary mb-2">Biblioteca Virtual</h3>
             <p class="text-gray-600">Acceder a recursos de la biblioteca.</p>
         </a>
-        <a href="../schedules/view.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
-            <h3 class="text-xl font-semibold text-primary mb-2">Horarios de Aulas</h3>
-            <p class="text-gray-600">Consultar disponibilidad de aulas.</p>
+        <a href="schedules.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
+            <h3 class="text-xl font-semibold text-primary mb-2">Horarios de Clases</h3>
+            <p class="text-gray-600">Ver horarios organizados por mención.</p>
         </a>
         <a href="profile.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
             <h3 class="text-xl font-semibold text-primary mb-2">Mi Perfil</h3>
