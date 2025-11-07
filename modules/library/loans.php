@@ -95,9 +95,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($loan_check->fetchColumn() > 0) {
                 $error = "No se puede eliminar un libro con préstamos activos";
             } else {
-                $stmt = $pdo->prepare("DELETE FROM physical_books WHERE id = ?");
-                $stmt->execute([$book_id]);
-                $success = "Libro eliminado exitosamente.";
+                // Start transaction to ensure atomicity
+                $pdo->beginTransaction();
+
+                try {
+                    // Delete related records first to avoid foreign key constraints
+
+                    // Delete all book loans for this book (should be none due to check above, but just in case)
+                    $stmt = $pdo->prepare("DELETE FROM book_loans WHERE book_id = ?");
+                    $stmt->execute([$book_id]);
+
+                    // Finally, delete the book
+                    $stmt = $pdo->prepare("DELETE FROM physical_books WHERE id = ?");
+                    $stmt->execute([$book_id]);
+
+                    // Commit the transaction
+                    $pdo->commit();
+                    $success = "Libro eliminado exitosamente junto con todos sus registros relacionados.";
+                } catch (Exception $e) {
+                    // Rollback on error
+                    $pdo->rollBack();
+                    $error = "Error al eliminar el libro: " . $e->getMessage();
+                }
             }
         } elseif (isset($_POST['admin_loan_book'])) {
             $book_id = (int)$_POST['book_id'];

@@ -51,9 +51,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     } elseif (isset($_POST['delete_schedule'])) {
         $id = (int)$_POST['id'];
-        $stmt = $pdo->prepare("DELETE FROM schedules WHERE id = ?");
-        $stmt->execute([$id]);
-        $success = "Horario eliminado exitosamente.";
+
+        // Start transaction to ensure atomicity
+        $pdo->beginTransaction();
+
+        try {
+            // Delete related records first to avoid foreign key constraints
+
+            // Delete attendance records for this schedule's course
+            $stmt = $pdo->prepare("DELETE FROM attendance WHERE course_id IN (SELECT course_id FROM schedules WHERE id = ?)");
+            $stmt->execute([$id]);
+
+            // Delete enrollments for this schedule's course
+            $stmt = $pdo->prepare("DELETE FROM enrollments WHERE course_id IN (SELECT course_id FROM schedules WHERE id = ?)");
+            $stmt->execute([$id]);
+
+            // Delete activities for this schedule's course
+            $stmt = $pdo->prepare("DELETE FROM activities WHERE course_id IN (SELECT course_id FROM schedules WHERE id = ?)");
+            $stmt->execute([$id]);
+
+            // Delete schedule conflicts for this schedule
+            $stmt = $pdo->prepare("DELETE FROM schedule_conflicts WHERE schedule_id = ?");
+            $stmt->execute([$id]);
+
+            // Finally, delete the schedule
+            $stmt = $pdo->prepare("DELETE FROM schedules WHERE id = ?");
+            $stmt->execute([$id]);
+
+            // Commit the transaction
+            $pdo->commit();
+            $success = "Horario eliminado exitosamente junto con todos sus registros relacionados.";
+        } catch (Exception $e) {
+            // Rollback on error
+            $pdo->rollBack();
+            $error = "Error al eliminar el horario: " . $e->getMessage();
+        }
     } elseif (isset($_POST['bulk_update'])) {
         $schedule_ids = $_POST['schedule_ids'] ?? [];
         $action = $_POST['bulk_action'];

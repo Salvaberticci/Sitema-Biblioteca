@@ -22,9 +22,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     } elseif (isset($_POST['unenroll_student'])) {
         $enrollment_id = (int)$_POST['enrollment_id'];
-        $stmt = $pdo->prepare("DELETE FROM enrollments WHERE id = ?");
-        $stmt->execute([$enrollment_id]);
-        $success = "Estudiante desmatriculado exitosamente.";
+
+        // Start transaction to ensure atomicity
+        $pdo->beginTransaction();
+
+        try {
+            // Delete related records first to avoid foreign key constraints
+
+            // Delete attendance records for this enrollment
+            $stmt = $pdo->prepare("DELETE FROM attendance WHERE student_id IN (SELECT student_id FROM enrollments WHERE id = ?) AND course_id IN (SELECT course_id FROM enrollments WHERE id = ?)");
+            $stmt->execute([$enrollment_id, $enrollment_id]);
+
+            // Delete submissions for this enrollment
+            $stmt = $pdo->prepare("DELETE FROM submissions WHERE student_id IN (SELECT student_id FROM enrollments WHERE id = ?) AND activity_id IN (SELECT id FROM activities WHERE course_id IN (SELECT course_id FROM enrollments WHERE id = ?))");
+            $stmt->execute([$enrollment_id, $enrollment_id]);
+
+            // Finally, delete the enrollment
+            $stmt = $pdo->prepare("DELETE FROM enrollments WHERE id = ?");
+            $stmt->execute([$enrollment_id]);
+
+            // Commit the transaction
+            $pdo->commit();
+            $success = "Estudiante desmatriculado exitosamente junto con todos sus registros relacionados.";
+        } catch (Exception $e) {
+            // Rollback on error
+            $pdo->rollBack();
+            $error = "Error al desmatricular el estudiante: " . $e->getMessage();
+        }
     }
 }
 
