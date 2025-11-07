@@ -843,15 +843,19 @@ document.getElementById('createScheduleForm').addEventListener('submit', functio
     .then(data => {
         if (data.success) {
             closeCreateScheduleModal();
-            // Reload the page to show updated schedules
-            window.location.reload();
+            // Show success message
+            showAjaxMessage('Horario creado exitosamente', 'success');
+            // Reload the page after a short delay to show the message
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
         } else {
-            alert('Error: ' + data.message);
+            showAjaxMessage('Error: ' + data.message, 'error');
         }
     })
     .catch(error => {
         console.error('Error creating schedule:', error);
-        alert('Error al crear el horario');
+        showAjaxMessage('Error al crear el horario', 'error');
     })
     .finally(() => {
         submitBtn.innerHTML = originalText;
@@ -946,21 +950,57 @@ document.getElementById('scheduleForm').addEventListener('submit', function(e) {
     .then(data => {
         if (data.success) {
             closeScheduleModal();
-            // Reload the page to show updated schedules
-            window.location.reload();
+            // Show success message
+            showAjaxMessage('Horario actualizado exitosamente', 'success');
+            // Reload the page after a short delay to show the message
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
         } else {
-            alert('Error: ' + data.message);
+            showAjaxMessage('Error: ' + data.message, 'error');
         }
     })
     .catch(error => {
         console.error('Error updating schedule:', error);
-        alert('Error al actualizar el horario');
+        showAjaxMessage('Error al actualizar el horario', 'error');
     })
     .finally(() => {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
     });
 });
+
+// Function to show AJAX messages
+function showAjaxMessage(message, type) {
+    const successDiv = document.getElementById('ajax-success-message');
+    const errorDiv = document.getElementById('ajax-error-message');
+    const successText = document.getElementById('ajax-success-text');
+    const errorText = document.getElementById('ajax-error-text');
+
+    // Hide both messages first
+    successDiv.classList.add('hidden');
+    errorDiv.classList.add('hidden');
+
+    // Show the appropriate message
+    if (type === 'success') {
+        successText.textContent = message;
+        successDiv.classList.remove('hidden');
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+            successDiv.classList.add('hidden');
+        }, 3000);
+    } else {
+        errorText.textContent = message;
+        errorDiv.classList.remove('hidden');
+        // Auto-hide after 5 seconds for errors
+        setTimeout(() => {
+            errorDiv.classList.add('hidden');
+        }, 5000);
+    }
+
+    // Scroll to top to show the message
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 // Close modals when clicking outside
 document.addEventListener('click', function(event) {
