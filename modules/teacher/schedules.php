@@ -1054,16 +1054,26 @@ function showAjaxMessage(message, type) {
 
 // Function to select an available classroom
 function selectAvailableClassroom(classroomId, classroomName) {
-    // Update the classroom select dropdown
-    const classroomSelect = document.activeElement.closest('.modal').querySelector('select[name="classroom_id"]');
-    if (classroomSelect) {
-        classroomSelect.value = classroomId;
+    // Find the active modal
+    let modal = null;
+    if (document.getElementById('createScheduleModal').classList.contains('hidden') === false) {
+        modal = document.getElementById('createScheduleModal');
+    } else if (document.getElementById('scheduleModal').classList.contains('hidden') === false) {
+        modal = document.getElementById('scheduleModal');
+    }
 
-        // Trigger availability check
-        if (document.activeElement.closest('#createScheduleModal')) {
-            checkCreateAvailability();
-        } else {
-            checkAvailability();
+    if (modal) {
+        // Update the classroom select dropdown
+        const classroomSelect = modal.querySelector('select[name="classroom_id"]');
+        if (classroomSelect) {
+            classroomSelect.value = classroomId;
+
+            // Trigger availability check
+            if (modal.id === 'createScheduleModal') {
+                checkCreateAvailability();
+            } else {
+                checkAvailability();
+            }
         }
     }
 }
