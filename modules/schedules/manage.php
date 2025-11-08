@@ -10,23 +10,6 @@ $courses = $pdo->query("SELECT * FROM courses ORDER BY name")->fetchAll(PDO::FET
 $selected_course = $_GET['course'] ?? 'all';
 $selected_teacher = $_GET['teacher'] ?? 'all';
 
-// Get teachers based on selected course filter
-if ($selected_course !== 'all') {
-    // Get only teachers assigned to the selected course
-    $stmt = $pdo->prepare("
-        SELECT DISTINCT u.id, u.name
-        FROM users u
-        JOIN teacher_courses tc ON u.id = tc.teacher_id
-        WHERE tc.course_id = ? AND tc.status = 'active' AND u.role = 'teacher'
-        ORDER BY u.name
-    ");
-    $stmt->execute([$selected_course]);
-    $teachers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} else {
-    // Get all teachers when no course is selected
-    $teachers = $pdo->query("SELECT * FROM users WHERE role = 'teacher' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
-}
-
 // Get all courses for admin management
 $courses = $pdo->query("SELECT * FROM courses ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 
@@ -244,7 +227,7 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
             <form method="GET" class="flex flex-wrap items-center gap-4">
                 <div class="flex items-center space-x-4">
                     <label for="course" class="text-sm font-medium text-gray-700">Seleccionar Materia:</label>
-                    <select id="course" name="course" onchange="updateTeacherFilter(this.value); this.form.submit()"
+                    <select id="course" name="course" onchange="this.form.submit()"
                             class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                         <option value="all" <?php echo $selected_course === 'all' ? 'selected' : ''; ?>>Todas las materias</option>
                         <?php foreach ($courses as $course): ?>
@@ -788,49 +771,7 @@ function showTab(tabName) {
     }
 }
 
-// Initialize default tab
-document.addEventListener('DOMContentLoaded', function() {
-    showTab('schedules');
-});
 
-// Function to update teacher filter based on selected course
-function updateTeacherFilter(courseId) {
-    const teacherSelect = document.getElementById('teacher');
-
-    if (courseId === 'all') {
-        // Reset to all teachers
-        teacherSelect.value = 'all';
-        return;
-    }
-
-    // AJAX request to get teachers for the selected course
-    fetch('get_teachers_by_course.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `course_id=${courseId}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Update teacher dropdown options
-            let optionsHtml = '<option value="all">Todos los docentes</option>';
-            data.teachers.forEach(teacher => {
-                optionsHtml += `<option value="${teacher.id}">${teacher.name}</option>`;
-            });
-            teacherSelect.innerHTML = optionsHtml;
-
-            // Reset teacher selection
-            teacherSelect.value = 'all';
-        } else {
-            console.error('Error loading teachers:', data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error updating teacher filter:', error);
-    });
-}
 
 // Load classroom availability
 function loadAvailability() {
@@ -996,13 +937,14 @@ function closeCreateScheduleModal() {
 // Check availability for create schedule form
 function checkCreateAvailability() {
     const courseId = document.getElementById('create_course_id').value;
+    const teacherId = document.getElementById('create_teacher').value;
     const classroomId = document.getElementById('create_classroom').value;
     const day = document.getElementById('create_day').value;
     const startTime = document.getElementById('create_start_time').value;
     const endTime = document.getElementById('create_end_time').value;
 
-    if (!courseId || !classroomId || !day || !startTime || !endTime) {
-        document.getElementById('create-availability-status').innerHTML = 'Selecciona materia, día, aula y horario para verificar disponibilidad...';
+    if (!courseId || !teacherId || !classroomId || !day || !startTime || !endTime) {
+        document.getElementById('create-availability-status').innerHTML = 'Selecciona materia, docente, día, aula y horario para verificar disponibilidad...';
         document.getElementById('create-available-classrooms').classList.add('hidden');
         return;
     }
@@ -1015,6 +957,7 @@ function checkCreateAvailability() {
         },
         body: JSON.stringify({
             classroom_id: classroomId,
+            teacher_id: teacherId,
             day: day,
             start_time: startTime,
             end_time: endTime
@@ -1058,6 +1001,7 @@ function checkCreateAvailability() {
 
 // Event listeners for create schedule availability checking
 document.getElementById('create_course_id').addEventListener('change', checkCreateAvailability);
+document.getElementById('create_teacher').addEventListener('change', checkCreateAvailability);
 document.getElementById('create_classroom').addEventListener('change', checkCreateAvailability);
 document.getElementById('create_day').addEventListener('change', checkCreateAvailability);
 document.getElementById('create_start_time').addEventListener('change', checkCreateAvailability);
