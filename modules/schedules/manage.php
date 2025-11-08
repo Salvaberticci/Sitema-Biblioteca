@@ -724,6 +724,8 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
             </div>
         </div>
     </div>
+
+<script>
 // Tab switching functionality
 function showTab(tabName) {
     const schedulesTab = document.getElementById('schedules-tab');
@@ -1273,3 +1275,4 @@ document.addEventListener('click', function(event) {
         closeScheduleModal();
     }
 });
+</script>
