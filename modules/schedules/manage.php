@@ -1055,6 +1055,7 @@ function checkCreateAvailability() {
     });
 }
 
+
 // Event listeners for create schedule availability checking
 document.getElementById('create_course_id').addEventListener('change', checkCreateAvailability);
 document.getElementById('create_classroom').addEventListener('change', checkCreateAvailability);
