@@ -3,13 +3,49 @@
 <?php include '../../templates/header.php'; ?>
 
 <?php
-// Get all courses and teachers for admin management
+// Get all courses for admin management
 $courses = $pdo->query("SELECT * FROM courses ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
-$teachers = $pdo->query("SELECT * FROM users WHERE role = 'teacher' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 
 // Get selected filters
 $selected_course = $_GET['course'] ?? 'all';
 $selected_teacher = $_GET['teacher'] ?? 'all';
+
+// Get teachers based on selected course filter
+if ($selected_course !== 'all') {
+    // Get only teachers assigned to the selected course
+    $stmt = $pdo->prepare("
+        SELECT DISTINCT u.id, u.name
+        FROM users u
+        JOIN teacher_courses tc ON u.id = tc.teacher_id
+        WHERE tc.course_id = ? AND tc.status = 'active' AND u.role = 'teacher'
+        ORDER BY u.name
+    ");
+    $stmt->execute([$selected_course]);
+    $teachers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    // Get all teachers when no course is selected
+    $teachers = $pdo->query("SELECT * FROM users WHERE role = 'teacher' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Get all courses for admin management
+$courses = $pdo->query("SELECT * FROM courses ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+
+// Get teachers based on selected course filter
+if ($selected_course !== 'all') {
+    // Get only teachers assigned to the selected course
+    $stmt = $pdo->prepare("
+        SELECT DISTINCT u.id, u.name
+        FROM users u
+        JOIN teacher_courses tc ON u.id = tc.teacher_id
+        WHERE tc.course_id = ? AND tc.status = 'active' AND u.role = 'teacher'
+        ORDER BY u.name
+    ");
+    $stmt->execute([$selected_course]);
+    $teachers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    // Get all teachers when no course is selected
+    $teachers = $pdo->query("SELECT * FROM users WHERE role = 'teacher' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+}
 
 // Get schedules for the selected filters
 $query = "
@@ -208,7 +244,7 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
             <form method="GET" class="flex flex-wrap items-center gap-4">
                 <div class="flex items-center space-x-4">
                     <label for="course" class="text-sm font-medium text-gray-700">Seleccionar Materia:</label>
-                    <select id="course" name="course" onchange="this.form.submit()"
+                    <select id="course" name="course" onchange="updateTeacherFilter(this.value); this.form.submit()"
                             class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                         <option value="all" <?php echo $selected_course === 'all' ? 'selected' : ''; ?>>Todas las materias</option>
                         <?php foreach ($courses as $course): ?>
@@ -756,6 +792,45 @@ function showTab(tabName) {
 document.addEventListener('DOMContentLoaded', function() {
     showTab('schedules');
 });
+
+// Function to update teacher filter based on selected course
+function updateTeacherFilter(courseId) {
+    const teacherSelect = document.getElementById('teacher');
+
+    if (courseId === 'all') {
+        // Reset to all teachers
+        teacherSelect.value = 'all';
+        return;
+    }
+
+    // AJAX request to get teachers for the selected course
+    fetch('get_teachers_by_course.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `course_id=${courseId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update teacher dropdown options
+            let optionsHtml = '<option value="all">Todos los docentes</option>';
+            data.teachers.forEach(teacher => {
+                optionsHtml += `<option value="${teacher.id}">${teacher.name}</option>`;
+            });
+            teacherSelect.innerHTML = optionsHtml;
+
+            // Reset teacher selection
+            teacherSelect.value = 'all';
+        } else {
+            console.error('Error loading teachers:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error updating teacher filter:', error);
+    });
+}
 
 // Load classroom availability
 function loadAvailability() {
