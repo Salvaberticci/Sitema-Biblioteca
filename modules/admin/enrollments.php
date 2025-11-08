@@ -3,24 +3,44 @@
 <?php include '../../templates/header.php'; ?>
 
 <?php
-// Handle form submissions
+// Debug output (visible on page)
+$debug_info = [];
+$debug_info[] = "Request Method: " . $_SERVER['REQUEST_METHOD'];
+if (!empty($_POST)) {
+    $debug_info[] = "All POST keys: " . implode(', ', array_keys($_POST));
+} else {
+    $debug_info[] = "No POST data received";
+}
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['enroll_student'])) {
+        $debug_info[] = "Processing enroll_student request";
         $student_id = (int)$_POST['student_id'];
         $course_id = (int)$_POST['course_id'];
         $period = sanitize($_POST['period']) ?: date('Y-1');
 
         // Check if student is already enrolled
+        $debug_info[] = "Checking enrollment for student $student_id in course $course_id";
         $stmt = $pdo->prepare("SELECT id FROM enrollments WHERE student_id = ? AND course_id = ?");
         $stmt->execute([$student_id, $course_id]);
-        if ($stmt->fetch()) {
+        $existing = $stmt->fetch();
+        $debug_info[] = "Existing enrollment check result: " . ($existing ? 'found' : 'not found');
+
+        if ($existing) {
             $error = "El estudiante ya está matriculado en este curso.";
+            $debug_info[] = "Enrollment failed: already enrolled";
         } else {
+            $debug_info[] = "Inserting enrollment for student $student_id in course $course_id with period $period";
             $stmt = $pdo->prepare("INSERT INTO enrollments (student_id, course_id, period, status) VALUES (?, ?, ?, 'enrolled')");
-            $stmt->execute([$student_id, $course_id, $period]);
-            $success = "Estudiante matriculado exitosamente.";
+            $result = $stmt->execute([$student_id, $course_id, $period]);
+            $debug_info[] = "Insert result: " . ($result ? 'success' : 'failed');
+            if ($result) {
+                $success = "Estudiante matriculado exitosamente.";
+            } else {
+                $error = "Error al insertar la matrícula en la base de datos.";
+                $debug_info[] = "Insert failed without exception";
+            }
         }
-    } elseif (isset($_POST['unenroll_student'])) {
+    } elseif (isset($_POST['enrollment_id'])) {
         $enrollment_id = (int)$_POST['enrollment_id'];
 
         // Start transaction to ensure atomicity
@@ -53,20 +73,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // Fetch all enrollments with student and course info
-$stmt = $pdo->query("
-    SELECT e.id, e.period, e.status, e.grade,
-           u.name as student_name, u.username as student_username,
-           c.name as course_name, c.code as course_code
-    FROM enrollments e
-    JOIN users u ON e.student_id = u.id
-    JOIN courses c ON e.course_id = c.id
-    ORDER BY c.name, u.name
-");
-$enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+try {
+    $stmt = $pdo->query("
+        SELECT e.id, e.period, e.status, e.grade,
+               u.name as student_name, u.username as student_username,
+               c.name as course_name, c.code as course_code
+        FROM enrollments e
+        JOIN users u ON e.student_id = u.id
+        JOIN courses c ON e.course_id = c.id
+        ORDER BY c.name, u.name
+    ");
+    $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $debug_info[] = "Error fetching enrollments: " . $e->getMessage();
+    $enrollments = [];
+}
 
 // Fetch students and courses for enrollment form
-$students = $pdo->query("SELECT id, name, username FROM users WHERE role = 'student' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
-$courses = $pdo->query("SELECT id, name, code FROM courses ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+try {
+    $students = $pdo->query("SELECT id, name, username FROM users WHERE role = 'student' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+    $courses = $pdo->query("SELECT id, name, code FROM courses ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $debug_info[] = "Error fetching students/courses: " . $e->getMessage();
+    $students = [];
+    $courses = [];
+}
 ?>
 
 <main class="container mx-auto px-6 py-8">
@@ -86,6 +117,7 @@ $courses = $pdo->query("SELECT id, name, code FROM courses ORDER BY name")->fetc
             <?php echo $error; ?>
         </div>
     <?php endif; ?>
+
 
     <!-- Enrollment Form -->
     <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 animate-fade-in-up">
@@ -121,10 +153,11 @@ $courses = $pdo->query("SELECT id, name, code FROM courses ORDER BY name")->fetc
                 <input type="text" id="period" name="period" value="<?php echo date('Y-1'); ?>" placeholder="2025-1" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
             </div>
             <div class="flex items-end">
-                <button type="submit" name="enroll_student" class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-8 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center">
+                <button type="submit" class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-8 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center">
                     <i class="fas fa-user-plus mr-2"></i>
                     Matricular
                 </button>
+                <input type="hidden" name="enroll_student" value="1">
             </div>
         </form>
     </div>
@@ -149,7 +182,8 @@ $courses = $pdo->query("SELECT id, name, code FROM courses ORDER BY name")->fetc
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
-                    <?php foreach ($enrollments as $enrollment): ?>
+                    <?php if (isset($enrollments) && is_array($enrollments)): ?>
+                        <?php foreach ($enrollments as $enrollment): ?>
                         <tr class="hover:bg-gray-50 transition duration-200">
                             <td class="px-6 py-4 text-sm font-medium text-gray-900">
                                 <?php echo htmlspecialchars($enrollment['student_name']); ?>
@@ -193,7 +227,8 @@ $courses = $pdo->query("SELECT id, name, code FROM courses ORDER BY name")->fetc
                                 </form>
                             </td>
                         </tr>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>

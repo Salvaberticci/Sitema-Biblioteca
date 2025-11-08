@@ -5,20 +5,50 @@
 <?php
 $user_id = $_SESSION['user_id'];
 
+// Debug output (visible on page)
+$debug_info = [];
+$debug_info[] = "User ID: " . ($user_id ?? 'not set');
+$debug_info[] = "Role: " . (getUserRole() ?? 'not set');
+$debug_info[] = "Request Method: " . $_SERVER['REQUEST_METHOD'];
+$debug_info[] = "POST data: " . (isset($_POST['enroll_course']) ? 'enroll_course set' : 'enroll_course not set');
+$debug_info[] = "All POST keys: " . implode(', ', array_keys($_POST));
+$debug_info[] = "Course ID in POST: " . ($_POST['course_id'] ?? 'not set');
+$debug_info[] = "Period in POST: " . ($_POST['period'] ?? 'not set');
+
 // Handle enrollment request
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['enroll_course'])) {
+    $debug_info[] = "Processing enrollment request";
+    $debug_info[] = "Course ID: " . ($_POST['course_id'] ?? 'not set');
+    $debug_info[] = "Period: " . ($_POST['period'] ?? 'not set');
     $course_id = (int)$_POST['course_id'];
     $period = sanitize($_POST['period']) ?: date('Y-1');
 
-    // Check if student is already enrolled
-    $stmt = $pdo->prepare("SELECT id FROM enrollments WHERE student_id = ? AND course_id = ?");
-    $stmt->execute([$user_id, $course_id]);
-    if ($stmt->fetch()) {
-        $error = "Ya estás matriculado en esta mención.";
-    } else {
-        $stmt = $pdo->prepare("INSERT INTO enrollments (student_id, course_id, period, status) VALUES (?, ?, ?, 'enrolled')");
-        $stmt->execute([$user_id, $course_id, $period]);
-        $success = "Te has matriculado exitosamente en la mención.";
+    try {
+        // Check if student is already enrolled
+        $debug_info[] = "Checking enrollment for user $user_id in course $course_id";
+        $stmt = $pdo->prepare("SELECT id FROM enrollments WHERE student_id = ? AND course_id = ?");
+        $stmt->execute([$user_id, $course_id]);
+        $existing = $stmt->fetch();
+        $debug_info[] = "Existing enrollment check result: " . ($existing ? 'found' : 'not found');
+
+        if ($existing) {
+            $error = "Ya estás matriculado en esta mención.";
+            $debug_info[] = "Enrollment failed: already enrolled";
+        } else {
+            $debug_info[] = "Inserting enrollment for user $user_id in course $course_id with period $period";
+            $stmt = $pdo->prepare("INSERT INTO enrollments (student_id, course_id, period, status) VALUES (?, ?, ?, 'enrolled')");
+            $result = $stmt->execute([$user_id, $course_id, $period]);
+            $debug_info[] = "Insert result: " . ($result ? 'success' : 'failed');
+            if ($result) {
+                $success = "Te has matriculado exitosamente en la mención.";
+            } else {
+                $error = "Error al insertar la matrícula en la base de datos.";
+                $debug_info[] = "Insert failed without exception";
+            }
+        }
+    } catch (PDOException $e) {
+        $debug_info[] = "PDO Exception during enrollment: " . $e->getMessage();
+        $error = "Error al procesar la matrícula: " . $e->getMessage();
     }
 }
 
@@ -63,6 +93,7 @@ $current_enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php echo $error; ?>
         </div>
     <?php endif; ?>
+
 
     <!-- Current Enrollments -->
     <?php if (!empty($current_enrollments)): ?>
@@ -152,9 +183,10 @@ $current_enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <?php echo htmlspecialchars(substr($course['description'] ?? 'Sin descripción', 0, 100)); ?>...
                         </p>
                         <form method="POST" class="mt-4">
+                            <input type="hidden" name="enroll_course" value="1">
                             <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
                             <input type="hidden" name="period" value="<?php echo date('Y-1'); ?>">
-                            <button type="submit" name="enroll_course" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center justify-center">
+                            <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center justify-center">
                                 <i class="fas fa-user-plus mr-2"></i>
                                 Matricularme
                             </button>
