@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 07-11-2025 a las 05:25:36
+-- Tiempo de generación: 10-11-2025 a las 20:05:57
 -- Versión del servidor: 10.4.28-MariaDB
 -- Versión de PHP: 8.2.4
 
@@ -160,7 +160,10 @@ CREATE TABLE `enrollments` (
 --
 
 INSERT INTO `enrollments` (`id`, `student_id`, `course_id`, `period`, `grade`, `status`) VALUES
-(3, 3, 2, '2025-1', 16.00, 'enrolled');
+(3, 3, 2, '2025-1', 16.00, 'enrolled'),
+(4, 3, 16, '2025-1', NULL, 'enrolled'),
+(5, 3, 17, '2025-1', NULL, 'enrolled'),
+(7, 23, 16, '2025-1', NULL, 'enrolled');
 
 -- --------------------------------------------------------
 
@@ -234,18 +237,8 @@ CREATE TABLE `schedules` (
 --
 
 INSERT INTO `schedules` (`id`, `classroom_id`, `course_id`, `teacher_id`, `day_of_week`, `start_time`, `end_time`, `semester`, `academic_year`, `status`, `notes`, `created_at`, `updated_at`) VALUES
-(1, 1, 2, 2, 'monday', '08:00:00', '09:30:00', '2025-1', '2025', 'active', 'Clase de Informática Básica', '2025-10-22 00:14:26', '2025-10-22 00:14:26'),
-(2, 1, 3, 4, 'monday', '09:45:00', '11:15:00', '2025-1', '2025', 'active', 'Matemáticas Básicas', '2025-10-22 00:14:26', '2025-10-22 00:14:26'),
-(3, 2, 4, 5, 'monday', '13:00:00', '14:30:00', '2025-1', '2025', 'active', 'Física General', '2025-10-22 00:19:10', '2025-10-22 00:19:10'),
-(6, 3, 7, 8, 'tuesday', '09:45:00', '11:15:00', '2025-1', '2025', 'active', 'Historia Universal', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
-(7, 4, 8, 4, 'tuesday', '13:00:00', '14:30:00', '2025-1', '2025', 'active', 'Geografía General', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
-(8, 4, 9, 5, 'tuesday', '14:45:00', '16:15:00', '2025-1', '2025', 'active', 'Lengua y Literatura', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
-(10, 6, 13, 7, 'wednesday', '09:45:00', '11:15:00', '2025-1', '2025', 'active', 'Electrónica Básica', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
-(11, 7, 14, 8, 'wednesday', '13:00:00', '14:30:00', '2025-1', '2025', 'active', 'Mecánica Industrial', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
-(12, 1, 15, 4, 'thursday', '08:00:00', '09:30:00', '2025-1', '2025', 'active', 'Contabilidad Básica', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
-(13, 2, 16, 5, 'thursday', '09:45:00', '11:15:00', '2025-1', '2025', 'active', 'Administración General', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
-(15, 8, 12, 7, 'friday', '08:00:00', '09:30:00', '2025-1', '2025', 'active', 'Educación Física', '2025-10-22 00:25:15', '2025-10-22 00:25:15'),
-(16, 9, 11, 8, 'friday', '09:45:00', '11:15:00', '2025-1', '2025', 'active', 'Educación Artística', '2025-10-22 00:25:15', '2025-10-22 00:25:15');
+(8, 1, 16, 2, 'monday', '07:00:00', '08:00:00', '2025-1', '2025', 'active', NULL, '2025-11-07 23:36:49', '2025-11-07 23:36:49'),
+(9, 1, 17, 5, 'monday', '18:33:00', '20:33:00', '2025-1', '2025', 'active', NULL, '2025-11-08 20:33:45', '2025-11-08 20:40:07');
 
 -- --------------------------------------------------------
 
@@ -284,6 +277,28 @@ CREATE TABLE `submissions` (
 
 INSERT INTO `submissions` (`id`, `activity_id`, `student_id`, `file_path`, `grade`, `comments`, `submitted_at`) VALUES
 (1, 1, 3, 'uploads/submissions/1761872447_3_Opera Captura de pantalla_2025-09-17_144729_127.0.0.1.png', 18.00, '', '2025-10-31 01:00:47');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `teacher_courses`
+--
+
+CREATE TABLE `teacher_courses` (
+  `id` int(11) NOT NULL,
+  `teacher_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `assigned_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `status` enum('active','inactive') DEFAULT 'active'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `teacher_courses`
+--
+
+INSERT INTO `teacher_courses` (`id`, `teacher_id`, `course_id`, `assigned_at`, `status`) VALUES
+(13, 2, 16, '2025-11-07 20:39:13', 'active'),
+(14, 2, 17, '2025-11-07 21:39:23', 'active');
 
 -- --------------------------------------------------------
 
@@ -427,6 +442,14 @@ ALTER TABLE `submissions`
   ADD KEY `student_id` (`student_id`);
 
 --
+-- Indices de la tabla `teacher_courses`
+--
+ALTER TABLE `teacher_courses`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_teacher_course` (`teacher_id`,`course_id`),
+  ADD KEY `course_id` (`course_id`);
+
+--
 -- Indices de la tabla `users`
 --
 ALTER TABLE `users`
@@ -471,7 +494,7 @@ ALTER TABLE `courses`
 -- AUTO_INCREMENT de la tabla `enrollments`
 --
 ALTER TABLE `enrollments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `library_resources`
@@ -489,7 +512,7 @@ ALTER TABLE `physical_books`
 -- AUTO_INCREMENT de la tabla `schedules`
 --
 ALTER TABLE `schedules`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `schedule_conflicts`
@@ -502,6 +525,12 @@ ALTER TABLE `schedule_conflicts`
 --
 ALTER TABLE `submissions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `teacher_courses`
+--
+ALTER TABLE `teacher_courses`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `users`
@@ -568,6 +597,13 @@ ALTER TABLE `schedule_conflicts`
 ALTER TABLE `submissions`
   ADD CONSTRAINT `submissions_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `activities` (`id`),
   ADD CONSTRAINT `submissions_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`);
+
+--
+-- Filtros para la tabla `teacher_courses`
+--
+ALTER TABLE `teacher_courses`
+  ADD CONSTRAINT `teacher_courses_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `teacher_courses_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
