@@ -109,6 +109,7 @@ $students = $pdo->query("SELECT id, name, username FROM users WHERE role = 'stud
                 Matricular Estudiante en Mis Menciones
             </h3>
             <form method="POST" class="grid md:grid-cols-4 gap-6">
+                <input type="hidden" name="enroll_student" value="1">
                 <div>
                     <label for="student_id" class="block text-sm font-medium text-gray-700 mb-2">Estudiante</label>
                     <select id="student_id" name="student_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
@@ -204,7 +205,8 @@ $students = $pdo->query("SELECT id, name, username FROM users WHERE role = 'stud
                                 <td class="px-6 py-4 text-sm">
                                     <form method="POST" class="inline" onsubmit="return confirm('¿Está seguro de desmatricular a este estudiante?')">
                                         <input type="hidden" name="enrollment_id" value="<?php echo $enrollment['id']; ?>">
-                                        <button type="submit" name="unenroll_student" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200 flex items-center" title="Desmatricular">
+                                        <input type="hidden" name="unenroll_student" value="1">
+                                        <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200 flex items-center" title="Desmatricular">
                                             <i class="fas fa-user-minus mr-1"></i>
                                             <span class="hidden sm:inline">Desmatricular</span>
                                         </button>

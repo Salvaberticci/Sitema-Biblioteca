@@ -6,25 +6,55 @@
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['create_user'])) {
-        $username = sanitize($_POST['username']);
-        $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-        $email = sanitize($_POST['email']);
-        $name = sanitize($_POST['name']);
-        $role = sanitize($_POST['role']);
+        try {
+            $username = sanitize($_POST['username']);
+            $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+            $email = sanitize($_POST['email']);
+            $name = sanitize($_POST['name']);
+            $role = sanitize($_POST['role']);
 
-        $stmt = $pdo->prepare("INSERT INTO users (username, password, email, name, role) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$username, $password, $email, $name, $role]);
-        $success = "Usuario creado exitosamente.";
+            $stmt = $pdo->prepare("INSERT INTO users (username, password, email, name, role) VALUES (?, ?, ?, ?, ?)");
+            $result = $stmt->execute([$username, $password, $email, $name, $role]);
+
+            if ($result) {
+                $success = "Usuario creado exitosamente.";
+            } else {
+                $error = "Error al crear el usuario.";
+            }
+        } catch (Exception $e) {
+            $error = "Error al crear el usuario: " . $e->getMessage();
+        }
     } elseif (isset($_POST['update_user'])) {
-        $id = (int)$_POST['id'];
-        $username = sanitize($_POST['username']);
-        $email = sanitize($_POST['email']);
-        $name = sanitize($_POST['name']);
-        $role = sanitize($_POST['role']);
+        try {
+            $id = (int)$_POST['id'];
+            $username = sanitize($_POST['username']);
+            $email = sanitize($_POST['email']);
+            $name = sanitize($_POST['name']);
+            $role = sanitize($_POST['role']);
 
-        $stmt = $pdo->prepare("UPDATE users SET username = ?, email = ?, name = ?, role = ? WHERE id = ?");
-        $stmt->execute([$username, $email, $name, $role, $id]);
-        $success = "Usuario actualizado exitosamente.";
+            // Build query dynamically based on whether password is provided
+            $updateFields = "username = ?, email = ?, name = ?, role = ?";
+            $params = [$username, $email, $name, $role];
+
+            if (!empty($_POST['password'])) {
+                $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+                $updateFields .= ", password = ?";
+                $params[] = $password;
+            }
+
+            $params[] = $id;
+
+            $stmt = $pdo->prepare("UPDATE users SET $updateFields WHERE id = ?");
+            $result = $stmt->execute($params);
+
+            if ($result) {
+                $success = "Usuario actualizado exitosamente.";
+            } else {
+                $error = "Error al actualizar el usuario.";
+            }
+        } catch (Exception $e) {
+            $error = "Error al actualizar el usuario: " . $e->getMessage();
+        }
     } elseif (isset($_POST['delete_user'])) {
         $id = (int)$_POST['id'];
 
@@ -52,6 +82,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             // Delete schedules for this teacher
             $stmt = $pdo->prepare("DELETE FROM schedules WHERE teacher_id = ?");
+            $stmt->execute([$id]);
+
+            // Delete teacher_course assignments for this teacher
+            $stmt = $pdo->prepare("DELETE FROM teacher_courses WHERE teacher_id = ?");
             $stmt->execute([$id]);
 
             // Delete book loans for this user
@@ -97,9 +131,103 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     <?php endif; ?>
 
+    <!-- Debug Information Panel - Commented out for production
+    <div class="bg-gray-100 border border-gray-300 p-4 rounded mb-6">
+        <h3 class="text-lg font-semibold mb-3 text-gray-800">🔍 Debug Information</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <h4 class="font-medium text-gray-700">Request Info:</h4>
+                <ul class="text-sm text-gray-600">
+                    <li>Method: <code><?php echo htmlspecialchars($debug_info['request_method'] ?? 'Unknown'); ?></code></li>
+                    <li>User Agent: <code><?php echo htmlspecialchars(substr($debug_info['user_agent'] ?? 'Unknown', 0, 50)); ?></code></li>
+                    <li>Session: <?php echo isset($debug_info['session']) ? 'Active' : 'None'; ?></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-medium text-gray-700">Database:</h4>
+                <ul class="text-sm text-gray-600">
+                    <li>Connection: <span class="<?php echo strpos($debug_info['db_connection'] ?? '', 'successfully') !== false ? 'text-green-600' : 'text-red-600'; ?>"><?php echo htmlspecialchars($debug_info['db_connection'] ?? 'Unknown'); ?></span></li>
+                    <li>Test Query: <?php echo ($debug_info['db_test_query'] ?? 'Unknown') === 'OK' ? '✅' : '❌'; ?></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-medium text-gray-700">POST Data:</h4>
+                <pre class="text-xs bg-white p-2 rounded border overflow-auto max-h-32"><?php echo htmlspecialchars(print_r($debug_info['post_data'] ?? [], true)); ?></pre>
+            </div>
+        </div>
+
+        <?php if (isset($debug_info['operation'])): ?>
+        <div class="mt-4">
+            <h4 class="font-medium text-gray-700">Operation: <?php echo htmlspecialchars($debug_info['operation']); ?></h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                <div>
+                    <h5 class="text-sm font-medium text-gray-600">Input Data:</h5>
+                    <pre class="text-xs bg-white p-2 rounded border overflow-auto max-h-24"><?php
+                        $input_key = $debug_info['operation'] . '_data';
+                        echo htmlspecialchars(print_r($debug_info[$input_key] ?? [], true));
+                    ?></pre>
+                </div>
+                <div>
+                    <h5 class="text-sm font-medium text-gray-600">Operation Status:</h5>
+                    <span class="px-2 py-1 rounded text-xs font-medium <?php
+                        echo match($debug_info['operation_status'] ?? '') {
+                            'success' => 'bg-green-100 text-green-800',
+                            'failed' => 'bg-red-100 text-red-800',
+                            'exception' => 'bg-yellow-100 text-yellow-800',
+                            default => 'bg-gray-100 text-gray-800'
+                        };
+                    ?>">
+                        <?php echo htmlspecialchars($debug_info['operation_status'] ?? 'unknown'); ?>
+                    </span>
+                    <?php if (isset($debug_info['exception_message'])): ?>
+                        <p class="text-xs text-red-600 mt-1">Exception: <?php echo htmlspecialchars($debug_info['exception_message']); ?></p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <?php if (isset($debug_info['delete_steps'])): ?>
+            <div class="mt-4">
+                <h5 class="text-sm font-medium text-gray-600">Delete Steps:</h5>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-xs bg-white border rounded">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-2 py-1 border">Table</th>
+                                <th class="px-2 py-1 border">SQL</th>
+                                <th class="px-2 py-1 border">Result</th>
+                                <th class="px-2 py-1 border">Affected Rows</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($debug_info['delete_steps'] as $table => $step): ?>
+                            <tr>
+                                <td class="px-2 py-1 border"><?php echo htmlspecialchars($table); ?></td>
+                                <td class="px-2 py-1 border"><?php echo htmlspecialchars($step['sql']); ?></td>
+                                <td class="px-2 py-1 border"><?php echo $step['result'] ? '✅' : '❌'; ?></td>
+                                <td class="px-2 py-1 border"><?php echo htmlspecialchars($step['affected']); ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <?php if (isset($debug_info['sql_query'])): ?>
+            <div class="mt-2">
+                <h5 class="text-sm font-medium text-gray-600">SQL Query:</h5>
+                <code class="text-xs bg-white p-1 rounded border block"><?php echo htmlspecialchars($debug_info['sql_query']); ?></code>
+            </div>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+    -->
+
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <h3 class="text-xl font-semibold mb-4">Crear Nuevo Usuario</h3>
         <form method="POST" class="grid md:grid-cols-2 gap-4">
+            <input type="hidden" name="create_user" value="1">
             <div>
                 <label for="username" class="block text-sm font-medium text-gray-700">Usuario</label>
                 <input type="text" id="username" name="username" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
@@ -155,7 +283,8 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <button onclick="editUser(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username']); ?>', '<?php echo htmlspecialchars($user['email']); ?>', '<?php echo htmlspecialchars($user['name']); ?>', '<?php echo $user['role']; ?>')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-sm mr-2">Editar</button>
                                 <form method="POST" class="inline" onsubmit="return confirm('¿Está seguro de eliminar este usuario?')">
                                     <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
-                                    <button type="submit" name="delete_user" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm">Eliminar</button>
+                                    <input type="hidden" name="delete_user" value="1">
+                                    <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm">Eliminar</button>
                                 </form>
                             </td>
                         </tr>
@@ -167,11 +296,12 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </main>
 
 <!-- Edit User Modal -->
-<div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+<div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3">
             <h3 class="text-lg font-medium text-gray-900 mb-4">Editar Usuario</h3>
             <form method="POST" class="space-y-4">
+                <input type="hidden" name="update_user" value="1">
                 <input type="hidden" id="edit_id" name="id">
                 <div>
                     <label for="edit_username" class="block text-sm font-medium text-gray-700">Usuario</label>
@@ -184,6 +314,10 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div>
                     <label for="edit_name" class="block text-sm font-medium text-gray-700">Nombre Completo</label>
                     <input type="text" id="edit_name" name="name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                </div>
+                <div>
+                    <label for="edit_password" class="block text-sm font-medium text-gray-700">Nueva Contraseña (dejar vacío para mantener la actual)</label>
+                    <input type="password" id="edit_password" name="password" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                 </div>
                 <div>
                     <label for="edit_role" class="block text-sm font-medium text-gray-700">Rol</label>
@@ -209,6 +343,7 @@ function editUser(id, username, email, name, role) {
     document.getElementById('edit_username').value = username;
     document.getElementById('edit_email').value = email;
     document.getElementById('edit_name').value = name;
+    document.getElementById('edit_password').value = ''; // Clear password field
     document.getElementById('edit_role').value = role;
     document.getElementById('editModal').classList.remove('hidden');
 }

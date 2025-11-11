@@ -126,6 +126,7 @@ $courses_taught = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </h3>
 
                 <form method="POST" class="space-y-6">
+                    <input type="hidden" name="update_profile" value="1">
                     <div class="grid md:grid-cols-2 gap-6">
                         <div>
                             <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Usuario</label>

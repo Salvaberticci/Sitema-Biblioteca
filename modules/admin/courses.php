@@ -93,6 +93,7 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
             Crear Nueva Mención
         </h3>
         <form method="POST" class="grid md:grid-cols-2 gap-6">
+            <input type="hidden" name="create_course" value="1">
             <div>
                 <label for="code" class="block text-sm font-medium text-gray-700 mb-2">Código de la Mención</label>
                 <input type="text" id="code" name="code" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
@@ -149,7 +150,8 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     </button>
                                     <form method="POST" class="inline" onsubmit="return confirm('¿Está seguro de eliminar este curso?')">
                                         <input type="hidden" name="id" value="<?php echo $course['id']; ?>">
-                                        <button type="submit" name="delete_course" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200 flex items-center" title="Eliminar mención">
+                                        <input type="hidden" name="delete_course" value="1">
+                                        <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200 flex items-center" title="Eliminar mención">
                                             <i class="fas fa-trash mr-1"></i>
                                             <span class="hidden sm:inline">Eliminar</span>
                                         </button>
@@ -173,6 +175,7 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 Editar Mención
             </h3>
             <form method="POST" class="space-y-4">
+                <input type="hidden" name="update_course" value="1">
                 <input type="hidden" id="edit_id" name="id">
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>

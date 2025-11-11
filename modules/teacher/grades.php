@@ -96,6 +96,7 @@ if ($selected_course) {
 
             <form method="POST">
                 <input type="hidden" name="course_id" value="<?php echo $selected_course; ?>">
+                <input type="hidden" name="update_grades" value="1">
 
                 <div class="overflow-x-auto">
                     <table class="min-w-full table-auto">

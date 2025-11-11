@@ -187,6 +187,7 @@ foreach ($activities as $activity) {
 
                         <form method="POST" enctype="multipart/form-data" class="bg-white p-4 rounded-lg border">
                             <input type="hidden" name="activity_id" value="<?php echo $activity['id']; ?>">
+                            <input type="hidden" name="submit_activity" value="1">
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Subir tu entrega</label>
                                 <input type="file" name="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.png,.zip" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">

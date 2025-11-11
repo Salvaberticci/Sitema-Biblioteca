@@ -116,6 +116,7 @@ $resources = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </h3>
         <form method="POST" enctype="multipart/form-data" class="space-y-6">
             <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+            <input type="hidden" name="upload_resource" value="1">
             <div class="grid md:grid-cols-2 gap-6">
                 <div>
                     <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Título</label>
@@ -207,7 +208,8 @@ $resources = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <form method="POST" class="inline" onsubmit="return confirm('¿Está seguro de eliminar este recurso?')">
                                         <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
                                         <input type="hidden" name="id" value="<?php echo $resource['id']; ?>">
-                                        <button type="submit" name="delete_resource" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200 flex items-center" title="Eliminar recurso">
+                                        <input type="hidden" name="delete_resource" value="1">
+                                        <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg transition duration-200 flex items-center" title="Eliminar recurso">
                                             <i class="fas fa-trash mr-1"></i>
                                             <span class="hidden sm:inline">Eliminar</span>
                                         </button>

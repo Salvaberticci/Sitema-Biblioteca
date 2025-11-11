@@ -110,6 +110,7 @@ if (isset($_GET['activity_id'])) {
                 Crear Nueva Actividad
             </h3>
             <form method="POST" enctype="multipart/form-data" class="grid md:grid-cols-2 gap-6">
+                <input type="hidden" name="create_activity" value="1">
                 <div>
                     <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Título de la Actividad</label>
                     <input type="text" id="title" name="title" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
@@ -263,6 +264,7 @@ if (isset($_GET['activity_id'])) {
 
                             <form method="POST" class="bg-gray-50 p-4 rounded-lg">
                                 <input type="hidden" name="submission_id" value="<?php echo $submission['id']; ?>">
+                                <input type="hidden" name="grade_submission" value="1">
                                 <div class="grid md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Calificación (0-20)</label>

@@ -125,6 +125,7 @@ if ($selected_course) {
             <form method="POST">
                 <input type="hidden" name="course_id" value="<?php echo $selected_course; ?>">
                 <input type="hidden" name="date" value="<?php echo $selected_date; ?>">
+                <input type="hidden" name="mark_attendance" value="1">
 
                 <div class="overflow-x-auto">
                     <table class="min-w-full table-auto">
