@@ -1,0 +1,30 @@
+# User uploaded files
+uploads/library/*
+uploads/activities/*
+uploads/submissions/*
+
+# Log files
+*.log
+php_errors.log
+
+# Database files (if any local copies)
+*.sql
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
