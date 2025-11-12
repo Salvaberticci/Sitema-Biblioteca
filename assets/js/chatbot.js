@@ -122,8 +122,19 @@ class ChatbotManager {
                 this.chatbotWindow.classList.remove('hidden');
                 this.chatbotWindow.style.display = 'flex';
                 this.chatbotWindow.style.position = 'fixed';
-                this.chatbotWindow.style.bottom = '96px'; // 24px * 4 (bottom-24)
-                this.chatbotWindow.style.right = '24px';
+                // Responsive positioning
+                if (window.innerWidth >= 768) {
+                    this.chatbotWindow.style.bottom = '96px'; // 24px * 4 (bottom-24)
+                    this.chatbotWindow.style.right = '24px';
+                    this.chatbotWindow.style.width = '480px';
+                    this.chatbotWindow.style.height = '550px';
+                } else {
+                    // Mobile: let CSS handle full screen
+                    this.chatbotWindow.style.bottom = '0';
+                    this.chatbotWindow.style.right = '0';
+                    this.chatbotWindow.style.width = '100vw';
+                    this.chatbotWindow.style.height = '100vh';
+                }
                 console.log('Chat window should now be visible');
             } else {
                 console.error('Chatbot window element not found!');
@@ -135,6 +146,8 @@ class ChatbotManager {
                 this.chatbotInput.focus();
             }
             this.scrollToBottom();
+            // Hide notification badge when opening
+            this.hideNotificationBadge();
         } else {
             console.log('Closing chat window');
             this.closeChat();
@@ -151,6 +164,8 @@ class ChatbotManager {
         if (this.chatbotButton) {
             this.chatbotButton.classList.remove('scale-110');
         }
+        // Show notification badge when closing
+        this.showNotificationBadge();
     }
 
     toggleSendButton() {
@@ -234,6 +249,11 @@ class ChatbotManager {
                     <p class="text-sm text-gray-800">${this.escapeHtml(text)}</p>
                 </div>
             `;
+
+            // Show notification badge if chat is closed and it's a bot message
+            if (!this.isOpen && sender === 'bot') {
+                this.showNotificationBadge();
+            }
         }
 
         this.chatbotMessages.appendChild(messageDiv);
@@ -294,6 +314,22 @@ class ChatbotManager {
         const welcomeMessage = '¡Hola! Soy el asistente virtual de la ETC Pedro García Leal. ¿En qué puedo ayudarte hoy?';
         this.addMessage(welcomeMessage, 'bot');
         // Don't save welcome message to avoid persistence
+    }
+
+    // Show notification badge
+    showNotificationBadge() {
+        const notification = document.getElementById('chatbot-notification');
+        if (notification) {
+            notification.classList.remove('hidden');
+        }
+    }
+
+    // Hide notification badge
+    hideNotificationBadge() {
+        const notification = document.getElementById('chatbot-notification');
+        if (notification) {
+            notification.classList.add('hidden');
+        }
     }
 
     // Public method to send a welcome message

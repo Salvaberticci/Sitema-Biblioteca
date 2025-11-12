@@ -30,6 +30,135 @@ class ChatbotAPI {
     private $geminiApiKey = 'AIzaSyBAHLANDPjRD16-hKkcI6Tlky-GQWelnWE';
     private $geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
+    private function isLibraryQuery($message) {
+        $message = strtolower($message);
+
+        // More specific patterns that indicate the user wants to see what's available
+        $libraryQueryPatterns = [
+            // Direct questions about what's available
+            'qué hay en la biblioteca',
+            'que hay en la biblioteca',
+            'qué hay en biblioteca',
+            'que hay en biblioteca',
+            'qué recursos hay',
+            'que recursos hay',
+            'qué libros hay',
+            'que libros hay',
+            'qué materiales hay',
+            'que materiales hay',
+            'qué documentos hay',
+            'que documentos hay',
+
+            // Requests to show/list resources
+            'muéstrame los recursos',
+            'mostrarme los recursos',
+            'lista de recursos',
+            'ver recursos disponibles',
+            'ver qué hay',
+            'ver biblioteca',
+            'mostrar biblioteca',
+
+            // Questions about availability
+            'qué está disponible',
+            'que esta disponible',
+            'qué puedo encontrar',
+            'que puedo encontrar',
+            'qué tienen disponible',
+            'que tienen disponible',
+
+            // Catalog requests
+            'catálogo de biblioteca',
+            'catalogo de biblioteca',
+            'inventario biblioteca',
+            'contenido biblioteca'
+        ];
+
+        foreach ($libraryQueryPatterns as $pattern) {
+            if (strpos($message, $pattern) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function handleLibraryQuery($message) {
+        try {
+            // Fetch library resources
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, 'http://' . $_SERVER['HTTP_HOST'] . '/biblioteca/api/library.php?list');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpCode !== 200) {
+                return [
+                    'response' => 'Lo siento, no pude acceder al catálogo de la biblioteca en este momento. Por favor, intenta más tarde.',
+                    'timestamp' => date('Y-m-d H:i:s')
+                ];
+            }
+
+            $data = json_decode($response, true);
+
+            if (!$data || !isset($data['resources']) || empty($data['resources'])) {
+                return [
+                    'response' => 'Actualmente no hay recursos disponibles en la biblioteca virtual. Los docentes están trabajando para agregar más materiales educativos.',
+                    'timestamp' => date('Y-m-d H:i:s')
+                ];
+            }
+
+            $resources = $data['resources'];
+
+            if (empty($resources)) {
+                $response = "Actualmente no tenemos recursos disponibles en la biblioteca virtual, pero nuestros docentes están trabajando para agregar más materiales educativos. Te recomiendo revisar periódicamente o contactar a tu profesor para materiales específicos de tu asignatura.";
+            } else {
+                $response = "¡Claro! Aquí tienes los recursos que están disponibles en nuestra Biblioteca Virtual:\n\n";
+
+                foreach ($resources as $resource) {
+                    $typeIcon = $this->getResourceTypeIcon($resource['type']);
+                    $response .= "{$typeIcon} **{$resource['title']}**\n";
+                    if ($resource['author']) {
+                        $response .= "👤 Autor: {$resource['author']}\n";
+                    }
+                    if ($resource['subject']) {
+                        $response .= "📖 Asignatura: {$resource['subject']}\n";
+                    }
+                    $response .= "📅 Subido: " . date('d/m/Y', strtotime($resource['upload_date'])) . "\n";
+                    $response .= "🔗 Tipo: " . ucfirst($resource['type']) . "\n\n";
+                }
+
+                $response .= "💡 **¿Cómo acceder?**\n";
+                $response .= "Solo ve a la sección 'Biblioteca Virtual' en el menú principal, busca los recursos que te interesen y haz clic en 'Descargar'.\n\n";
+                $response .= "¿Hay algún recurso específico que te gustaría encontrar o necesitas ayuda con algo en particular?";
+            }
+
+            return [
+                'response' => $response,
+                'timestamp' => date('Y-m-d H:i:s')
+            ];
+
+        } catch (Exception $e) {
+            error_log('Library query error: ' . $e->getMessage());
+            return [
+                'response' => 'Lo siento, hubo un problema al consultar la biblioteca. Por favor, intenta acceder directamente desde el menú principal.',
+                'timestamp' => date('Y-m-d H:i:s')
+            ];
+        }
+    }
+
+    private function getResourceTypeIcon($type) {
+        switch ($type) {
+            case 'book': return '📖';
+            case 'article': return '📰';
+            case 'video': return '🎥';
+            case 'document': return '📄';
+            default: return '📋';
+        }
+    }
+
     public function handleRequest() {
         try {
             // Get and validate input
@@ -47,6 +176,11 @@ class ChatbotAPI {
 
             if (strlen($userMessage) > 1000) {
                 throw new Exception('Message too long (max 1000 characters)');
+            }
+
+            // Check for specific library queries
+            if ($this->isLibraryQuery($userMessage)) {
+                return $this->handleLibraryQuery($userMessage);
             }
 
             // Validate if message is related to ETC topics

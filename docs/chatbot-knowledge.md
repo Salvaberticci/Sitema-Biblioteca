@@ -73,6 +73,24 @@
 - Estadísticas de uso y recursos disponibles
 - Gestión de recursos multimedia
 
+#### Recursos Disponibles en la Biblioteca
+La biblioteca virtual contiene diversos recursos educativos organizados por categorías:
+
+**Documentos y Certificados:**
+- Certificados de cursos de Python (disponibles para descarga)
+- Documentos técnicos y guías de estudio
+
+**Tipos de Recursos:**
+- Documentos PDF con certificados y materiales de estudio
+- Recursos organizados por asignaturas técnicas
+- Materiales actualizados regularmente por docentes
+
+**Acceso a Recursos:**
+- Todos los estudiantes pueden acceder a la biblioteca virtual
+- Descarga directa de recursos disponibles
+- Búsqueda por título, autor o asignatura
+- Recursos organizados por tipo: documentos, libros, artículos
+
 ### 3. Gestión de Horarios Inteligentes
 - Programación de horarios con detección automática de conflictos
 - Filtros por semestre, año académico, estado
