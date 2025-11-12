@@ -52,6 +52,48 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
         http_response_code(500);
         echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
     }
+} elseif (isset($_GET['search']) && !empty($_GET['search'])) {
+    // Search for specific resources
+    $searchTerm = trim($_GET['search']);
+
+    try {
+        $stmt = $pdo->prepare("
+            SELECT lr.id, lr.title, lr.author, lr.type, lr.subject, lr.description,
+                   DATE(lr.upload_date) as upload_date, u.name as uploader_name
+            FROM library_resources lr
+            LEFT JOIN users u ON lr.uploaded_by = u.id
+            WHERE lr.title LIKE ? OR lr.author LIKE ? OR lr.subject LIKE ? OR lr.description LIKE ?
+            ORDER BY
+                CASE
+                    WHEN lr.title LIKE ? THEN 1
+                    WHEN lr.author LIKE ? THEN 2
+                    WHEN lr.subject LIKE ? THEN 3
+                    ELSE 4
+                END,
+                lr.upload_date DESC
+            LIMIT 10
+        ");
+
+        $searchPattern = '%' . $searchTerm . '%';
+        $exactPattern = $searchTerm;
+
+        $stmt->execute([
+            $searchPattern, $searchPattern, $searchPattern, $searchPattern,
+            '%' . $exactPattern . '%', '%' . $exactPattern . '%', '%' . $exactPattern . '%'
+        ]);
+
+        $resources = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        echo json_encode([
+            'success' => true,
+            'resources' => $resources,
+            'count' => count($resources),
+            'search_term' => $searchTerm
+        ]);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
+    }
 } else {
     http_response_code(400);
     echo json_encode(['error' => 'Invalid request. Use ?id=NUMBER for details or ?list for resource list']);

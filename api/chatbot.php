@@ -82,6 +82,198 @@ class ChatbotAPI {
         return false;
     }
 
+    private function isSpecificResourceQuery($message) {
+        $message = strtolower($message);
+
+        // Patterns that indicate searching for specific resources
+        $specificPatterns = [
+            'tienen el libro',
+            'tienen el documento',
+            'tienen el material',
+            'tienen el recurso',
+            'hay algún libro',
+            'hay algún documento',
+            'hay algún material',
+            'hay algún recurso',
+            'busco el libro',
+            'busco el documento',
+            'busco el material',
+            'busco el recurso',
+            'está disponible el libro',
+            'esta disponible el libro',
+            'está disponible el documento',
+            'esta disponible el documento',
+            'tienen disponible',
+            'hay disponible',
+            'puedo encontrar',
+            'dónde está el libro',
+            'donde esta el libro'
+        ];
+
+        foreach ($specificPatterns as $pattern) {
+            if (strpos($message, $pattern) !== false) {
+                return true;
+            }
+        }
+
+        // Also check for questions that might contain book titles or subjects
+        $questionWords = ['tienen', 'hay', 'está', 'esta', 'busco', 'necesito', 'quiero'];
+        $libraryWords = ['libro', 'documento', 'material', 'recurso', 'pdf', 'texto'];
+
+        foreach ($questionWords as $qWord) {
+            foreach ($libraryWords as $lWord) {
+                if (strpos($message, $qWord) !== false && strpos($message, $lWord) !== false) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private function extractSearchTerm($message) {
+        // Try to extract the search term from the message
+        $message = strtolower($message);
+
+        // Remove common question prefixes
+        $prefixes = [
+            'tienen el libro', 'tienen el documento', 'tienen el material', 'tienen el recurso',
+            'hay algún libro', 'hay algún documento', 'hay algún material', 'hay algún recurso',
+            'busco el libro', 'busco el documento', 'busco el material', 'busco el recurso',
+            'está disponible el libro', 'esta disponible el libro',
+            'está disponible el documento', 'esta disponible el documento',
+            'tienen disponible', 'hay disponible', 'puedo encontrar',
+            'dónde está el libro', 'donde esta el libro',
+            'necesito el libro', 'necesito el documento', 'necesito el material',
+            'quiero el libro', 'quiero el documento', 'quiero el material'
+        ];
+
+        foreach ($prefixes as $prefix) {
+            if (strpos($message, $prefix) !== false) {
+                $searchTerm = str_replace($prefix, '', $message);
+                $searchTerm = trim($searchTerm, ' ?¿¡!.,');
+                if (!empty($searchTerm)) {
+                    return $searchTerm;
+                }
+            }
+        }
+
+        // If no specific prefix found, try to extract after library-related words
+        $libraryWords = ['libro de', 'libro sobre', 'documento de', 'material de', 'recurso de'];
+        foreach ($libraryWords as $word) {
+            if (strpos($message, $word) !== false) {
+                $searchTerm = str_replace($word, '', $message);
+                $searchTerm = trim($searchTerm, ' ?¿¡!.,');
+                if (!empty($searchTerm)) {
+                    return $searchTerm;
+                }
+            }
+        }
+
+        // Last resort: return the whole message cleaned up
+        return trim($message, ' ?¿¡!.,');
+    }
+
+    private function handleSpecificResourceQuery($message) {
+        $searchTerm = $this->extractSearchTerm($message);
+
+        if (empty($searchTerm)) {
+            return [
+                'response' => 'No pude identificar qué recurso estás buscando. ¿Puedes darme más detalles sobre el libro, documento o material que necesitas?',
+                'timestamp' => date('Y-m-d H:i:s')
+            ];
+        }
+
+        try {
+            // Search for the specific resource
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, 'http://' . $_SERVER['HTTP_HOST'] . '/biblioteca/api/library.php?search=' . urlencode($searchTerm));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpCode !== 200) {
+                return [
+                    'response' => 'Lo siento, no pude buscar en la biblioteca en este momento. Por favor, intenta más tarde.',
+                    'timestamp' => date('Y-m-d H:i:s')
+                ];
+            }
+
+            $data = json_decode($response, true);
+
+            if (!$data || !isset($data['resources'])) {
+                return [
+                    'response' => "No encontré recursos que coincidan con '$searchTerm'. ¿Puedes verificar el título o darme más detalles?",
+                    'timestamp' => date('Y-m-d H:i:s')
+                ];
+            }
+
+            $resources = $data['resources'];
+
+            if (empty($resources)) {
+                return [
+                    'response' => "Lo siento, no encontré ningún recurso que coincida con '$searchTerm' en nuestra biblioteca virtual. ¿Quizás esté bajo un título diferente o puedes darme más detalles para ayudarte mejor?",
+                    'timestamp' => date('Y-m-d H:i:s')
+                ];
+            }
+
+            // If we found resources, format them nicely
+            if (count($resources) === 1) {
+                // Single result
+                $resource = $resources[0];
+                $typeIcon = $this->getResourceTypeIcon($resource['type']);
+
+                $response = "¡Sí! Encontré este recurso que podría ser lo que buscas:\n\n";
+                $response .= "{$typeIcon} **{$resource['title']}**\n";
+                if ($resource['author']) {
+                    $response .= "👤 Autor: {$resource['author']}\n";
+                }
+                if ($resource['subject']) {
+                    $response .= "📖 Asignatura: {$resource['subject']}\n";
+                }
+                $response .= "📅 Subido: " . date('d/m/Y', strtotime($resource['upload_date'])) . "\n";
+                $response .= "🔗 Tipo: " . ucfirst($resource['type']) . "\n\n";
+
+                $response .= "💡 Para descargarlo, ve a la Biblioteca Virtual y busca por el título.\n\n";
+                $response .= "¿Es este el recurso que estabas buscando?";
+            } else {
+                // Multiple results
+                $response = "Encontré varios recursos que podrían coincidir con '$searchTerm':\n\n";
+
+                foreach (array_slice($resources, 0, 3) as $resource) { // Show max 3 results
+                    $typeIcon = $this->getResourceTypeIcon($resource['type']);
+                    $response .= "{$typeIcon} **{$resource['title']}**\n";
+                    if ($resource['author']) {
+                        $response .= "   👤 {$resource['author']}\n";
+                    }
+                    $response .= "   📖 " . ucfirst($resource['type']) . "\n\n";
+                }
+
+                if (count($resources) > 3) {
+                    $response .= "...y " . (count($resources) - 3) . " recursos más.\n\n";
+                }
+
+                $response .= "💡 Te recomiendo ir a la Biblioteca Virtual y usar la búsqueda avanzada para encontrar exactamente lo que necesitas.\n\n";
+                $response .= "¿Alguno de estos es el que buscas?";
+            }
+
+            return [
+                'response' => $response,
+                'timestamp' => date('Y-m-d H:i:s')
+            ];
+
+        } catch (Exception $e) {
+            error_log('Specific resource query error: ' . $e->getMessage());
+            return [
+                'response' => 'Lo siento, hubo un problema al buscar en la biblioteca. Por favor, intenta acceder directamente desde el menú principal.',
+                'timestamp' => date('Y-m-d H:i:s')
+            ];
+        }
+    }
+
     private function handleLibraryQuery($message) {
         try {
             // Fetch library resources
@@ -178,7 +370,12 @@ class ChatbotAPI {
                 throw new Exception('Message too long (max 1000 characters)');
             }
 
-            // Check for specific library queries
+            // Check for specific resource queries first
+            if ($this->isSpecificResourceQuery($userMessage)) {
+                return $this->handleSpecificResourceQuery($userMessage);
+            }
+
+            // Check for general library queries (what's available)
             if ($this->isLibraryQuery($userMessage)) {
                 return $this->handleLibraryQuery($userMessage);
             }
