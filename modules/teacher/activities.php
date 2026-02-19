@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['create_activity'])) {
         $title = sanitize($_POST['title']);
         $description = sanitize($_POST['description']);
-        $course_id = (int)$_POST['course_id'];
+        $course_id = (int) $_POST['course_id'];
         $due_date = $_POST['due_date'];
 
         // Handle file upload
@@ -33,13 +33,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute([$title, $description, $course_id, $user_id, $due_date, $file_path]);
         $success = "Actividad creada exitosamente.";
     } elseif (isset($_POST['grade_submission'])) {
-        $submission_id = (int)$_POST['submission_id'];
-        $grade = !empty($_POST['grade']) ? (float)$_POST['grade'] : null;
+        $submission_id = (int) $_POST['submission_id'];
+        $grade = !empty($_POST['grade']) ? (float) $_POST['grade'] : null;
         $comments = sanitize($_POST['comments']);
 
         $stmt = $pdo->prepare("UPDATE submissions SET grade = ?, comments = ? WHERE id = ?");
         $stmt->execute([$grade, $comments, $submission_id]);
         $success = "Calificación guardada exitosamente.";
+    } elseif (isset($_POST['delete_activity']) || isset($_POST['submit_delete_activity'])) {
+        // CSRF check
+        if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+            $error = "Error de seguridad. Intente nuevamente.";
+        } else {
+            $activity_id = (int) $_POST['activity_id'];
+
+            // Ensure the activity belongs to the teacher
+            $check_stmt = $pdo->prepare("SELECT id FROM activities WHERE id = ? AND teacher_id = ?");
+            $check_stmt->execute([$activity_id, $user_id]);
+
+            if ($check_stmt->fetch()) {
+                $pdo->beginTransaction();
+                try {
+                    // Delete submissions first
+                    $pdo->prepare("DELETE FROM submissions WHERE activity_id = ?")->execute([$activity_id]);
+                    $pdo->prepare("DELETE FROM activities WHERE id = ?")->execute([$activity_id]);
+                    $pdo->commit();
+                    $success = "Actividad eliminada permanentemente junto con sus notas y entregas.";
+                } catch (Exception $e) {
+                    $pdo->rollBack();
+                    $error = "Error al eliminar la actividad: " . $e->getMessage();
+                }
+            } else {
+                $error = "No tienes permiso para eliminar esta actividad.";
+            }
+        }
     }
 }
 
@@ -48,17 +75,32 @@ $stmt = $pdo->prepare("SELECT DISTINCT c.* FROM courses c JOIN schedules s ON c.
 $stmt->execute([$user_id]);
 $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Filtering logic
+$filter_course = isset($_GET['filter_course']) ? (int) $_GET['filter_course'] : null;
+$filter_month = isset($_GET['filter_month']) ? sanitize($_GET['filter_month']) : null;
+
 // Fetch activities created by this teacher
-$stmt = $pdo->prepare("
+$activities_query = "
     SELECT a.*, c.name as course_name, c.code as course_code,
            COUNT(s.id) as submission_count
     FROM activities a
     JOIN courses c ON a.course_id = c.id
     LEFT JOIN submissions s ON a.id = s.activity_id
     WHERE a.teacher_id = ?
-    GROUP BY a.id
-    ORDER BY a.due_date DESC
-");
+";
+
+if ($filter_course) {
+    $activities_query .= " AND a.course_id = $filter_course";
+}
+
+if ($filter_month) {
+    // filter_month is YYYY-MM
+    $activities_query .= " AND a.due_date LIKE '$filter_month%'";
+}
+
+$activities_query .= " GROUP BY a.id ORDER BY a.due_date DESC";
+
+$stmt = $pdo->prepare($activities_query);
 $stmt->execute([$user_id]);
 $activities = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -66,7 +108,7 @@ $activities = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $selected_activity = null;
 $submissions = [];
 if (isset($_GET['activity_id'])) {
-    $activity_id = (int)$_GET['activity_id'];
+    $activity_id = (int) $_GET['activity_id'];
     $stmt = $pdo->prepare("
         SELECT a.*, c.name as course_name, c.code as course_code
         FROM activities a
@@ -113,32 +155,40 @@ if (isset($_GET['activity_id'])) {
                 <input type="hidden" name="create_activity" value="1">
                 <div>
                     <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Título de la Actividad</label>
-                    <input type="text" id="title" name="title" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                    <input type="text" id="title" name="title" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
                 </div>
                 <div>
                     <label for="course_id" class="block text-sm font-medium text-gray-700 mb-2">Mención</label>
-                    <select id="course_id" name="course_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                    <select id="course_id" name="course_id" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
                         <option value="">Seleccionar mención</option>
                         <?php foreach ($courses as $course): ?>
-                            <option value="<?php echo $course['id']; ?>"><?php echo htmlspecialchars($course['name']); ?> (<?php echo htmlspecialchars($course['code']); ?>)</option>
+                            <option value="<?php echo $course['id']; ?>"><?php echo htmlspecialchars($course['name']); ?>
+                                (<?php echo htmlspecialchars($course['code']); ?>)</option>
                         <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="md:col-span-2">
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
-                    <textarea id="description" name="description" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"></textarea>
+                    <textarea id="description" name="description" rows="4"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"></textarea>
                 </div>
                 <div>
                     <label for="due_date" class="block text-sm font-medium text-gray-700 mb-2">Fecha de Entrega</label>
-                    <input type="datetime-local" id="due_date" name="due_date" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                    <input type="datetime-local" id="due_date" name="due_date" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
                 </div>
                 <div>
-                    <label for="file" class="block text-sm font-medium text-gray-700 mb-2">Archivo Adjunto (Opcional)</label>
-                    <input type="file" id="file" name="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.png" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                    <label for="file" class="block text-sm font-medium text-gray-700 mb-2">Archivo Adjunto
+                        (Opcional)</label>
+                    <input type="file" id="file" name="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.png"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
                     <p class="text-sm text-gray-500 mt-1">Formatos permitidos: PDF, DOC, PPT, imágenes</p>
                 </div>
                 <div class="md:col-span-2">
-                    <button type="submit" name="create_activity" class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center">
+                    <button type="submit" name="create_activity"
+                        class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center">
                         <i class="fas fa-plus mr-2"></i>
                         Crear Actividad
                     </button>
@@ -148,17 +198,54 @@ if (isset($_GET['activity_id'])) {
 
         <!-- Activities List -->
         <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up">
-            <h3 class="text-xl font-semibold mb-6 flex items-center">
-                <i class="fas fa-list mr-2 text-primary"></i>
-                Mis Actividades (<?php echo count($activities); ?>)
-            </h3>
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4">
+                <h3 class="text-xl font-semibold flex items-center">
+                    <i class="fas fa-list mr-2 text-primary"></i>
+                    Mis Actividades (<?php echo count($activities); ?>)
+                </h3>
+                <div class="flex flex-wrap items-center gap-4">
+                    <div class="flex items-center">
+                        <label for="filter_month" class="mr-3 text-sm font-medium text-gray-700">Mes/Año:</label>
+                        <input type="month" id="filter_month" value="<?php echo $filter_month; ?>"
+                            onchange="updateFilters()"
+                            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                    </div>
+                    <div class="flex items-center">
+                        <label for="filter_course" class="mr-3 text-sm font-medium text-gray-700">Mención:</label>
+                        <select id="filter_course" onchange="updateFilters()"
+                            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                            <option value="">Todas las menciones</option>
+                            <?php foreach ($courses as $course): ?>
+                                <option value="<?php echo $course['id']; ?>" <?php echo $filter_course == $course['id'] ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($course['name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <a href="activities.php" class="text-sm text-primary hover:underline">Limpiar Filtros</a>
+                </div>
+            </div>
+
+            <script>
+                function updateFilters() {
+                    const course = document.getElementById('filter_course').value;
+                    const month = document.getElementById('filter_month').value;
+                    let url = 'activities.php?';
+                    if (course) url += 'filter_course=' + course + '&';
+                    if (month) url += 'filter_month=' + month;
+                    window.location.href = url;
+                }
+            </script>
             <div class="space-y-4">
                 <?php foreach ($activities as $activity): ?>
                     <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition duration-300">
                         <div class="flex justify-between items-start">
                             <div class="flex-1">
-                                <h4 class="text-lg font-semibold text-gray-800 mb-2"><?php echo htmlspecialchars($activity['title']); ?></h4>
-                                <p class="text-gray-600 mb-2"><?php echo htmlspecialchars($activity['course_name']); ?> (<?php echo htmlspecialchars($activity['course_code']); ?>)</p>
+                                <h4 class="text-lg font-semibold text-gray-800 mb-2">
+                                    <?php echo htmlspecialchars($activity['title']); ?>
+                                </h4>
+                                <p class="text-gray-600 mb-2"><?php echo htmlspecialchars($activity['course_name']); ?>
+                                    (<?php echo htmlspecialchars($activity['course_code']); ?>)</p>
                                 <div class="flex items-center text-sm text-gray-500 mb-2">
                                     <i class="fas fa-calendar mr-2"></i>
                                     <span>Entrega: <?php echo date('d/m/Y H:i', strtotime($activity['due_date'])); ?></span>
@@ -166,13 +253,27 @@ if (isset($_GET['activity_id'])) {
                                     <i class="fas fa-users mr-2"></i>
                                     <span><?php echo $activity['submission_count']; ?> entregas</span>
                                 </div>
-                                <p class="text-gray-700"><?php echo htmlspecialchars(substr($activity['description'], 0, 100)); ?>...</p>
+                                <p class="text-gray-700">
+                                    <?php echo htmlspecialchars(substr($activity['description'], 0, 100)); ?>...
+                                </p>
                             </div>
-                            <div class="ml-4">
-                                <a href="?activity_id=<?php echo $activity['id']; ?>" class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-200 flex items-center">
+                            <div class="ml-4 flex flex-col gap-2">
+                                <a href="?activity_id=<?php echo $activity['id']; ?>"
+                                    class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-200 flex items-center justify-center">
                                     <i class="fas fa-eye mr-2"></i>
                                     Ver Detalles
                                 </a>
+                                <form method="POST"
+                                    onsubmit="return confirm('¡ADVERTENCIA! Esta acción eliminará permanentemente la actividad, todas las entregas de los estudiantes y sus notas. Se recomienda tener un registro externo de las notas antes de proceder. ¿Está seguro de que desea eliminar esta actividad?')">
+                                    <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+                                    <input type="hidden" name="activity_id" value="<?php echo $activity['id']; ?>">
+                                    <input type="hidden" name="submit_delete_activity" value="1">
+                                    <button type="submit" name="delete_activity"
+                                        class="w-full bg-red-100 hover:bg-red-200 text-red-600 font-bold py-2 px-4 rounded transition duration-200 flex items-center justify-center">
+                                        <i class="fas fa-trash mr-2"></i>
+                                        Eliminar
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -184,14 +285,18 @@ if (isset($_GET['activity_id'])) {
         <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up mb-6">
             <div class="flex justify-between items-start mb-6">
                 <div>
-                    <h3 class="text-2xl font-bold text-gray-800 mb-2"><?php echo htmlspecialchars($selected_activity['title']); ?></h3>
-                    <p class="text-gray-600"><?php echo htmlspecialchars($selected_activity['course_name']); ?> (<?php echo htmlspecialchars($selected_activity['course_code']); ?>)</p>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <?php echo htmlspecialchars($selected_activity['title']); ?>
+                    </h3>
+                    <p class="text-gray-600"><?php echo htmlspecialchars($selected_activity['course_name']); ?>
+                        (<?php echo htmlspecialchars($selected_activity['course_code']); ?>)</p>
                     <p class="text-sm text-gray-500 mt-1">
                         <i class="fas fa-calendar mr-1"></i>
                         Fecha límite: <?php echo date('d/m/Y H:i', strtotime($selected_activity['due_date'])); ?>
                     </p>
                 </div>
-                <a href="activities.php" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-200 flex items-center">
+                <a href="activities.php"
+                    class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-200 flex items-center">
                     <i class="fas fa-arrow-left mr-2"></i>
                     Volver
                 </a>
@@ -199,13 +304,16 @@ if (isset($_GET['activity_id'])) {
 
             <div class="mb-6">
                 <h4 class="text-lg font-semibold mb-2">Descripción</h4>
-                <p class="text-gray-700 bg-gray-50 p-4 rounded-lg"><?php echo nl2br(htmlspecialchars($selected_activity['description'])); ?></p>
+                <p class="text-gray-700 bg-gray-50 p-4 rounded-lg">
+                    <?php echo nl2br(htmlspecialchars($selected_activity['description'])); ?>
+                </p>
             </div>
 
             <?php if ($selected_activity['file_path']): ?>
                 <div class="mb-6">
                     <h4 class="text-lg font-semibold mb-2">Archivo Adjunto</h4>
-                    <a href="/biblioteca/<?php echo htmlspecialchars($selected_activity['file_path']); ?>" target="_blank" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+                    <a href="/biblioteca/<?php echo htmlspecialchars($selected_activity['file_path']); ?>" target="_blank"
+                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
                         <i class="fas fa-download mr-2"></i>
                         Descargar Archivo
                     </a>
@@ -233,7 +341,9 @@ if (isset($_GET['activity_id'])) {
                         <div class="border border-gray-200 rounded-lg p-6">
                             <div class="flex justify-between items-start mb-4">
                                 <div>
-                                    <h4 class="font-semibold text-gray-800"><?php echo htmlspecialchars($submission['student_name']); ?></h4>
+                                    <h4 class="font-semibold text-gray-800">
+                                        <?php echo htmlspecialchars($submission['student_name']); ?>
+                                    </h4>
                                     <p class="text-sm text-gray-500"><?php echo htmlspecialchars($submission['username']); ?></p>
                                     <p class="text-sm text-gray-500">
                                         <i class="fas fa-clock mr-1"></i>
@@ -255,7 +365,8 @@ if (isset($_GET['activity_id'])) {
 
                             <?php if ($submission['file_path']): ?>
                                 <div class="mb-4">
-                                    <a href="/biblioteca/<?php echo htmlspecialchars($submission['file_path']); ?>" target="_blank" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm inline-flex items-center">
+                                    <a href="/biblioteca/<?php echo htmlspecialchars($submission['file_path']); ?>" target="_blank"
+                                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm inline-flex items-center">
                                         <i class="fas fa-download mr-2"></i>
                                         Descargar Entrega
                                     </a>
@@ -268,15 +379,19 @@ if (isset($_GET['activity_id'])) {
                                 <div class="grid md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Calificación (0-20)</label>
-                                        <input type="number" name="grade" min="0" max="20" step="0.1" value="<?php echo $submission['grade'] ?? ''; ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                        <input type="number" name="grade" min="0" max="20" step="0.1"
+                                            value="<?php echo $submission['grade'] ?? ''; ?>"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Comentarios</label>
-                                        <textarea name="comments" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"><?php echo htmlspecialchars($submission['comments'] ?? ''); ?></textarea>
+                                        <textarea name="comments" rows="2"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"><?php echo htmlspecialchars($submission['comments'] ?? ''); ?></textarea>
                                     </div>
                                 </div>
                                 <div class="mt-4">
-                                    <button type="submit" name="grade_submission" class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-200">
+                                    <button type="submit" name="grade_submission"
+                                        class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-200">
                                         <i class="fas fa-save mr-2"></i>
                                         Guardar Calificación
                                     </button>

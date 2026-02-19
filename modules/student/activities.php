@@ -7,7 +7,7 @@ $user_id = $_SESSION['user_id'];
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_activity'])) {
-    $activity_id = (int)$_POST['activity_id'];
+    $activity_id = (int) $_POST['activity_id'];
 
     // Handle file upload
     $file_path = '';
@@ -121,7 +121,8 @@ foreach ($activities as $activity) {
                 <div>
                     <p class="text-gray-600 text-sm font-medium">Actividades Calificadas</p>
                     <p class="text-3xl font-bold text-green-500">
-                        <?php echo count(array_filter($completed_activities, function($a) { return $a['grade'] !== null; })); ?>
+                        <?php echo count(array_filter($completed_activities, function ($a) {
+                            return $a['grade'] !== null; })); ?>
                     </p>
                 </div>
                 <div class="text-4xl text-green-500 opacity-70">
@@ -143,10 +144,12 @@ foreach ($activities as $activity) {
                     <div class="border-l-4 border-orange-500 bg-orange-50 p-6 rounded-r-lg">
                         <div class="flex justify-between items-start mb-4">
                             <div class="flex-1">
-                                <h4 class="text-lg font-semibold text-gray-800 mb-2"><?php echo htmlspecialchars($activity['title']); ?></h4>
+                                <h4 class="text-lg font-semibold text-gray-800 mb-2">
+                                    <?php echo htmlspecialchars($activity['title']); ?></h4>
                                 <p class="text-gray-600 mb-2">
                                     <i class="fas fa-graduation-cap mr-1"></i>
-                                    <?php echo htmlspecialchars($activity['course_name']); ?> (<?php echo htmlspecialchars($activity['course_code']); ?>)
+                                    <?php echo htmlspecialchars($activity['course_name']); ?>
+                                    (<?php echo htmlspecialchars($activity['course_code']); ?>)
                                 </p>
                                 <p class="text-gray-600 mb-2">
                                     <i class="fas fa-user mr-1"></i>
@@ -154,31 +157,41 @@ foreach ($activities as $activity) {
                                 </p>
                                 <div class="flex items-center text-sm text-gray-500 mb-3">
                                     <i class="fas fa-calendar-alt mr-2"></i>
-                                    <span>Fecha límite: <?php echo date('d/m/Y H:i', strtotime($activity['due_date'])); ?></span>
+                                    <span>Fecha límite:
+                                        <?php echo date('d/m/Y H:i', strtotime($activity['due_date'])); ?></span>
                                     <?php
                                     $now = new DateTime();
                                     $due_date = new DateTime($activity['due_date']);
-                                    $interval = $now->diff($due_date);
-                                    $days_left = $interval->days;
 
                                     if ($now > $due_date) {
                                         echo '<span class="ml-4 text-red-600 font-medium"><i class="fas fa-exclamation-circle mr-1"></i>Vencida</span>';
-                                    } elseif ($days_left <= 1) {
-                                        echo '<span class="ml-4 text-red-600 font-medium"><i class="fas fa-exclamation-circle mr-1"></i>¡Último día!</span>';
-                                    } elseif ($days_left <= 3) {
-                                        echo '<span class="ml-4 text-orange-600 font-medium"><i class="fas fa-clock mr-1"></i>' . $days_left . ' días restantes</span>';
                                     } else {
-                                        echo '<span class="ml-4 text-green-600 font-medium"><i class="fas fa-clock mr-1"></i>' . $days_left . ' días restantes</span>';
+                                        $diff = $now->diff($due_date);
+                                        $hours_left = ($diff->days * 24) + $diff->h;
+
+                                        if ($hours_left < 24) {
+                                            echo '<span class="ml-4 text-red-600 font-medium"><i class="fas fa-exclamation-circle mr-1"></i>¡Último día!</span>';
+                                        } else {
+                                            $days_left = $diff->days;
+                                            // Handle the "exactly 24h" edge case or just use days as is
+                                            if ($hours_left >= 24 && $days_left == 0) $days_left = 1; 
+                                            
+                                            $color_class = $days_left <= 3 ? 'text-orange-600' : 'text-green-600';
+                                            $day_text = $days_left == 1 ? 'día restante' : 'días restantes';
+                                            echo '<span class="ml-4 ' . $color_class . ' font-medium"><i class="fas fa-clock mr-1"></i>' . $days_left . ' ' . $day_text . '</span>';
+                                        }
                                     }
                                     ?>
                                 </div>
-                                <p class="text-gray-700"><?php echo htmlspecialchars(substr($activity['description'], 0, 150)); ?>...</p>
+                                <p class="text-gray-700">
+                                    <?php echo htmlspecialchars(substr($activity['description'], 0, 150)); ?>...</p>
                             </div>
                         </div>
 
                         <?php if ($activity['file_path']): ?>
                             <div class="mb-4">
-                                <a href="/biblioteca/<?php echo htmlspecialchars($activity['file_path']); ?>" target="_blank" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm inline-flex items-center">
+                                <a href="/biblioteca/<?php echo htmlspecialchars($activity['file_path']); ?>" target="_blank"
+                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm inline-flex items-center">
                                     <i class="fas fa-download mr-2"></i>
                                     Descargar Archivo de la Actividad
                                 </a>
@@ -190,10 +203,12 @@ foreach ($activities as $activity) {
                             <input type="hidden" name="submit_activity" value="1">
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Subir tu entrega</label>
-                                <input type="file" name="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.png,.zip" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                                <input type="file" name="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.png,.zip" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
                                 <p class="text-sm text-gray-500 mt-1">Formatos permitidos: PDF, DOC, PPT, imágenes, ZIP</p>
                             </div>
-                            <button type="submit" name="submit_activity" class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center">
+                            <button type="submit" name="submit_activity"
+                                class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center">
                                 <i class="fas fa-paper-plane mr-2"></i>
                                 Enviar Actividad
                             </button>
@@ -213,13 +228,16 @@ foreach ($activities as $activity) {
             </h3>
             <div class="space-y-4">
                 <?php foreach ($completed_activities as $activity): ?>
-                    <div class="border border-gray-200 rounded-lg p-6 <?php echo $activity['grade'] !== null ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'; ?>">
+                    <div
+                        class="border border-gray-200 rounded-lg p-6 <?php echo $activity['grade'] !== null ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'; ?>">
                         <div class="flex justify-between items-start mb-4">
                             <div class="flex-1">
-                                <h4 class="text-lg font-semibold text-gray-800 mb-2"><?php echo htmlspecialchars($activity['title']); ?></h4>
+                                <h4 class="text-lg font-semibold text-gray-800 mb-2">
+                                    <?php echo htmlspecialchars($activity['title']); ?></h4>
                                 <p class="text-gray-600 mb-2">
                                     <i class="fas fa-graduation-cap mr-1"></i>
-                                    <?php echo htmlspecialchars($activity['course_name']); ?> (<?php echo htmlspecialchars($activity['course_code']); ?>)
+                                    <?php echo htmlspecialchars($activity['course_name']); ?>
+                                    (<?php echo htmlspecialchars($activity['course_code']); ?>)
                                 </p>
                                 <div class="flex items-center text-sm text-gray-500 mb-2">
                                     <i class="fas fa-calendar-check mr-2"></i>
@@ -251,7 +269,8 @@ foreach ($activities as $activity) {
 
                         <?php if ($activity['submission_file']): ?>
                             <div>
-                                <a href="/biblioteca/<?php echo htmlspecialchars($activity['submission_file']); ?>" target="_blank" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm inline-flex items-center">
+                                <a href="/biblioteca/<?php echo htmlspecialchars($activity['submission_file']); ?>" target="_blank"
+                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm inline-flex items-center">
                                     <i class="fas fa-download mr-2"></i>
                                     Ver mi entrega
                                 </a>
