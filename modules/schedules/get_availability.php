@@ -1,5 +1,10 @@
 <?php
 require_once '../../includes/config.php';
+if (!isLoggedIn() || (getUserRole() !== 'admin' && getUserRole() !== 'teacher' && getUserRole() !== 'student')) {
+    header('HTTP/1.1 403 Forbidden');
+    echo json_encode(['success' => false, 'message' => 'Acceso denegado']);
+    exit();
+}
 
 header('Content-Type: application/json');
 

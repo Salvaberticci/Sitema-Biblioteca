@@ -1,5 +1,6 @@
 <?php
 require_once '../../includes/config.php';
+requireRole('admin');
 
 header('Content-Type: application/json');
 

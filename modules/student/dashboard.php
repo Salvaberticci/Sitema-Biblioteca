@@ -31,8 +31,8 @@
             <p class="text-gray-600">Ver y devolver recursos prestados de la biblioteca.</p>
         </a>
         <a href="../schedules/view.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
-            <h3 class="text-xl font-semibold text-primary mb-2">Horarios de Aulas</h3>
-            <p class="text-gray-600">Consultar disponibilidad de aulas.</p>
+            <h3 class="text-xl font-semibold text-primary mb-2">Consulta de Horarios</h3>
+            <p class="text-gray-600">Ver mis horarios de clases y ubicación de aulas.</p>
         </a>
         <a href="profile.php" class="bg-white p-6 rounded-lg shadow-md card-hover">
             <h3 class="text-xl font-semibold text-primary mb-2">Mi Perfil</h3>

@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Sistema de Gestión ETC Pedro García Leal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script>
         tailwind.config = {
             theme: {
@@ -47,12 +50,14 @@
     <script src="/biblioteca/assets/js/chatbot.js" defer></script>
     <script>console.log('Header template loaded, chatbot.js should be loading...');</script>
 </head>
+
 <body class="bg-gradient-to-br from-gray-50 to-accent min-h-screen flex flex-col">
     <header class="bg-gradient-to-r from-primary to-secondary text-white shadow-2xl sticky top-0 z-50">
         <div class="container mx-auto px-6 py-4">
             <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-4 animate-slide-in-left">
-                    <img src="/biblioteca/logo.png" alt="Logo ETC" class="h-16 w-16 rounded-full border-4 border-white shadow-lg">
+                    <img src="/biblioteca/logo.png" alt="Logo ETC"
+                        class="h-16 w-16 rounded-full border-4 border-white shadow-lg">
                     <div>
                         <h1 class="text-2xl font-bold tracking-wide">Sistema de Gestión</h1>
                         <p class="text-sm opacity-90">ETC Pedro García Leal</p>
@@ -61,13 +66,22 @@
                 <nav class="hidden md:block">
                     <ul class="flex space-x-8">
                         <?php if (!isLoggedIn()): ?>
-                            <li><a href="/biblioteca/index.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 transform hover:scale-105"><i class="fas fa-home"></i><span>Inicio</span></a></li>
+                            <li><a href="/biblioteca/index.php"
+                                    class="flex items-center space-x-2 hover:text-accent transition duration-300 transform hover:scale-105"><i
+                                        class="fas fa-home"></i><span>Inicio</span></a></li>
                         <?php endif; ?>
                         <?php if (isLoggedIn()): ?>
-                            <li><a href="/biblioteca/dashboard.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 transform hover:scale-105"><i class="fas fa-tachometer-alt"></i><span>Panel de Administración</span></a></li>
-                            <li><a href="/biblioteca/logout.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 transform hover:scale-105"><i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></a></li>
+                            <?php $nav_label = (getUserRole() === 'admin') ? 'Panel de Administración' : 'Mi Panel Control'; ?>
+                            <li><a href="/biblioteca/dashboard.php"
+                                    class="flex items-center space-x-2 hover:text-accent transition duration-300 transform hover:scale-105"><i
+                                        class="fas fa-tachometer-alt"></i><span><?php echo $nav_label; ?></span></a></li>
+                            <li><a href="/biblioteca/logout.php"
+                                    class="flex items-center space-x-2 hover:text-accent transition duration-300 transform hover:scale-105"><i
+                                        class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></a></li>
                         <?php else: ?>
-                            <li><a href="/biblioteca/login.php" class="flex items-center space-x-2 bg-white text-primary px-4 py-2 rounded-full hover:bg-accent transition duration-300 transform hover:scale-105 shadow-lg"><i class="fas fa-sign-in-alt"></i><span>Iniciar Sesión</span></a></li>
+                            <li><a href="/biblioteca/login.php"
+                                    class="flex items-center space-x-2 bg-white text-primary px-4 py-2 rounded-full hover:bg-accent transition duration-300 transform hover:scale-105 shadow-lg"><i
+                                        class="fas fa-sign-in-alt"></i><span>Iniciar Sesión</span></a></li>
                         <?php endif; ?>
                     </ul>
                 </nav>
@@ -78,19 +92,27 @@
             <nav class="md:hidden mt-4 hidden" id="mobile-menu">
                 <ul class="flex flex-col space-y-2">
                     <?php if (!isLoggedIn()): ?>
-                        <li><a href="/biblioteca/index.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 py-2"><i class="fas fa-home"></i><span>Inicio</span></a></li>
+                        <li><a href="/biblioteca/index.php"
+                                class="flex items-center space-x-2 hover:text-accent transition duration-300 py-2"><i
+                                    class="fas fa-home"></i><span>Inicio</span></a></li>
                     <?php endif; ?>
                     <?php if (isLoggedIn()): ?>
-                        <li><a href="/biblioteca/dashboard.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 py-2"><i class="fas fa-tachometer-alt"></i><span>Panel de Administración</span></a></li>
-                        <li><a href="/biblioteca/logout.php" class="flex items-center space-x-2 hover:text-accent transition duration-300 py-2"><i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></a></li>
+                        <li><a href="/biblioteca/dashboard.php"
+                                class="flex items-center space-x-2 hover:text-accent transition duration-300 py-2"><i
+                                    class="fas fa-tachometer-alt"></i><span>Panel de Administración</span></a></li>
+                        <li><a href="/biblioteca/logout.php"
+                                class="flex items-center space-x-2 hover:text-accent transition duration-300 py-2"><i
+                                    class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></a></li>
                     <?php else: ?>
-                        <li><a href="/biblioteca/login.php" class="flex items-center space-x-2 bg-white text-primary px-4 py-2 rounded-full hover:bg-accent transition duration-300 shadow-lg"><i class="fas fa-sign-in-alt"></i><span>Iniciar Sesión</span></a></li>
+                        <li><a href="/biblioteca/login.php"
+                                class="flex items-center space-x-2 bg-white text-primary px-4 py-2 rounded-full hover:bg-accent transition duration-300 shadow-lg"><i
+                                    class="fas fa-sign-in-alt"></i><span>Iniciar Sesión</span></a></li>
                     <?php endif; ?>
                 </ul>
             </nav>
         </div>
         <div class="flex-grow">
-        </header>
+    </header>
 
-        <!-- Include Chatbot Component -->
-        <?php include __DIR__ . '/chatbot.php'; ?>
+    <!-- Include Chatbot Component -->
+    <?php include __DIR__ . '/chatbot.php'; ?>

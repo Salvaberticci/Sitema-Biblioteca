@@ -72,12 +72,12 @@ $days = [
     <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 animate-fade-in-up">
         <div class="flex flex-wrap gap-4 mb-6">
             <button onclick="showTab('schedules')" id="schedules-tab"
-                    class="px-6 py-3 rounded-lg font-medium transition duration-300 bg-primary text-white">
+                class="px-6 py-3 rounded-lg font-medium transition duration-300 bg-primary text-white">
                 <i class="fas fa-calendar-week mr-2"></i>
                 Horarios por Mención
             </button>
             <button onclick="showTab('availability')" id="availability-tab"
-                    class="px-6 py-3 rounded-lg font-medium transition duration-300 bg-gray-200 text-gray-700 hover:bg-gray-300">
+                class="px-6 py-3 rounded-lg font-medium transition duration-300 bg-gray-200 text-gray-700 hover:bg-gray-300">
                 <i class="fas fa-building mr-2"></i>
                 Disponibilidad de Aulas
             </button>
@@ -90,7 +90,8 @@ $days = [
                     <i class="fas fa-filter mr-2 text-primary"></i>
                     Filtrar por Mención
                 </h3>
-                <button onclick="openCreateScheduleModal()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 flex items-center">
+                <button onclick="openCreateScheduleModal()"
+                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 flex items-center">
                     <i class="fas fa-plus mr-2"></i>
                     Agregar Horario
                 </button>
@@ -99,11 +100,13 @@ $days = [
                 <div class="flex items-center space-x-4">
                     <label for="course" class="text-sm font-medium text-gray-700">Seleccionar Mención:</label>
                     <select id="course" name="course" onchange="this.form.submit()"
-                            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                        <option value="all" <?php echo $selected_course === 'all' ? 'selected' : ''; ?>>Todas las menciones</option>
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <option value="all" <?php echo $selected_course === 'all' ? 'selected' : ''; ?>>Todas las
+                            menciones</option>
                         <?php foreach ($teacher_courses as $course): ?>
                             <option value="<?php echo $course['id']; ?>" <?php echo $selected_course == $course['id'] ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($course['name']); ?> (<?php echo htmlspecialchars($course['code']); ?>)
+                                <?php echo htmlspecialchars($course['name']); ?>
+                                (<?php echo htmlspecialchars($course['code']); ?>)
                             </option>
                         <?php endforeach; ?>
                     </select>
@@ -123,18 +126,22 @@ $days = [
             <div class="grid md:grid-cols-4 gap-4">
                 <div>
                     <label for="filter_classroom" class="block text-sm font-medium text-gray-700 mb-2">Aula</label>
-                    <select id="filter_classroom" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <select id="filter_classroom"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                         <option value="all">Todas las aulas</option>
                         <?php
                         $classrooms = $pdo->query("SELECT * FROM classrooms ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
                         foreach ($classrooms as $classroom): ?>
-                            <option value="<?php echo $classroom['id']; ?>"><?php echo htmlspecialchars($classroom['name']); ?></option>
+                            <option value="<?php echo $classroom['id']; ?>">
+                                <?php echo htmlspecialchars($classroom['name']); ?>
+                            </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
                 <div>
                     <label for="filter_day" class="block text-sm font-medium text-gray-700 mb-2">Día</label>
-                    <select id="filter_day" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <select id="filter_day"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                         <option value="all">Todos los días</option>
                         <option value="monday">Lunes</option>
                         <option value="tuesday">Martes</option>
@@ -146,22 +153,25 @@ $days = [
                     </select>
                 </div>
                 <div>
-                    <label for="filter_start_time" class="block text-sm font-medium text-gray-700 mb-2">Hora Inicio</label>
+                    <label for="filter_start_time" class="block text-sm font-medium text-gray-700 mb-2">Hora
+                        Inicio</label>
                     <input type="time" id="filter_start_time" value="08:00"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                 </div>
                 <div>
                     <label for="filter_end_time" class="block text-sm font-medium text-gray-700 mb-2">Hora Fin</label>
                     <input type="time" id="filter_end_time" value="18:00"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                 </div>
             </div>
             <div class="mt-4 flex gap-4">
-                <button onclick="loadAvailability()" class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
+                <button onclick="loadAvailability()"
+                    class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
                     <i class="fas fa-search mr-2"></i>
                     Buscar Disponibilidad
                 </button>
-                <button onclick="resetFilters()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
+                <button onclick="resetFilters()"
+                    class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
                     <i class="fas fa-times mr-2"></i>
                     Limpiar Filtros
                 </button>
@@ -181,7 +191,8 @@ $days = [
                     <h3 class="text-xl font-semibold text-gray-600 mb-2">No hay horarios disponibles</h3>
                     <p class="text-gray-500">No tienes menciones asignadas con horarios programados.</p>
                     <div class="mt-6">
-                        <a href="assignments.php" class="bg-primary hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300 inline-flex items-center">
+                        <a href="assignments.php"
+                            class="bg-primary hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300 inline-flex items-center">
                             <i class="fas fa-plus mr-2"></i>
                             Asignar Menciones
                         </a>
@@ -195,9 +206,11 @@ $days = [
                 <?php foreach ($teacher_courses as $course): ?>
                     <?php
                     $course_schedules = $schedules_by_course[$course['id']] ?? [];
-                    if (empty($course_schedules)) continue;
+                    if (empty($course_schedules))
+                        continue;
                     ?>
-                    <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 animate-fade-in-up course-schedule" data-course-id="<?php echo $course['id']; ?>">
+                    <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 animate-fade-in-up course-schedule"
+                        data-course-id="<?php echo $course['id']; ?>">
                         <div class="flex items-center justify-between mb-6">
                             <h3 class="text-xl font-semibold flex items-center">
                                 <i class="fas fa-graduation-cap mr-3 text-primary"></i>
@@ -210,7 +223,8 @@ $days = [
                         </div>
 
                         <div class="overflow-x-auto">
-                            <table class="min-w-full table-auto border-collapse course-table" data-course-id="<?php echo $course['id']; ?>">
+                            <table class="min-w-full table-auto border-collapse course-table"
+                                data-course-id="<?php echo $course['id']; ?>">
                                 <thead>
                                     <tr class="bg-gray-50">
                                         <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Día</th>
@@ -230,7 +244,7 @@ $days = [
 
                                     foreach ($days as $day_key => $day_name):
                                         $day_course_schedules = $day_schedules[$day_key] ?? [];
-                                    ?>
+                                        ?>
                                         <tr class="hover:bg-gray-50 transition duration-200">
                                             <td class="px-4 py-4 text-sm font-medium text-gray-900 border-b">
                                                 <?php echo $day_name; ?>
@@ -238,7 +252,8 @@ $days = [
                                             <td class="px-4 py-4 text-sm text-gray-600 border-b">
                                                 <?php if (!empty($day_course_schedules)): ?>
                                                     <?php foreach ($day_course_schedules as $schedule): ?>
-                                                        <div class="mb-2 last:mb-0 schedule-item" data-schedule-id="<?php echo $schedule['id']; ?>">
+                                                        <div class="mb-2 last:mb-0 schedule-item"
+                                                            data-schedule-id="<?php echo $schedule['id']; ?>">
                                                             <div class="font-medium">
                                                                 <?php echo date('h:i A', strtotime($schedule['start_time'])); ?> -
                                                                 <?php echo date('h:i A', strtotime($schedule['end_time'])); ?>
@@ -280,8 +295,8 @@ $days = [
                                                             <span class="px-2 py-1 text-xs rounded-full
                                                                 <?php
                                                                 echo $schedule['status'] == 'active' ? 'bg-green-100 text-green-800' :
-                                                                     ($schedule['status'] == 'cancelled' ? 'bg-red-100 text-red-800' :
-                                                                      ($schedule['status'] == 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'));
+                                                                    ($schedule['status'] == 'cancelled' ? 'bg-red-100 text-red-800' :
+                                                                        ($schedule['status'] == 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'));
                                                                 ?>">
                                                                 <?php echo ucfirst($schedule['status']); ?>
                                                             </span>
@@ -295,13 +310,15 @@ $days = [
                                                 <?php if (!empty($day_course_schedules)): ?>
                                                     <?php foreach ($day_course_schedules as $schedule): ?>
                                                         <div class="mb-2 last:mb-0 flex space-x-1">
-                                                            <button onclick="openScheduleModal(<?php echo $schedule['id']; ?>, '<?php echo $day_key; ?>', '<?php echo $schedule['start_time']; ?>', '<?php echo $schedule['end_time']; ?>', <?php echo $schedule['classroom_id']; ?>, <?php echo $course['id']; ?>)"
-                                                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs transition duration-200">
+                                                            <button
+                                                                onclick="openScheduleModal(<?php echo $schedule['id']; ?>, '<?php echo $day_key; ?>', '<?php echo $schedule['start_time']; ?>', '<?php echo $schedule['end_time']; ?>', <?php echo $schedule['classroom_id']; ?>, <?php echo $course['id']; ?>)"
+                                                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs transition duration-200">
                                                                 <i class="fas fa-edit mr-1"></i>
                                                                 Cambiar
                                                             </button>
-                                                            <button onclick="deleteSchedule(<?php echo $schedule['id']; ?>, '<?php echo htmlspecialchars($schedule['course_name']); ?>', '<?php echo $day_name; ?>')"
-                                                                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-xs transition duration-200">
+                                                            <button
+                                                                onclick="deleteSchedule(<?php echo $schedule['id']; ?>, '<?php echo htmlspecialchars($schedule['course_name']); ?>', '<?php echo $day_name; ?>')"
+                                                                class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-xs transition duration-200">
                                                                 <i class="fas fa-trash mr-1"></i>
                                                                 Eliminar
                                                             </button>
@@ -338,7 +355,8 @@ $days = [
                             <h3 class="text-xl font-semibold flex items-center">
                                 <i class="fas fa-graduation-cap mr-3 text-primary"></i>
                                 <?php echo htmlspecialchars($selected_course_data['name']); ?>
-                                <span class="ml-2 text-sm text-gray-600">(<?php echo htmlspecialchars($selected_course_data['code']); ?>)</span>
+                                <span
+                                    class="ml-2 text-sm text-gray-600">(<?php echo htmlspecialchars($selected_course_data['code']); ?>)</span>
                             </h3>
                             <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                                 <?php echo $selected_course_data['assignment_type']; ?>
@@ -366,7 +384,7 @@ $days = [
 
                                     foreach ($days as $day_key => $day_name):
                                         $day_course_schedules = $day_schedules[$day_key] ?? [];
-                                    ?>
+                                        ?>
                                         <tr class="hover:bg-gray-50 transition duration-200">
                                             <td class="px-4 py-4 text-sm font-medium text-gray-900 border-b">
                                                 <?php echo $day_name; ?>
@@ -374,7 +392,8 @@ $days = [
                                             <td class="px-4 py-4 text-sm text-gray-600 border-b">
                                                 <?php if (!empty($day_course_schedules)): ?>
                                                     <?php foreach ($day_course_schedules as $schedule): ?>
-                                                        <div class="mb-2 last:mb-0 schedule-item" data-schedule-id="<?php echo $schedule['id']; ?>">
+                                                        <div class="mb-2 last:mb-0 schedule-item"
+                                                            data-schedule-id="<?php echo $schedule['id']; ?>">
                                                             <div class="font-medium">
                                                                 <?php echo date('h:i A', strtotime($schedule['start_time'])); ?> -
                                                                 <?php echo date('h:i A', strtotime($schedule['end_time'])); ?>
@@ -416,8 +435,8 @@ $days = [
                                                             <span class="px-2 py-1 text-xs rounded-full
                                                                 <?php
                                                                 echo $schedule['status'] == 'active' ? 'bg-green-100 text-green-800' :
-                                                                     ($schedule['status'] == 'cancelled' ? 'bg-red-100 text-red-800' :
-                                                                      ($schedule['status'] == 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'));
+                                                                    ($schedule['status'] == 'cancelled' ? 'bg-red-100 text-red-800' :
+                                                                        ($schedule['status'] == 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'));
                                                                 ?>">
                                                                 <?php echo ucfirst($schedule['status']); ?>
                                                             </span>
@@ -431,8 +450,9 @@ $days = [
                                                 <?php if (!empty($day_course_schedules)): ?>
                                                     <?php foreach ($day_course_schedules as $schedule): ?>
                                                         <div class="mb-2 last:mb-0">
-                                                            <button onclick="openScheduleModal(<?php echo $schedule['id']; ?>, '<?php echo $day_key; ?>', '<?php echo $schedule['start_time']; ?>', '<?php echo $schedule['end_time']; ?>', <?php echo $schedule['classroom_id']; ?>, <?php echo $selected_course_data['id']; ?>)"
-                                                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-xs transition duration-200">
+                                                            <button
+                                                                onclick="openScheduleModal(<?php echo $schedule['id']; ?>, '<?php echo $day_key; ?>', '<?php echo $schedule['start_time']; ?>', '<?php echo $schedule['end_time']; ?>', <?php echo $schedule['classroom_id']; ?>, <?php echo $selected_course_data['id']; ?>)"
+                                                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-xs transition duration-200">
                                                                 <i class="fas fa-edit mr-1"></i>
                                                                 Cambiar
                                                             </button>
@@ -467,7 +487,8 @@ $days = [
     </div>
 
     <!-- Create Schedule Modal -->
-    <div id="createScheduleModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div id="createScheduleModal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
         <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
             <div class="mt-3">
                 <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
@@ -477,17 +498,23 @@ $days = [
                 <form id="createScheduleForm" class="space-y-4">
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label for="create_course_id" class="block text-sm font-medium text-gray-700 mb-2">Mención</label>
-                            <select id="create_course_id" name="course_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <label for="create_course_id"
+                                class="block text-sm font-medium text-gray-700 mb-2">Mención</label>
+                            <select id="create_course_id" name="course_id" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                                 <option value="">Seleccionar mención</option>
                                 <?php foreach ($teacher_courses as $course): ?>
-                                    <option value="<?php echo $course['id']; ?>"><?php echo htmlspecialchars($course['name']); ?> (<?php echo htmlspecialchars($course['code']); ?>)</option>
+                                    <option value="<?php echo $course['id']; ?>">
+                                        <?php echo htmlspecialchars($course['name']); ?>
+                                        (<?php echo htmlspecialchars($course['code']); ?>)
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
                         <div>
                             <label for="create_day" class="block text-sm font-medium text-gray-700 mb-2">Día</label>
-                            <select id="create_day" name="day" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <select id="create_day" name="day" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                                 <option value="monday">Lunes</option>
                                 <option value="tuesday">Martes</option>
                                 <option value="wednesday">Miércoles</option>
@@ -498,21 +525,30 @@ $days = [
                             </select>
                         </div>
                         <div>
-                            <label for="create_classroom" class="block text-sm font-medium text-gray-700 mb-2">Aula</label>
-                            <select id="create_classroom" name="classroom_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <label for="create_classroom"
+                                class="block text-sm font-medium text-gray-700 mb-2">Aula</label>
+                            <select id="create_classroom" name="classroom_id" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                                 <option value="">Seleccionar aula</option>
                                 <?php foreach ($classrooms as $classroom): ?>
-                                    <option value="<?php echo $classroom['id']; ?>"><?php echo htmlspecialchars($classroom['name']); ?> (<?php echo $classroom['capacity']; ?> personas)</option>
+                                    <option value="<?php echo $classroom['id']; ?>">
+                                        <?php echo htmlspecialchars($classroom['name']); ?>
+                                        (<?php echo $classroom['capacity']; ?> personas)
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
                         <div>
-                            <label for="create_start_time" class="block text-sm font-medium text-gray-700 mb-2">Hora de Inicio</label>
-                            <input type="time" id="create_start_time" name="start_time" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <label for="create_start_time" class="block text-sm font-medium text-gray-700 mb-2">Hora de
+                                Inicio</label>
+                            <input type="time" id="create_start_time" name="start_time" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
                         <div class="md:col-span-2">
-                            <label for="create_end_time" class="block text-sm font-medium text-gray-700 mb-2">Hora de Fin</label>
-                            <input type="time" id="create_end_time" name="end_time" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <label for="create_end_time" class="block text-sm font-medium text-gray-700 mb-2">Hora de
+                                Fin</label>
+                            <input type="time" id="create_end_time" name="end_time" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
                     </div>
 
@@ -523,13 +559,17 @@ $days = [
                         </div>
                         <div id="create-available-classrooms" class="mt-3 hidden">
                             <h5 class="text-sm font-medium text-gray-700 mb-2">Aulas disponibles para este horario:</h5>
-                            <div id="create-classrooms-list" class="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto"></div>
+                            <div id="create-classrooms-list" class="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
+                            </div>
                         </div>
                     </div>
 
                     <div class="flex justify-end space-x-3 pt-4">
-                        <button type="button" onclick="closeCreateScheduleModal()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-200">Cancelar</button>
-                        <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-200">Crear Horario</button>
+                        <button type="button" onclick="closeCreateScheduleModal()"
+                            class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-200">Cancelar</button>
+                        <button type="submit"
+                            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-200">Crear
+                            Horario</button>
                     </div>
                 </form>
             </div>
@@ -551,7 +591,8 @@ $days = [
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
                             <label for="modal_day" class="block text-sm font-medium text-gray-700 mb-2">Día</label>
-                            <select id="modal_day" name="day" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <select id="modal_day" name="day" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                                 <option value="monday">Lunes</option>
                                 <option value="tuesday">Martes</option>
                                 <option value="wednesday">Miércoles</option>
@@ -562,20 +603,29 @@ $days = [
                             </select>
                         </div>
                         <div>
-                            <label for="modal_classroom" class="block text-sm font-medium text-gray-700 mb-2">Aula</label>
-                            <select id="modal_classroom" name="classroom_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <label for="modal_classroom"
+                                class="block text-sm font-medium text-gray-700 mb-2">Aula</label>
+                            <select id="modal_classroom" name="classroom_id" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                                 <?php foreach ($classrooms as $classroom): ?>
-                                    <option value="<?php echo $classroom['id']; ?>"><?php echo htmlspecialchars($classroom['name']); ?> (<?php echo $classroom['capacity']; ?> personas)</option>
+                                    <option value="<?php echo $classroom['id']; ?>">
+                                        <?php echo htmlspecialchars($classroom['name']); ?>
+                                        (<?php echo $classroom['capacity']; ?> personas)
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
                         <div>
-                            <label for="modal_start_time" class="block text-sm font-medium text-gray-700 mb-2">Hora de Inicio</label>
-                            <input type="time" id="modal_start_time" name="start_time" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <label for="modal_start_time" class="block text-sm font-medium text-gray-700 mb-2">Hora de
+                                Inicio</label>
+                            <input type="time" id="modal_start_time" name="start_time" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
                         <div>
-                            <label for="modal_end_time" class="block text-sm font-medium text-gray-700 mb-2">Hora de Fin</label>
-                            <input type="time" id="modal_end_time" name="end_time" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <label for="modal_end_time" class="block text-sm font-medium text-gray-700 mb-2">Hora de
+                                Fin</label>
+                            <input type="time" id="modal_end_time" name="end_time" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
                     </div>
 
@@ -591,8 +641,11 @@ $days = [
                     </div>
 
                     <div class="flex justify-end space-x-3 pt-4">
-                        <button type="button" onclick="closeScheduleModal()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-200">Cancelar</button>
-                        <button type="submit" class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-200">Actualizar Horario</button>
+                        <button type="button" onclick="closeScheduleModal()"
+                            class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-200">Cancelar</button>
+                        <button type="submit"
+                            class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-200">Actualizar
+                            Horario</button>
                     </div>
                 </form>
             </div>
@@ -601,69 +654,69 @@ $days = [
 </main>
 
 <script>
-// Tab switching functionality
-function showTab(tabName) {
-    const schedulesTab = document.getElementById('schedules-tab');
-    const availabilityTab = document.getElementById('availability-tab');
-    const schedulesContent = document.getElementById('schedules-content');
-    const availabilityContent = document.getElementById('availability-content');
-    const schedulesFilters = document.getElementById('schedules-filters');
-    const availabilityFilters = document.getElementById('availability-filters');
+    // Tab switching functionality
+    function showTab(tabName) {
+        const schedulesTab = document.getElementById('schedules-tab');
+        const availabilityTab = document.getElementById('availability-tab');
+        const schedulesContent = document.getElementById('schedules-content');
+        const availabilityContent = document.getElementById('availability-content');
+        const schedulesFilters = document.getElementById('schedules-filters');
+        const availabilityFilters = document.getElementById('availability-filters');
 
-    if (tabName === 'schedules') {
-        schedulesTab.className = 'px-6 py-3 rounded-lg font-medium transition duration-300 bg-primary text-white';
-        availabilityTab.className = 'px-6 py-3 rounded-lg font-medium transition duration-300 bg-gray-200 text-gray-700 hover:bg-gray-300';
-        schedulesContent.classList.remove('hidden');
-        availabilityContent.classList.add('hidden');
-        schedulesFilters.classList.remove('hidden');
-        availabilityFilters.classList.add('hidden');
-    } else {
-        availabilityTab.className = 'px-6 py-3 rounded-lg font-medium transition duration-300 bg-primary text-white';
-        schedulesTab.className = 'px-6 py-3 rounded-lg font-medium transition duration-300 bg-gray-200 text-gray-700 hover:bg-gray-300';
-        availabilityContent.classList.remove('hidden');
-        schedulesContent.classList.add('hidden');
-        availabilityFilters.classList.remove('hidden');
-        schedulesFilters.classList.add('hidden');
+        if (tabName === 'schedules') {
+            schedulesTab.className = 'px-6 py-3 rounded-lg font-medium transition duration-300 bg-primary text-white';
+            availabilityTab.className = 'px-6 py-3 rounded-lg font-medium transition duration-300 bg-gray-200 text-gray-700 hover:bg-gray-300';
+            schedulesContent.classList.remove('hidden');
+            availabilityContent.classList.add('hidden');
+            schedulesFilters.classList.remove('hidden');
+            availabilityFilters.classList.add('hidden');
+        } else {
+            availabilityTab.className = 'px-6 py-3 rounded-lg font-medium transition duration-300 bg-primary text-white';
+            schedulesTab.className = 'px-6 py-3 rounded-lg font-medium transition duration-300 bg-gray-200 text-gray-700 hover:bg-gray-300';
+            availabilityContent.classList.remove('hidden');
+            schedulesContent.classList.add('hidden');
+            availabilityFilters.classList.remove('hidden');
+            schedulesFilters.classList.add('hidden');
+        }
     }
-}
 
-// Load classroom availability
-function loadAvailability() {
-    const classroomId = document.getElementById('filter_classroom').value;
-    const day = document.getElementById('filter_day').value;
-    const startTime = document.getElementById('filter_start_time').value;
-    const endTime = document.getElementById('filter_end_time').value;
+    // Load classroom availability
+    function loadAvailability() {
+        const classroomId = document.getElementById('filter_classroom').value;
+        const day = document.getElementById('filter_day').value;
+        const startTime = document.getElementById('filter_start_time').value;
+        const endTime = document.getElementById('filter_end_time').value;
 
-    const resultsDiv = document.getElementById('availability-results');
+        const resultsDiv = document.getElementById('availability-results');
 
-    // Show loading
-    resultsDiv.innerHTML = `
+        // Show loading
+        resultsDiv.innerHTML = `
         <div class="text-center py-12">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <p class="text-gray-600">Cargando disponibilidad...</p>
         </div>
     `;
 
-    // AJAX request
-    fetch('get_availability.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            classroom_id: classroomId,
-            day: day,
-            start_time: startTime,
-            end_time: endTime
+        // AJAX request
+        fetch('../schedules/get_availability.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                classroom_id: classroomId,
+                day: day,
+                start_time: startTime,
+                end_time: endTime
+            })
         })
-    })
-    .then(response => response.json())
-    .then(data => {
-        displayAvailability(data, classroomId, day, startTime, endTime);
-    })
-    .catch(error => {
-        console.error('Error loading availability:', error);
-        resultsDiv.innerHTML = `
+            .then(response => response.json())
+            .then(data => {
+                displayAvailability(data, classroomId, day, startTime, endTime);
+            })
+            .catch(error => {
+                console.error('Error loading availability:', error);
+                resultsDiv.innerHTML = `
             <div class="text-center py-12">
                 <div class="text-red-500 mb-4">
                     <i class="fas fa-exclamation-triangle text-4xl"></i>
@@ -671,14 +724,14 @@ function loadAvailability() {
                 <p class="text-gray-600">Error al cargar la disponibilidad</p>
             </div>
         `;
-    });
-}
+            });
+    }
 
-// Display availability results
-function displayAvailability(data, classroomId, day, startTime, endTime) {
-    const resultsDiv = document.getElementById('availability-results');
+    // Display availability results
+    function displayAvailability(data, classroomId, day, startTime, endTime) {
+        const resultsDiv = document.getElementById('availability-results');
 
-    let html = `
+        let html = `
         <div class="mb-6">
             <h3 class="text-xl font-semibold mb-4 flex items-center">
                 <i class="fas fa-building mr-2 text-primary"></i>
@@ -695,15 +748,15 @@ function displayAvailability(data, classroomId, day, startTime, endTime) {
         </div>
     `;
 
-    if (data.availability && data.availability.length > 0) {
-        html += '<div class="space-y-4">';
+        if (data.availability && data.availability.length > 0) {
+            html += '<div class="space-y-4">';
 
-        data.availability.forEach(item => {
-            const statusClass = item.available ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200';
-            const statusIcon = item.available ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-500';
-            const statusText = item.available ? 'Disponible' : 'Ocupado';
+            data.availability.forEach(item => {
+                const statusClass = item.available ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200';
+                const statusIcon = item.available ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-500';
+                const statusText = item.available ? 'Disponible' : 'Ocupado';
 
-            html += `
+                html += `
                 <div class="border rounded-lg p-4 ${statusClass}">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4">
@@ -724,11 +777,11 @@ function displayAvailability(data, classroomId, day, startTime, endTime) {
                     </div>
                 </div>
             `;
-        });
+            });
 
-        html += '</div>';
-    } else {
-        html += `
+            html += '</div>';
+        } else {
+            html += `
             <div class="text-center py-12">
                 <div class="text-6xl text-gray-300 mb-4">
                     <i class="fas fa-search"></i>
@@ -737,20 +790,20 @@ function displayAvailability(data, classroomId, day, startTime, endTime) {
                 <p class="text-gray-500">Intenta ajustar los filtros de búsqueda</p>
             </div>
         `;
+        }
+
+        resultsDiv.innerHTML = html;
     }
 
-    resultsDiv.innerHTML = html;
-}
+    // Reset filters
+    function resetFilters() {
+        document.getElementById('filter_classroom').value = 'all';
+        document.getElementById('filter_day').value = 'all';
+        document.getElementById('filter_start_time').value = '08:00';
+        document.getElementById('filter_end_time').value = '18:00';
 
-// Reset filters
-function resetFilters() {
-    document.getElementById('filter_classroom').value = 'all';
-    document.getElementById('filter_day').value = 'all';
-    document.getElementById('filter_start_time').value = '08:00';
-    document.getElementById('filter_end_time').value = '18:00';
-
-    const resultsDiv = document.getElementById('availability-results');
-    resultsDiv.innerHTML = `
+        const resultsDiv = document.getElementById('availability-results');
+        resultsDiv.innerHTML = `
         <div class="text-center py-12">
             <div class="text-6xl text-gray-300 mb-4">
                 <i class="fas fa-building"></i>
@@ -759,392 +812,407 @@ function resetFilters() {
             <p class="text-gray-500">Selecciona los filtros y haz clic en "Buscar Disponibilidad"</p>
         </div>
     `;
-}
+    }
 
-// Helper function to get day names
-function getDayName(dayKey) {
-    const days = {
-        'monday': 'Lunes',
-        'tuesday': 'Martes',
-        'wednesday': 'Miércoles',
-        'thursday': 'Jueves',
-        'friday': 'Viernes',
-        'saturday': 'Sábado',
-        'sunday': 'Domingo'
-    };
-    return days[dayKey] || dayKey;
-}
+    // Helper function to get day names
+    function getDayName(dayKey) {
+        const days = {
+            'monday': 'Lunes',
+            'tuesday': 'Martes',
+            'wednesday': 'Miércoles',
+            'thursday': 'Jueves',
+            'friday': 'Viernes',
+            'saturday': 'Sábado',
+            'sunday': 'Domingo'
+        };
+        return days[dayKey] || dayKey;
+    }
 
-// Create schedule modal functions
-function openCreateScheduleModal() {
-    document.getElementById('createScheduleModal').classList.remove('hidden');
+    // Create schedule modal functions
+    function openCreateScheduleModal() {
+        document.getElementById('createScheduleModal').classList.remove('hidden');
 
-    // Reset form
-    document.getElementById('createScheduleForm').reset();
-    document.getElementById('create-availability-status').innerHTML = 'Selecciona mención, día, aula y horario para verificar disponibilidad...';
-}
-
-function closeCreateScheduleModal() {
-    document.getElementById('createScheduleModal').classList.add('hidden');
-}
-
-// Check availability for create schedule form
-function checkCreateAvailability() {
-    const courseId = document.getElementById('create_course_id').value;
-    const classroomId = document.getElementById('create_classroom').value;
-    const day = document.getElementById('create_day').value;
-    const startTime = document.getElementById('create_start_time').value;
-    const endTime = document.getElementById('create_end_time').value;
-
-    if (!courseId || !classroomId || !day || !startTime || !endTime) {
+        // Reset form
+        document.getElementById('createScheduleForm').reset();
         document.getElementById('create-availability-status').innerHTML = 'Selecciona mención, día, aula y horario para verificar disponibilidad...';
-        document.getElementById('create-available-classrooms').classList.add('hidden');
-        return;
     }
 
-    // AJAX request to check availability
-    fetch('check_availability.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            classroom_id: classroomId,
-            day: day,
-            start_time: startTime,
-            end_time: endTime
+    function closeCreateScheduleModal() {
+        document.getElementById('createScheduleModal').classList.add('hidden');
+    }
+
+    // Check availability for create schedule form
+    function checkCreateAvailability() {
+        const classroomId = document.getElementById('create_classroom').value;
+        const day = document.getElementById('create_day').value;
+        const startTime = document.getElementById('create_start_time').value;
+        const endTime = document.getElementById('create_end_time').value;
+        const teacherId = '<?php echo $_SESSION['user_id']; ?>';
+
+        if (!classroomId || !day || !startTime || !endTime) {
+            document.getElementById('create-availability-status').innerHTML = '<span class="text-gray-500">Selecciona aula, día y horario para verificar disponibilidad...</span>';
+            document.getElementById('create-available-classrooms').classList.add('hidden');
+            document.querySelector('#createScheduleForm button[type="submit"]').disabled = false;
+            return;
+        }
+
+        // AJAX request to check availability
+        fetch('../schedules/check_availability.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                classroom_id: classroomId,
+                teacher_id: teacherId,
+                day: day,
+                start_time: startTime,
+                end_time: endTime
+            })
         })
-    })
-    .then(response => response.json())
-    .then(data => {
-        const statusDiv = document.getElementById('create-availability-status');
-        const classroomsDiv = document.getElementById('create-available-classrooms');
-        const classroomsList = document.getElementById('create-classrooms-list');
+            .then(response => response.json())
+            .then(data => {
+                const statusDiv = document.getElementById('create-availability-status');
+                const classroomsDiv = document.getElementById('create-available-classrooms');
+                const classroomsList = document.getElementById('create-classrooms-list');
 
-        if (data.available) {
-            statusDiv.innerHTML = '<span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>Aula disponible para el horario seleccionado</span>';
-            classroomsDiv.classList.add('hidden');
-        } else {
-            statusDiv.innerHTML = '<span class="text-red-600"><i class="fas fa-times-circle mr-1"></i>Aula ocupada. Conflicto con: ' + data.conflict_info + '</span>';
+                if (data.available) {
+                    statusDiv.innerHTML = '<div class="flex items-center text-green-600 font-bold p-2 bg-green-50 rounded-lg border border-green-200"><i class="fas fa-check-circle mr-2"></i>Aula disponible para el horario seleccionado</div>';
+                    classroomsDiv.classList.add('hidden');
+                    document.querySelector('#createScheduleForm button[type="submit"]').disabled = false;
+                    document.querySelector('#createScheduleForm button[type="submit"]').classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    statusDiv.innerHTML = '<div class="flex flex-col text-red-600 font-bold p-3 bg-red-50 rounded-lg border border-red-200"><div class="flex items-center mb-1"><i class="fas fa-times-circle mr-2 text-xl"></i>¡CONFLICTO DETECTADO!</div><span class="text-xs font-medium opacity-90">' + data.conflict_info + '</span></div>';
+                    document.querySelector('#createScheduleForm button[type="submit"]').disabled = true;
+                    document.querySelector('#createScheduleForm button[type="submit"]').classList.add('opacity-50', 'cursor-not-allowed');
 
-            // Show available classrooms
-            if (data.available_classrooms && data.available_classrooms.length > 0) {
-                classroomsList.innerHTML = data.available_classrooms.map(classroom =>
-                    `<button type="button" onclick="selectAvailableClassroom('${classroom.id}', '${classroom.name}')"
+                    // Show available classrooms
+                    if (data.available_classrooms && data.available_classrooms.length > 0) {
+                        classroomsList.innerHTML = data.available_classrooms.map(classroom =>
+                            `<button type="button" onclick="selectAvailableClassroom('${classroom.id}', '${classroom.name}')"
+                             class="text-left p-2 bg-blue-50 hover:bg-blue-100 rounded border text-sm transition duration-200">
+                        <i class="fas fa-building mr-1 text-blue-500"></i>
+                         ${classroom.name} (${classroom.capacity} personas)
+                    </button>`
+                        ).join('');
+                        classroomsDiv.classList.remove('hidden');
+                    } else {
+                        classroomsList.innerHTML = '<p class="text-sm text-gray-500 italic">No hay aulas disponibles para este horario</p>';
+                        classroomsDiv.classList.remove('hidden');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error checking availability:', error);
+                document.getElementById('create-availability-status').innerHTML = '<span class="text-yellow-600"><i class="fas fa-exclamation-triangle mr-1"></i>Error al verificar disponibilidad</span>';
+                document.getElementById('create-available-classrooms').classList.add('hidden');
+            });
+    }
+
+    // Event listeners for create schedule availability checking
+    ['create_classroom', 'create_day', 'create_start_time', 'create_end_time'].forEach(id => {
+        document.getElementById(id).addEventListener('change', checkCreateAvailability);
+        if (id.includes('time')) {
+            document.getElementById(id).addEventListener('input', checkCreateAvailability);
+        }
+    });
+
+    // Handle create schedule form submission
+    document.getElementById('createScheduleForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        // Show loading
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creando...';
+        submitBtn.disabled = true;
+
+        fetch('create_schedule.php', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeCreateScheduleModal();
+                    // Show success message
+                    showAjaxMessage('Horario creado exitosamente', 'success');
+                    // Reload the page after a short delay to show the message
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    showAjaxMessage('Error: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error creating schedule:', error);
+                showAjaxMessage('Error al crear el horario', 'error');
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+    });
+
+    // Schedule modification modal functions
+    function openScheduleModal(scheduleId, currentDay, currentStartTime, currentEndTime, currentClassroomId, courseId) {
+        document.getElementById('modal_schedule_id').value = scheduleId;
+        document.getElementById('modal_course_id').value = courseId;
+        document.getElementById('modal_day').value = currentDay;
+        document.getElementById('modal_start_time').value = currentStartTime;
+        document.getElementById('modal_end_time').value = currentEndTime;
+        document.getElementById('modal_classroom').value = currentClassroomId;
+
+        document.getElementById('scheduleModal').classList.remove('hidden');
+
+        // Check initial availability
+        checkAvailability();
+    }
+
+    function closeScheduleModal() {
+        document.getElementById('scheduleModal').classList.add('hidden');
+    }
+
+    // Check classroom availability for selected time
+    function checkAvailability() {
+        const classroomId = document.getElementById('modal_classroom').value;
+        const day = document.getElementById('modal_day').value;
+        const startTime = document.getElementById('modal_start_time').value;
+        const endTime = document.getElementById('modal_end_time').value;
+        const scheduleId = document.getElementById('modal_schedule_id').value;
+
+        if (!classroomId || !day || !startTime || !endTime) {
+            document.getElementById('availability-status').innerHTML = '<span class="text-gray-500">Selecciona aula, día y horario para verificar disponibilidad...</span>';
+            document.getElementById('available-classrooms').classList.add('hidden');
+            document.querySelector('#scheduleForm button[type="submit"]').disabled = false;
+            return;
+        }
+
+        // AJAX request to check availability
+        fetch('../schedules/check_availability.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                classroom_id: classroomId,
+                teacher_id: '<?php echo $_SESSION['user_id']; ?>',
+                day: day,
+                start_time: startTime,
+                end_time: endTime,
+                exclude_schedule_id: scheduleId
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                const statusDiv = document.getElementById('availability-status');
+                const classroomsDiv = document.getElementById('available-classrooms');
+                const classroomsList = document.getElementById('classrooms-list');
+
+                if (data.available) {
+                    statusDiv.innerHTML = '<div class="flex items-center text-green-600 font-bold p-2 bg-green-50 rounded-lg border border-green-200"><i class="fas fa-check-circle mr-2"></i>Aula disponible para el horario seleccionado</div>';
+                    classroomsDiv.classList.add('hidden');
+                    document.querySelector('#scheduleForm button[type="submit"]').disabled = false;
+                    document.querySelector('#scheduleForm button[type="submit"]').classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    statusDiv.innerHTML = '<div class="flex flex-col text-red-600 font-bold p-3 bg-red-50 rounded-lg border border-red-200"><div class="flex items-center mb-1"><i class="fas fa-times-circle mr-2 text-xl"></i>¡CONFLICTO DETECTADO!</div><span class="text-xs font-medium opacity-90">' + data.conflict_info + '</span></div>';
+                    document.querySelector('#scheduleForm button[type="submit"]').disabled = true;
+                    document.querySelector('#scheduleForm button[type="submit"]').classList.add('opacity-50', 'cursor-not-allowed');
+
+                    // Show available classrooms
+                    if (data.available_classrooms && data.available_classrooms.length > 0) {
+                        classroomsList.innerHTML = data.available_classrooms.map(classroom =>
+                            `<button type="button" onclick="selectAvailableClassroom('${classroom.id}', '${classroom.name}')"
                              class="text-left p-2 bg-blue-50 hover:bg-blue-100 rounded border text-sm transition duration-200">
                         <i class="fas fa-building mr-1 text-blue-500"></i>
                         ${classroom.name} (${classroom.capacity} personas)
                     </button>`
-                ).join('');
-                classroomsDiv.classList.remove('hidden');
-            } else {
-                classroomsList.innerHTML = '<p class="text-sm text-gray-500 italic">No hay aulas disponibles para este horario</p>';
-                classroomsDiv.classList.remove('hidden');
+                        ).join('');
+                        classroomsDiv.classList.remove('hidden');
+                    } else {
+                        classroomsList.innerHTML = '<p class="text-sm text-gray-500 italic">No hay aulas disponibles para este horario</p>';
+                        classroomsDiv.classList.remove('hidden');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error checking availability:', error);
+                document.getElementById('availability-status').innerHTML = '<span class="text-yellow-600"><i class="fas fa-exclamation-triangle mr-1"></i>Error al verificar disponibilidad</span>';
+                document.getElementById('available-classrooms').classList.add('hidden');
+            });
+    }
+
+    // Event listeners for availability checking
+    ['modal_classroom', 'modal_day', 'modal_start_time', 'modal_end_time'].forEach(id => {
+        document.getElementById(id).addEventListener('change', checkAvailability);
+        if (id.includes('time')) {
+            document.getElementById(id).addEventListener('input', checkAvailability);
+        }
+    });
+
+    // Handle schedule form submission
+    document.getElementById('scheduleForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        // Show loading
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Actualizando...';
+        submitBtn.disabled = true;
+
+        fetch('update_schedule.php', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeScheduleModal();
+                    // Show success message
+                    showAjaxMessage('Horario actualizado exitosamente', 'success');
+                    // Reload the page after a short delay to show the message
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    showAjaxMessage('Error: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error updating schedule:', error);
+                showAjaxMessage('Error al actualizar el horario', 'error');
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+    });
+
+    // Function to show AJAX messages
+    function showAjaxMessage(message, type) {
+        const successDiv = document.getElementById('ajax-success-message');
+        const errorDiv = document.getElementById('ajax-error-message');
+        const successText = document.getElementById('ajax-success-text');
+        const errorText = document.getElementById('ajax-error-text');
+
+        // Check if elements exist
+        if (!successDiv || !errorDiv || !successText || !errorText) {
+            console.error('AJAX message elements not found');
+            return;
+        }
+
+        // Hide both messages first
+        successDiv.classList.add('hidden');
+        errorDiv.classList.add('hidden');
+
+        // Show the appropriate message
+        if (type === 'success') {
+            successText.textContent = message;
+            successDiv.classList.remove('hidden');
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                if (successDiv) successDiv.classList.add('hidden');
+            }, 3000);
+        } else {
+            errorText.textContent = message;
+            errorDiv.classList.remove('hidden');
+            // Auto-hide after 5 seconds for errors
+            setTimeout(() => {
+                if (errorDiv) errorDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Scroll to top to show the message
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Function to select an available classroom
+    function selectAvailableClassroom(classroomId, classroomName) {
+        // Find the active modal
+        let modal = null;
+        if (document.getElementById('createScheduleModal').classList.contains('hidden') === false) {
+            modal = document.getElementById('createScheduleModal');
+        } else if (document.getElementById('scheduleModal').classList.contains('hidden') === false) {
+            modal = document.getElementById('scheduleModal');
+        }
+
+        if (modal) {
+            // Update the classroom select dropdown
+            const classroomSelect = modal.querySelector('select[name="classroom_id"]');
+            if (classroomSelect) {
+                classroomSelect.value = classroomId;
+
+                // Trigger availability check
+                if (modal.id === 'createScheduleModal') {
+                    checkCreateAvailability();
+                } else {
+                    checkAvailability();
+                }
             }
         }
-    })
-    .catch(error => {
-        console.error('Error checking availability:', error);
-        document.getElementById('create-availability-status').innerHTML = '<span class="text-yellow-600"><i class="fas fa-exclamation-triangle mr-1"></i>Error al verificar disponibilidad</span>';
-        document.getElementById('create-available-classrooms').classList.add('hidden');
-    });
-}
+    }
 
-// Event listeners for create schedule availability checking
-document.getElementById('create_course_id').addEventListener('change', checkCreateAvailability);
-document.getElementById('create_classroom').addEventListener('change', checkCreateAvailability);
-document.getElementById('create_day').addEventListener('change', checkCreateAvailability);
-document.getElementById('create_start_time').addEventListener('change', checkCreateAvailability);
-document.getElementById('create_end_time').addEventListener('change', checkCreateAvailability);
+    // Function to delete a schedule
+    function deleteSchedule(scheduleId, courseName, dayName) {
+        const confirmMessage = `¿Está seguro de eliminar el horario de "${courseName}" para ${dayName}?\n\nEsta acción no se puede deshacer.`;
 
-// Handle create schedule form submission
-document.getElementById('createScheduleForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+        if (!confirm(confirmMessage)) {
+            return;
+        }
 
-    const formData = new FormData(this);
+        // Show loading state
+        const deleteBtn = event.target.closest('button');
+        const originalText = deleteBtn.innerHTML;
+        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Eliminando...';
+        deleteBtn.disabled = true;
 
-    // Show loading
-    const submitBtn = this.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creando...';
-    submitBtn.disabled = true;
+        // AJAX request to delete schedule
+        fetch('delete_schedule.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `schedule_id=${scheduleId}`
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAjaxMessage('Horario eliminado exitosamente', 'success');
+                    // Reload the page after a short delay to show the message
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    showAjaxMessage('Error: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting schedule:', error);
+                showAjaxMessage('Error al eliminar el horario', 'error');
+            })
+            .finally(() => {
+                deleteBtn.innerHTML = originalText;
+                deleteBtn.disabled = false;
+            });
+    }
 
-    fetch('create_schedule.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
+    // Close modals when clicking outside
+    document.addEventListener('click', function (event) {
+        const createModal = document.getElementById('createScheduleModal');
+        const editModal = document.getElementById('scheduleModal');
+
+        if (event.target === createModal) {
             closeCreateScheduleModal();
-            // Show success message
-            showAjaxMessage('Horario creado exitosamente', 'success');
-            // Reload the page after a short delay to show the message
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-        } else {
-            showAjaxMessage('Error: ' + data.message, 'error');
         }
-    })
-    .catch(error => {
-        console.error('Error creating schedule:', error);
-        showAjaxMessage('Error al crear el horario', 'error');
-    })
-    .finally(() => {
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    });
-});
-
-// Schedule modification modal functions
-function openScheduleModal(scheduleId, currentDay, currentStartTime, currentEndTime, currentClassroomId, courseId) {
-    document.getElementById('modal_schedule_id').value = scheduleId;
-    document.getElementById('modal_course_id').value = courseId;
-    document.getElementById('modal_day').value = currentDay;
-    document.getElementById('modal_start_time').value = currentStartTime;
-    document.getElementById('modal_end_time').value = currentEndTime;
-    document.getElementById('modal_classroom').value = currentClassroomId;
-
-    document.getElementById('scheduleModal').classList.remove('hidden');
-
-    // Check initial availability
-    checkAvailability();
-}
-
-function closeScheduleModal() {
-    document.getElementById('scheduleModal').classList.add('hidden');
-}
-
-// Check classroom availability for selected time
-function checkAvailability() {
-    const classroomId = document.getElementById('modal_classroom').value;
-    const day = document.getElementById('modal_day').value;
-    const startTime = document.getElementById('modal_start_time').value;
-    const endTime = document.getElementById('modal_end_time').value;
-    const scheduleId = document.getElementById('modal_schedule_id').value;
-
-    if (!classroomId || !day || !startTime || !endTime) {
-        document.getElementById('availability-status').innerHTML = 'Selecciona día, aula y horario para verificar disponibilidad...';
-        document.getElementById('available-classrooms').classList.add('hidden');
-        return;
-    }
-
-    // AJAX request to check availability
-    fetch('check_availability.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            classroom_id: classroomId,
-            day: day,
-            start_time: startTime,
-            end_time: endTime,
-            exclude_schedule_id: scheduleId
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        const statusDiv = document.getElementById('availability-status');
-        const classroomsDiv = document.getElementById('available-classrooms');
-        const classroomsList = document.getElementById('classrooms-list');
-
-        if (data.available) {
-            statusDiv.innerHTML = '<span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>Aula disponible para el horario seleccionado</span>';
-            classroomsDiv.classList.add('hidden');
-        } else {
-            statusDiv.innerHTML = '<span class="text-red-600"><i class="fas fa-times-circle mr-1"></i>Aula ocupada. Conflicto con: ' + data.conflict_info + '</span>';
-
-            // Show available classrooms
-            if (data.available_classrooms && data.available_classrooms.length > 0) {
-                classroomsList.innerHTML = data.available_classrooms.map(classroom =>
-                    `<button type="button" onclick="selectAvailableClassroom('${classroom.id}', '${classroom.name}')"
-                             class="text-left p-2 bg-blue-50 hover:bg-blue-100 rounded border text-sm transition duration-200">
-                        <i class="fas fa-building mr-1 text-blue-500"></i>
-                        ${classroom.name} (${classroom.capacity} personas)
-                    </button>`
-                ).join('');
-                classroomsDiv.classList.remove('hidden');
-            } else {
-                classroomsList.innerHTML = '<p class="text-sm text-gray-500 italic">No hay aulas disponibles para este horario</p>';
-                classroomsDiv.classList.remove('hidden');
-            }
-        }
-    })
-    .catch(error => {
-        console.error('Error checking availability:', error);
-        document.getElementById('availability-status').innerHTML = '<span class="text-yellow-600"><i class="fas fa-exclamation-triangle mr-1"></i>Error al verificar disponibilidad</span>';
-        document.getElementById('available-classrooms').classList.add('hidden');
-    });
-}
-
-// Event listeners for availability checking
-document.getElementById('modal_classroom').addEventListener('change', checkAvailability);
-document.getElementById('modal_day').addEventListener('change', checkAvailability);
-document.getElementById('modal_start_time').addEventListener('change', checkAvailability);
-document.getElementById('modal_end_time').addEventListener('change', checkAvailability);
-
-// Handle schedule form submission
-document.getElementById('scheduleForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const formData = new FormData(this);
-
-    // Show loading
-    const submitBtn = this.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Actualizando...';
-    submitBtn.disabled = true;
-
-    fetch('update_schedule.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
+        if (event.target === editModal) {
             closeScheduleModal();
-            // Show success message
-            showAjaxMessage('Horario actualizado exitosamente', 'success');
-            // Reload the page after a short delay to show the message
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-        } else {
-            showAjaxMessage('Error: ' + data.message, 'error');
         }
-    })
-    .catch(error => {
-        console.error('Error updating schedule:', error);
-        showAjaxMessage('Error al actualizar el horario', 'error');
-    })
-    .finally(() => {
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
     });
-});
-
-// Function to show AJAX messages
-function showAjaxMessage(message, type) {
-    const successDiv = document.getElementById('ajax-success-message');
-    const errorDiv = document.getElementById('ajax-error-message');
-    const successText = document.getElementById('ajax-success-text');
-    const errorText = document.getElementById('ajax-error-text');
-
-    // Check if elements exist
-    if (!successDiv || !errorDiv || !successText || !errorText) {
-        console.error('AJAX message elements not found');
-        return;
-    }
-
-    // Hide both messages first
-    successDiv.classList.add('hidden');
-    errorDiv.classList.add('hidden');
-
-    // Show the appropriate message
-    if (type === 'success') {
-        successText.textContent = message;
-        successDiv.classList.remove('hidden');
-        // Auto-hide after 3 seconds
-        setTimeout(() => {
-            if (successDiv) successDiv.classList.add('hidden');
-        }, 3000);
-    } else {
-        errorText.textContent = message;
-        errorDiv.classList.remove('hidden');
-        // Auto-hide after 5 seconds for errors
-        setTimeout(() => {
-            if (errorDiv) errorDiv.classList.add('hidden');
-        }, 5000);
-    }
-
-    // Scroll to top to show the message
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// Function to select an available classroom
-function selectAvailableClassroom(classroomId, classroomName) {
-    // Find the active modal
-    let modal = null;
-    if (document.getElementById('createScheduleModal').classList.contains('hidden') === false) {
-        modal = document.getElementById('createScheduleModal');
-    } else if (document.getElementById('scheduleModal').classList.contains('hidden') === false) {
-        modal = document.getElementById('scheduleModal');
-    }
-
-    if (modal) {
-        // Update the classroom select dropdown
-        const classroomSelect = modal.querySelector('select[name="classroom_id"]');
-        if (classroomSelect) {
-            classroomSelect.value = classroomId;
-
-            // Trigger availability check
-            if (modal.id === 'createScheduleModal') {
-                checkCreateAvailability();
-            } else {
-                checkAvailability();
-            }
-        }
-    }
-}
-
-// Function to delete a schedule
-function deleteSchedule(scheduleId, courseName, dayName) {
-    const confirmMessage = `¿Está seguro de eliminar el horario de "${courseName}" para ${dayName}?\n\nEsta acción no se puede deshacer.`;
-
-    if (!confirm(confirmMessage)) {
-        return;
-    }
-
-    // Show loading state
-    const deleteBtn = event.target.closest('button');
-    const originalText = deleteBtn.innerHTML;
-    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Eliminando...';
-    deleteBtn.disabled = true;
-
-    // AJAX request to delete schedule
-    fetch('delete_schedule.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `schedule_id=${scheduleId}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showAjaxMessage('Horario eliminado exitosamente', 'success');
-            // Reload the page after a short delay to show the message
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-        } else {
-            showAjaxMessage('Error: ' + data.message, 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error deleting schedule:', error);
-        showAjaxMessage('Error al eliminar el horario', 'error');
-    })
-    .finally(() => {
-        deleteBtn.innerHTML = originalText;
-        deleteBtn.disabled = false;
-    });
-}
-
-// Close modals when clicking outside
-document.addEventListener('click', function(event) {
-    const createModal = document.getElementById('createScheduleModal');
-    const editModal = document.getElementById('scheduleModal');
-
-    if (event.target === createModal) {
-        closeCreateScheduleModal();
-    }
-    if (event.target === editModal) {
-        closeScheduleModal();
-    }
-});
 </script>
 
 <?php include '../../templates/footer.php'; ?>
