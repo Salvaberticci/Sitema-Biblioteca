@@ -201,7 +201,8 @@ class ChatbotManager {
         } catch (error) {
             console.error('Chatbot error:', error);
             this.hideTypingIndicator();
-            this.addMessage('Lo siento, ha ocurrido un error. Por favor, intenta de nuevo.', 'bot');
+            // Show the actual error message received from the API or the fetch operation
+            this.addMessage(error.message || 'Lo siento, ha ocurrido un error. Por favor, intenta de nuevo.', 'bot');
         }
     }
 
@@ -218,7 +219,16 @@ class ChatbotManager {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+            try {
+                const errorData = await response.json();
+                if (errorData && errorData.error) {
+                    errorMessage = errorData.error;
+                }
+            } catch (e) {
+                // Not a JSON response
+            }
+            throw new Error(errorMessage);
         }
 
         return await response.json();
@@ -341,13 +351,13 @@ class ChatbotManager {
 }
 
 // Initialize chatbot when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('DOM loaded, initializing chatbot...');
     window.chatbotManager = new ChatbotManager();
 });
 
 // Also try to initialize on window load as fallback
-window.addEventListener('load', function() {
+window.addEventListener('load', function () {
     console.log('Window loaded, checking chatbot...');
     if (!window.chatbotManager || !window.chatbotManager.chatbotButton) {
         console.log('Re-initializing chatbot on window load...');

@@ -4,7 +4,8 @@
  * Virtual Assistant using Gemini API
  */
 
-class ChatbotPrompt {
+class ChatbotPrompt
+{
     private static $systemPrompt = "Eres un asistente virtual amigable y conversacional especializado en la Escuela Técnica Comercial 'Pedro García Leal' y su sistema de gestión académica.
 
 INFORMACIÓN INSTITUCIONAL:
@@ -50,11 +51,13 @@ BASE DE CONOCIMIENTO DISPONIBLE:
 
 Pregunta del usuario:";
 
-    public static function getSystemPrompt() {
+    public static function getSystemPrompt()
+    {
         return self::$systemPrompt;
     }
 
-    public static function getFullPrompt($userMessage, $knowledgeContext = '') {
+    public static function getFullPrompt($userMessage, $knowledgeContext = '')
+    {
         $prompt = self::$systemPrompt;
 
         if (!empty($knowledgeContext)) {
@@ -66,13 +69,31 @@ Pregunta del usuario:";
         return $prompt;
     }
 
-    public static function isValidTopic($message) {
+    public static function isValidTopic($message)
+    {
         // Allow common greetings and conversational starters
         $greetingKeywords = [
-            'hola', 'hello', 'hi', 'buenos días', 'buenas tardes', 'buenas noches',
-            'qué tal', 'como estas', 'cómo estás', 'qué pasa', 'saludos',
-            'gracias', 'thank you', 'thanks', 'bye', 'adios', 'hasta luego',
-            'ayuda', 'help', 'asistencia', 'soporte'
+            'hola',
+            'hello',
+            'hi',
+            'buenos días',
+            'buenas tardes',
+            'buenas noches',
+            'qué tal',
+            'como estas',
+            'cómo estás',
+            'qué pasa',
+            'saludos',
+            'gracias',
+            'thank you',
+            'thanks',
+            'bye',
+            'adios',
+            'hasta luego',
+            'ayuda',
+            'help',
+            'asistencia',
+            'soporte'
         ];
 
         $message = strtolower($message);
@@ -84,16 +105,46 @@ Pregunta del usuario:";
 
         // Check for ETC-specific keywords
         $validKeywords = [
-            'escuela', 'liceo', 'etc', 'pedro garcía leal', 'técnica comercial',
-            'sistema', 'gestión', 'académica', 'administrativa',
-            'estudiante', 'docente', 'profesor', 'administrador',
-            'biblioteca', 'virtual', 'préstamo', 'libro',
-            'horario', 'aula', 'clase', 'curso',
-            'actividad', 'tarea', 'calificación', 'nota',
-            'matrícula', 'inscripción', 'usuario',
-            'reporte', 'estadística', 'panel',
-            'login', 'contraseña', 'acceso',
-            'instalación', 'configuración', 'soporte'
+            'escuela',
+            'liceo',
+            'etc',
+            'pedro garcía leal',
+            'técnica comercial',
+            'sistema',
+            'gestión',
+            'académica',
+            'administrativa',
+            'estudiante',
+            'docente',
+            'profesor',
+            'administrador',
+            'biblioteca',
+            'virtual',
+            'préstamo',
+            'libro',
+            'horario',
+            'aula',
+            'clase',
+            'curso',
+            'actividad',
+            'tarea',
+            'calificación',
+            'nota',
+            'matrícula',
+            'inscripción',
+            'usuario',
+            'mención',
+            'menciones',
+            'especialidad',
+            'reporte',
+            'estadística',
+            'panel',
+            'login',
+            'contraseña',
+            'acceso',
+            'instalación',
+            'configuración',
+            'soporte'
         ];
 
         foreach ($validKeywords as $keyword) {

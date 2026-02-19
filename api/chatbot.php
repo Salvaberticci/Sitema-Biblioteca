@@ -26,11 +26,13 @@ require_once '../includes/config.php';
 require_once '../includes/functions.php';
 require_once '../includes/chatbot-prompt.php';
 
-class ChatbotAPI {
+class ChatbotAPI
+{
     private $geminiApiKey = 'AIzaSyBAHLANDPjRD16-hKkcI6Tlky-GQWelnWE';
     private $geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
-    private function isLibraryQuery($message) {
+    private function isLibraryQuery($message)
+    {
         $message = strtolower($message);
 
         // More specific patterns that indicate the user wants to see what's available
@@ -82,7 +84,8 @@ class ChatbotAPI {
         return false;
     }
 
-    private function isSpecificResourceQuery($message) {
+    private function isSpecificResourceQuery($message)
+    {
         $message = strtolower($message);
 
         // Patterns that indicate searching for specific resources
@@ -131,21 +134,40 @@ class ChatbotAPI {
         return false;
     }
 
-    private function extractSearchTerm($message) {
+    private function extractSearchTerm($message)
+    {
         // Try to extract the search term from the message
         $message = strtolower($message);
 
         // Remove common question prefixes
         $prefixes = [
-            'tienen el libro', 'tienen el documento', 'tienen el material', 'tienen el recurso',
-            'hay algún libro', 'hay algún documento', 'hay algún material', 'hay algún recurso',
-            'busco el libro', 'busco el documento', 'busco el material', 'busco el recurso',
-            'está disponible el libro', 'esta disponible el libro',
-            'está disponible el documento', 'esta disponible el documento',
-            'tienen disponible', 'hay disponible', 'puedo encontrar',
-            'dónde está el libro', 'donde esta el libro',
-            'necesito el libro', 'necesito el documento', 'necesito el material',
-            'quiero el libro', 'quiero el documento', 'quiero el material'
+            'tienen el libro',
+            'tienen el documento',
+            'tienen el material',
+            'tienen el recurso',
+            'hay algún libro',
+            'hay algún documento',
+            'hay algún material',
+            'hay algún recurso',
+            'busco el libro',
+            'busco el documento',
+            'busco el material',
+            'busco el recurso',
+            'está disponible el libro',
+            'esta disponible el libro',
+            'está disponible el documento',
+            'esta disponible el documento',
+            'tienen disponible',
+            'hay disponible',
+            'puedo encontrar',
+            'dónde está el libro',
+            'donde esta el libro',
+            'necesito el libro',
+            'necesito el documento',
+            'necesito el material',
+            'quiero el libro',
+            'quiero el documento',
+            'quiero el material'
         ];
 
         foreach ($prefixes as $prefix) {
@@ -174,7 +196,8 @@ class ChatbotAPI {
         return trim($message, ' ?¿¡!.,');
     }
 
-    private function handleSpecificResourceQuery($message) {
+    private function handleSpecificResourceQuery($message)
+    {
         $searchTerm = $this->extractSearchTerm($message);
 
         if (empty($searchTerm)) {
@@ -274,7 +297,8 @@ class ChatbotAPI {
         }
     }
 
-    private function handleLibraryQuery($message) {
+    private function handleLibraryQuery($message)
+    {
         try {
             // Fetch library resources
             $ch = curl_init();
@@ -341,17 +365,24 @@ class ChatbotAPI {
         }
     }
 
-    private function getResourceTypeIcon($type) {
+    private function getResourceTypeIcon($type)
+    {
         switch ($type) {
-            case 'book': return '📖';
-            case 'article': return '📰';
-            case 'video': return '🎥';
-            case 'document': return '📄';
-            default: return '📋';
+            case 'book':
+                return '📖';
+            case 'article':
+                return '📰';
+            case 'video':
+                return '🎥';
+            case 'document':
+                return '📄';
+            default:
+                return '📋';
         }
     }
 
-    public function handleRequest() {
+    public function handleRequest()
+    {
         try {
             // Get and validate input
             $input = json_decode(file_get_contents('php://input'), true);
@@ -401,86 +432,113 @@ class ChatbotAPI {
 
         } catch (Exception $e) {
             error_log('Chatbot API Error: ' . $e->getMessage());
+
+            // Special handling for quota exceeded (HTTP 429)
+            if (strpos($e->getMessage(), 'HTTP 429') !== false) {
+                http_response_code(429);
+                // Extract delay if present in message
+                $delay = "varios";
+                if (preg_match('/retry in ([\d\.]+)s/i', $e->getMessage(), $matches)) {
+                    $delay = round((float) $matches[1]);
+                }
+                return [
+                    'error' => "La cuota gratuita se ha acabado. El monto gratuito se acabó y se debe esperar 24 horas antes de poder seguir usando el chatbot.",
+                    'timestamp' => date('Y-m-d H:i:s')
+                ];
+            }
+
             http_response_code(500);
             return [
-                'error' => 'Lo siento, ha ocurrido un error. Por favor, intenta de nuevo más tarde.',
+                'error' => 'Lo siento, el servicio de inteligencia artificial no está disponible en este momento por límite de cuota o error técnico. Por favor, intenta de nuevo en unos minutos.',
                 'timestamp' => date('Y-m-d H:i:s')
             ];
         }
     }
 
-    private function getKnowledgeContext($userMessage) {
-        // Load knowledge base
-        $knowledgeFile = '../docs/chatbot-knowledge.md';
+    private function getKnowledgeContext($userMessage)
+    {
+        // Source files
+        $chatbotKnowledgeFile = '../docs/chatbot-knowledge.md';
+        $generalKnowledgeFile = '../docs/KNOWLEDGE_BASE.md';
 
-        if (!file_exists($knowledgeFile)) {
+        $knowledge = '';
+        if (file_exists($chatbotKnowledgeFile)) {
+            $knowledge .= file_get_contents($chatbotKnowledgeFile) . "\n\n";
+        }
+        if (file_exists($generalKnowledgeFile)) {
+            $knowledge .= file_get_contents($generalKnowledgeFile);
+        }
+
+        if (empty($knowledge)) {
             return '';
         }
 
-        $knowledge = file_get_contents($knowledgeFile);
-
         // Extract relevant sections based on user message keywords
         $context = '';
-
-        // Check for specific topics and extract relevant sections
         $message = strtolower($userMessage);
 
-        if (strpos($message, 'biblioteca') !== false || strpos($message, 'libro') !== false || strpos($message, 'préstamo') !== false) {
-            $context .= $this->extractSection($knowledge, 'Biblioteca Virtual Avanzada');
+        // Map keywords to section titles (searching in both files)
+        $topicMap = [
+            'biblioteca|libro|préstamo' => 'Biblioteca',
+            'horario|aula|clase' => 'Horario',
+            'actividad|tarea' => 'Actividades',
+            'estudiante|portal' => 'Estudiante',
+            'docente|profesor' => 'Docente',
+            'admin|administrador' => 'Admin|Administración',
+            'instalación|configuración' => 'Instalación',
+            'usuario|login|contraseña' => 'Usuarios',
+            'mención|especialidad|matrícula' => 'Mención|Matrícula'
+        ];
+
+        foreach ($topicMap as $keywords => $sectionSearch) {
+            $pattern = '/(' . $keywords . ')/i';
+            if (preg_match($pattern, $message)) {
+                $sectionTitles = explode('|', $sectionSearch);
+                foreach ($sectionTitles as $title) {
+                    $context .= $this->extractSection($knowledge, $title);
+                }
+            }
         }
 
-        if (strpos($message, 'horario') !== false || strpos($message, 'aula') !== false || strpos($message, 'clase') !== false) {
-            $context .= $this->extractSection($knowledge, 'Gestión de Horarios Inteligentes');
-        }
-
-        if (strpos($message, 'actividad') !== false || strpos($message, 'tarea') !== false) {
-            $context .= $this->extractSection($knowledge, 'Sistema de Actividades y Tareas');
-        }
-
-        if (strpos($message, 'estudiante') !== false || strpos($message, 'portal') !== false) {
-            $context .= $this->extractSection($knowledge, 'Portal del Estudiante');
-        }
-
-        if (strpos($message, 'docente') !== false || strpos($message, 'profesor') !== false) {
-            $context .= $this->extractSection($knowledge, 'Panel del Docente');
-        }
-
-        if (strpos($message, 'admin') !== false || strpos($message, 'administrador') !== false) {
-            $context .= $this->extractSection($knowledge, 'Panel de Administración');
-        }
-
-        if (strpos($message, 'instalación') !== false || strpos($message, 'configuración') !== false) {
-            $context .= $this->extractSection($knowledge, 'Instalación y Configuración');
-        }
-
-        if (strpos($message, 'usuario') !== false || strpos($message, 'login') !== false) {
-            $context .= $this->extractSection($knowledge, 'Usuarios de Prueba');
-        }
-
-        // If no specific context found, provide general institutional info
+        // If no specific context found, provide general info
         if (empty($context)) {
             $context = $this->extractSection($knowledge, 'Información Institucional');
+            if (empty($context)) {
+                $context = $this->extractSection($knowledge, 'Preguntas Generales');
+            }
         }
 
         return $context;
     }
 
-    private function extractSection($content, $sectionTitle) {
+    private function extractSection($content, $sectionTitle)
+    {
         $lines = explode("\n", $content);
         $section = '';
         $inSection = false;
+        $startLevel = 0;
 
         foreach ($lines as $line) {
-            if (strpos($line, $sectionTitle) !== false && strpos($line, '#') === 0) {
-                $inSection = true;
-                $section .= $line . "\n";
-                continue;
-            }
+            $trimmedLine = trim($line);
 
-            if ($inSection) {
-                if (strpos($line, '#') === 0 && !empty(trim($line))) {
-                    // Next section starts
-                    break;
+            // Detect section start
+            if (!$inSection) {
+                if (strpos($trimmedLine, '#') === 0 && stripos($trimmedLine, $sectionTitle) !== false) {
+                    $inSection = true;
+                    // Count starting #
+                    preg_match('/^(#+)/', $trimmedLine, $matches);
+                    $startLevel = strlen($matches[1]);
+                    $section .= $line . "\n";
+                    continue;
+                }
+            } else {
+                // Section end detection: next header of same or higher level (fewer or equal #)
+                if (strpos($trimmedLine, '#') === 0) {
+                    preg_match('/^(#+)/', $trimmedLine, $matches);
+                    $currentLevel = strlen($matches[1]);
+                    if ($currentLevel <= $startLevel) {
+                        break;
+                    }
                 }
                 $section .= $line . "\n";
             }
@@ -489,7 +547,8 @@ class ChatbotAPI {
         return trim($section);
     }
 
-    private function callGeminiAPI($userMessage, $knowledgeContext) {
+    private function callGeminiAPI($userMessage, $knowledgeContext)
+    {
         // Prepare the prompt
         $fullPrompt = ChatbotPrompt::getFullPrompt($userMessage, $knowledgeContext);
 
@@ -546,7 +605,7 @@ class ChatbotAPI {
                 'Content-Type: application/json'
             ],
             CURLOPT_TIMEOUT => 30,
-            CURLOPT_SSL_VERIFYPEER => true
+            CURLOPT_SSL_VERIFYPEER => false
         ]);
 
         $response = curl_exec($ch);
@@ -576,7 +635,8 @@ class ChatbotAPI {
         return $this->cleanResponse($generatedText);
     }
 
-    private function cleanResponse($text) {
+    private function cleanResponse($text)
+    {
         // Remove any unwanted formatting or prefixes
         $text = trim($text);
 
