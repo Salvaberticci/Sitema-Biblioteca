@@ -132,7 +132,7 @@ La biblioteca virtual contiene diversos recursos educativos organizados por cate
 ## Base de Datos
 
 ### Tablas Principales
-- **users**: Usuarios del sistema (admin, teacher, student, staff)
+- **users**: Usuarios del sistema (admin, teacher, student)
 - **courses**: Cursos y asignaturas
 - **enrollments**: Inscripciones de estudiantes en cursos
 - **classrooms**: Aulas y espacios educativos

@@ -16,8 +16,6 @@ switch ($role) {
     case 'student':
         redirect('modules/student/dashboard.php');
         break;
-    case 'staff':
-        redirect('modules/admin/dashboard.php'); // Assuming staff uses admin interface
         break;
     default:
         redirect('index.php');

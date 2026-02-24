@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     } elseif (isset($_POST['update_user'])) {
         try {
-            $id = (int)$_POST['id'];
+            $id = (int) $_POST['id'];
             $username = sanitize($_POST['username']);
             $email = sanitize($_POST['email']);
             $name = sanitize($_POST['name']);
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $error = "Error al actualizar el usuario: " . $e->getMessage();
         }
     } elseif (isset($_POST['delete_user'])) {
-        $id = (int)$_POST['id'];
+        $id = (int) $_POST['id'];
 
         // Start transaction to ensure atomicity
         $pdo->beginTransaction();
@@ -163,19 +163,19 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div>
                     <h5 class="text-sm font-medium text-gray-600">Input Data:</h5>
                     <pre class="text-xs bg-white p-2 rounded border overflow-auto max-h-24"><?php
-                        $input_key = $debug_info['operation'] . '_data';
-                        echo htmlspecialchars(print_r($debug_info[$input_key] ?? [], true));
+                    $input_key = $debug_info['operation'] . '_data';
+                    echo htmlspecialchars(print_r($debug_info[$input_key] ?? [], true));
                     ?></pre>
                 </div>
                 <div>
                     <h5 class="text-sm font-medium text-gray-600">Operation Status:</h5>
                     <span class="px-2 py-1 rounded text-xs font-medium <?php
-                        echo match($debug_info['operation_status'] ?? '') {
-                            'success' => 'bg-green-100 text-green-800',
-                            'failed' => 'bg-red-100 text-red-800',
-                            'exception' => 'bg-yellow-100 text-yellow-800',
-                            default => 'bg-gray-100 text-gray-800'
-                        };
+                    echo match ($debug_info['operation_status'] ?? '') {
+                        'success' => 'bg-green-100 text-green-800',
+                        'failed' => 'bg-red-100 text-red-800',
+                        'exception' => 'bg-yellow-100 text-yellow-800',
+                        default => 'bg-gray-100 text-gray-800'
+                    };
                     ?>">
                         <?php echo htmlspecialchars($debug_info['operation_status'] ?? 'unknown'); ?>
                     </span>
@@ -230,31 +230,37 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <input type="hidden" name="create_user" value="1">
             <div>
                 <label for="username" class="block text-sm font-medium text-gray-700">Usuario</label>
-                <input type="text" id="username" name="username" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <input type="text" id="username" name="username" required
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
             </div>
             <div>
                 <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
-                <input type="password" id="password" name="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <input type="password" id="password" name="password" required
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
             </div>
             <div>
                 <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                <input type="email" id="email" name="email" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <input type="email" id="email" name="email"
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
             </div>
             <div>
                 <label for="name" class="block text-sm font-medium text-gray-700">Nombre Completo</label>
-                <input type="text" id="name" name="name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <input type="text" id="name" name="name" required
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
             </div>
             <div>
                 <label for="role" class="block text-sm font-medium text-gray-700">Rol</label>
-                <select id="role" name="role" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <select id="role" name="role" required
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                     <option value="student">Estudiante</option>
                     <option value="teacher">Docente</option>
-                    <option value="staff">Personal Administrativo</option>
                     <option value="admin">Administrador</option>
                 </select>
             </div>
             <div class="md:col-span-2">
-                <button type="submit" name="create_user" class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-300">Crear Usuario</button>
+                <button type="submit" name="create_user"
+                    class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-300">Crear
+                    Usuario</button>
             </div>
         </form>
     </div>
@@ -280,11 +286,15 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td class="px-4 py-2"><?php echo htmlspecialchars($user['email']); ?></td>
                             <td class="px-4 py-2"><?php echo ucfirst($user['role']); ?></td>
                             <td class="px-4 py-2">
-                                <button onclick="editUser(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username']); ?>', '<?php echo htmlspecialchars($user['email']); ?>', '<?php echo htmlspecialchars($user['name']); ?>', '<?php echo $user['role']; ?>')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-sm mr-2">Editar</button>
-                                <form method="POST" class="inline" onsubmit="return confirm('¿Está seguro de eliminar este usuario?')">
+                                <button
+                                    onclick="editUser(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username']); ?>', '<?php echo htmlspecialchars($user['email']); ?>', '<?php echo htmlspecialchars($user['name']); ?>', '<?php echo $user['role']; ?>')"
+                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-sm mr-2">Editar</button>
+                                <form method="POST" class="inline"
+                                    onsubmit="return confirm('¿Está seguro de eliminar este usuario?')">
                                     <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
                                     <input type="hidden" name="delete_user" value="1">
-                                    <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm">Eliminar</button>
+                                    <button type="submit"
+                                        class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm">Eliminar</button>
                                 </form>
                             </td>
                         </tr>
@@ -305,32 +315,39 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <input type="hidden" id="edit_id" name="id">
                 <div>
                     <label for="edit_username" class="block text-sm font-medium text-gray-700">Usuario</label>
-                    <input type="text" id="edit_username" name="username" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    <input type="text" id="edit_username" name="username" required
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                 </div>
                 <div>
                     <label for="edit_email" class="block text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" id="edit_email" name="email" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    <input type="email" id="edit_email" name="email"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                 </div>
                 <div>
                     <label for="edit_name" class="block text-sm font-medium text-gray-700">Nombre Completo</label>
-                    <input type="text" id="edit_name" name="name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    <input type="text" id="edit_name" name="name" required
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                 </div>
                 <div>
-                    <label for="edit_password" class="block text-sm font-medium text-gray-700">Nueva Contraseña (dejar vacío para mantener la actual)</label>
-                    <input type="password" id="edit_password" name="password" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    <label for="edit_password" class="block text-sm font-medium text-gray-700">Nueva Contraseña (dejar
+                        vacío para mantener la actual)</label>
+                    <input type="password" id="edit_password" name="password"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                 </div>
                 <div>
                     <label for="edit_role" class="block text-sm font-medium text-gray-700">Rol</label>
-                    <select id="edit_role" name="role" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    <select id="edit_role" name="role" required
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
                         <option value="student">Estudiante</option>
                         <option value="teacher">Docente</option>
-                        <option value="staff">Personal Administrativo</option>
                         <option value="admin">Administrador</option>
                     </select>
                 </div>
                 <div class="flex justify-end space-x-2">
-                    <button type="button" onclick="closeModal()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">Cancelar</button>
-                    <button type="submit" name="update_user" class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded">Actualizar</button>
+                    <button type="button" onclick="closeModal()"
+                        class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">Cancelar</button>
+                    <button type="submit" name="update_user"
+                        class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded">Actualizar</button>
                 </div>
             </form>
         </div>
@@ -338,19 +355,19 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <script>
-function editUser(id, username, email, name, role) {
-    document.getElementById('edit_id').value = id;
-    document.getElementById('edit_username').value = username;
-    document.getElementById('edit_email').value = email;
-    document.getElementById('edit_name').value = name;
-    document.getElementById('edit_password').value = ''; // Clear password field
-    document.getElementById('edit_role').value = role;
-    document.getElementById('editModal').classList.remove('hidden');
-}
+    function editUser(id, username, email, name, role) {
+        document.getElementById('edit_id').value = id;
+        document.getElementById('edit_username').value = username;
+        document.getElementById('edit_email').value = email;
+        document.getElementById('edit_name').value = name;
+        document.getElementById('edit_password').value = ''; // Clear password field
+        document.getElementById('edit_role').value = role;
+        document.getElementById('editModal').classList.remove('hidden');
+    }
 
-function closeModal() {
-    document.getElementById('editModal').classList.add('hidden');
-}
+    function closeModal() {
+        document.getElementById('editModal').classList.add('hidden');
+    }
 </script>
 
 <?php include '../../templates/footer.php'; ?>
