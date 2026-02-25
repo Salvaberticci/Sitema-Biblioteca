@@ -1665,4 +1665,13 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
             if (event.target === createClassroomModal) closeCreateClassroomModal();
             if (event.target === editClassroomModal) closeEditClassroomModal();
         });
+
+        // Mobile menu toggle (footer.php not included in this page)
+        var menuToggle = document.getElementById('menu-toggle');
+        var mobileMenu = document.getElementById('mobile-menu');
+        if (menuToggle && mobileMenu) {
+            menuToggle.addEventListener('click', function () {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
     </script>
