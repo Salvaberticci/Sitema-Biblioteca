@@ -8,9 +8,9 @@
 - **Ubicación**: Venezuela
 - **Misión**: Excelencia en educación técnica y formación integral para jóvenes venezolanos
 - **Contacto**:
-  - Email: soporte@etcpedrogarcialeal.edu.ve
-  - Teléfono: (123) 456-7890
-  - Dirección: Calle Principal, Ciudad
+  - Email: ETCPedroGarciaLeal@gmail.com
+  - Teléfono: 0271-8289378
+  - Dirección: Calle 18 entre Av. 4 y Bolivariana Sector las Acacias.
 
 ### Sistema de Gestión
 - **Nombre**: Sistema de Gestión ETC "Pedro García Leal"
@@ -224,7 +224,7 @@ La biblioteca virtual contiene diversos recursos educativos organizados por cate
 
 ## Soporte y Contacto
 
-- **Email**: soporte@etcpedrogarcialeal.edu.ve
+- **Email**: ETCPedroGarciaLeal@gmail.com
 - **Documentación**: Disponible en panel de administración
 - **Desarrolladores**: Contactar para soporte técnico
 

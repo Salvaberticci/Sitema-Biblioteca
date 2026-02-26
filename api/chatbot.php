@@ -433,23 +433,42 @@ class ChatbotAPI
         } catch (Exception $e) {
             error_log('Chatbot API Error: ' . $e->getMessage());
 
-            // Special handling for quota exceeded (HTTP 429)
-            if (strpos($e->getMessage(), 'HTTP 429') !== false) {
+            $errorMessage = $e->getMessage();
+
+            // Handle Quota Exceeded (HTTP 429)
+            if (strpos($errorMessage, 'HTTP 429') !== false) {
                 http_response_code(429);
-                // Extract delay if present in message
-                $delay = "varios";
-                if (preg_match('/retry in ([\d\.]+)s/i', $e->getMessage(), $matches)) {
-                    $delay = round((float) $matches[1]);
-                }
                 return [
-                    'error' => "La cuota gratuita se ha acabado. El monto gratuito se acabó y se debe esperar 24 horas antes de poder seguir usando el chatbot.",
+                    'error' => "La cuota gratuita de la API se ha agotado. Por favor, intenta de nuevo en unas horas o mañana.",
                     'timestamp' => date('Y-m-d H:i:s')
                 ];
             }
 
+            // Handle Forbidden/Leaked Key (HTTP 403)
+            if (strpos($errorMessage, 'HTTP 403') !== false) {
+                http_response_code(403);
+                $isLeaked = strpos($errorMessage, 'reported as leaked') !== false;
+                return [
+                    'error' => $isLeaked
+                        ? "La clave de API de Gemini ha sido reportada como filtrada (leaked) por Google y ha sido desactivada por seguridad. Es necesario configurar una nueva clave de API."
+                        : "Acceso denegado a la API de Gemini. La configuración de la clave puede ser incorrecta o estar desactivada.",
+                    'timestamp' => date('Y-m-d H:i:s')
+                ];
+            }
+
+            // Handle Unauthorized (HTTP 401)
+            if (strpos($errorMessage, 'HTTP 401') !== false) {
+                http_response_code(401);
+                return [
+                    'error' => "La clave de API de Gemini es inválida o no tiene permisos. Por favor, verifica la configuración.",
+                    'timestamp' => date('Y-m-d H:i:s')
+                ];
+            }
+
+            // Default fallback for other errors
             http_response_code(500);
             return [
-                'error' => 'Lo siento, el servicio de inteligencia artificial no está disponible en este momento por límite de cuota o error técnico. Por favor, intenta de nuevo en unos minutos.',
+                'error' => 'Lo siento, el servicio de inteligencia artificial no está disponible en este momento por un error técnico. Por favor, intenta de nuevo más tarde.',
                 'timestamp' => date('Y-m-d H:i:s')
             ];
         }
