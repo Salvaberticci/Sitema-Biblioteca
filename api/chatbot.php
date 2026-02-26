@@ -25,11 +25,19 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 require_once '../includes/config.php';
 require_once '../includes/functions.php';
 require_once '../includes/chatbot-prompt.php';
+if (file_exists('../includes/api_keys.php')) {
+    require_once '../includes/api_keys.php';
+}
 
 class ChatbotAPI
 {
-    private $geminiApiKey = 'AIzaSyBAHLANDPjRD16-hKkcI6Tlky-GQWelnWE';
+    private $geminiApiKey;
     private $geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+
+    public function __construct()
+    {
+        $this->geminiApiKey = defined('GEMINI_API_KEY') ? GEMINI_API_KEY : '';
+    }
 
     private function isLibraryQuery($message)
     {
