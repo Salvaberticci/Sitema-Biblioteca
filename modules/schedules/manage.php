@@ -197,7 +197,7 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
 <main class="container mx-auto px-6 py-8">
     <h2 class="text-3xl font-bold text-gray-800 mb-6 animate-slide-in-left flex items-center">
         <i class="fas fa-calendar-week mr-4 text-primary"></i>
-        Gestión de Horarios por Materia
+        Gestión de Horarios por Mención
     </h2>
 
     <!-- AJAX Messages -->
@@ -223,7 +223,7 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
             <button onclick="showTab('schedules')" id="schedules-tab"
                 class="px-6 py-3 rounded-lg font-medium transition duration-300 bg-primary text-white">
                 <i class="fas fa-calendar-week mr-2"></i>
-                Horarios por Materia
+                Horarios por Mención
             </button>
             <button onclick="showTab('availability')" id="availability-tab"
                 class="px-6 py-3 rounded-lg font-medium transition duration-300 bg-gray-200 text-gray-700 hover:bg-gray-300">
@@ -242,7 +242,7 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-semibold flex items-center">
                     <i class="fas fa-filter mr-2 text-primary"></i>
-                    Filtrar por Materia y Docente
+                    Filtrar por Mención y Docente
                 </h3>
                 <button onclick="openCreateScheduleModal()"
                     class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 flex items-center">
@@ -252,10 +252,11 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
             </div>
             <form method="GET" class="flex flex-wrap items-center gap-4">
                 <div class="flex items-center space-x-4">
-                    <label for="course" class="text-sm font-medium text-gray-700">Seleccionar Materia:</label>
+                    <label for="course" class="text-sm font-medium text-gray-700">Seleccionar Mención:</label>
                     <select id="course" name="course" onchange="this.form.submit()"
                         class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                        <option value="all" <?php echo $selected_course === 'all' ? 'selected' : ''; ?>>Todas las materias
+                        <option value="all" <?php echo $selected_course === 'all' ? 'selected' : ''; ?>>Todas las
+                            menciones
                         </option>
                         <?php foreach ($courses as $course): ?>
                             <option value="<?php echo $course['id']; ?>" <?php echo $selected_course == $course['id'] ? 'selected' : ''; ?>>
@@ -354,8 +355,8 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
                     <div class="text-6xl text-gray-300 mb-4">
                         <i class="fas fa-graduation-cap"></i>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-600 mb-2">No hay materias disponibles</h3>
-                    <p class="text-gray-500">No se encontraron materias en el sistema.</p>
+                    <h3 class="text-xl font-semibold text-gray-600 mb-2">No hay menciones disponibles</h3>
+                    <p class="text-gray-500">No se encontraron menciones en el sistema.</p>
                 </div>
             </div>
         <?php else: ?>
@@ -388,247 +389,271 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
                                     <tr class="bg-gray-50">
                                         <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Día</th>
                                         <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Horario</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Aula</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Docente</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Estado</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200">
-                                    <?php
-                                    $day_schedules = [];
-                                    foreach ($course_schedules as $schedule) {
-                                        $day_schedules[$schedule['day_of_week']][] = $schedule;
-                                    }
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Mención</th>
+                                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Aula</th>
+                                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Docente</th>
+                                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Estado</th>
+                                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-gray-200">
+                                                <?php
+                                                $day_schedules = [];
+                                                foreach ($course_schedules as $schedule) {
+                                                    $day_schedules[$schedule['day_of_week']][] = $schedule;
+                                                }
 
-                                    foreach ($days as $day_key => $day_name):
-                                        $day_course_schedules = $day_schedules[$day_key] ?? [];
-                                        ?>
-                                        <tr class="hover:bg-gray-50 transition duration-200">
-                                            <td class="px-4 py-4 text-sm font-medium text-gray-900 border-b">
-                                                <?php echo $day_name; ?>
-                                            </td>
-                                            <td class="px-4 py-4 text-sm text-gray-600 border-b">
-                                                <?php if (!empty($day_course_schedules)): ?>
-                                                    <?php foreach ($day_course_schedules as $schedule): ?>
-                                                        <div class="mb-2 last:mb-0 schedule-item"
-                                                            data-schedule-id="<?php echo $schedule['id']; ?>">
-                                                            <div class="font-medium">
-                                                                <?php echo date('h:i A', strtotime($schedule['start_time'])); ?> -
-                                                                <?php echo date('h:i A', strtotime($schedule['end_time'])); ?>
-                                                            </div>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    <span class="text-gray-400 italic">Sin clases</span>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="px-4 py-4 text-sm text-gray-600 border-b">
-                                                <?php if (!empty($day_course_schedules)): ?>
-                                                    <?php foreach ($day_course_schedules as $schedule): ?>
-                                                        <div class="mb-2 last:mb-0">
-                                                            <i class="fas fa-map-marker-alt mr-1 text-green-500"></i>
-                                                            <?php echo htmlspecialchars($schedule['classroom_name']); ?>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    -
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="px-4 py-4 text-sm text-gray-600 border-b">
-                                                <?php if (!empty($day_course_schedules)): ?>
-                                                    <?php foreach ($day_course_schedules as $schedule): ?>
-                                                        <div class="mb-2 last:mb-0">
-                                                            <i class="fas fa-user mr-1 text-blue-500"></i>
-                                                            <?php echo htmlspecialchars($schedule['teacher_name']); ?>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    -
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="px-4 py-4 text-sm border-b">
-                                                <?php if (!empty($day_course_schedules)): ?>
-                                                    <?php foreach ($day_course_schedules as $schedule): ?>
-                                                        <div class="mb-2 last:mb-0">
-                                                            <span class="px-2 py-1 text-xs rounded-full
+                                                foreach ($days as $day_key => $day_name):
+                                                    $day_course_schedules = $day_schedules[$day_key] ?? [];
+                                                    ?>
+                                                        <tr class="hover:bg-gray-50 transition duration-200">
+                                                            <td class="px-4 py-4 text-sm font-medium text-gray-900 border-b">
+                                                                <?php echo $day_name; ?>
+                                                            </td>
+                                                            <td class="px-4 py-4 text-sm text-gray-600 border-b">
+                                                                <?php if (!empty($day_course_schedules)): ?>
+                                                                        <?php foreach ($day_course_schedules as $schedule): ?>
+                                                                                <div class="mb-2 last:mb-0 schedule-item"
+                                                                                    data-schedule-id="<?php echo $schedule['id']; ?>">
+                                                                                    <div class="font-medium">
+                                                                                        <?php echo date('h:i A', strtotime($schedule['start_time'])); ?> -
+                                                                                        <?php echo date('h:i A', strtotime($schedule['end_time'])); ?>
+                                                                                    </div>
+                                                                                </div>
+                                                                        <?php endforeach; ?>
+                                                                <?php else: ?>
+                                                                        <span class="text-gray-400 italic">Sin clases</span>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td class="px-4 py-4 text-sm text-gray-600 border-b">
+                                                                <?php if (!empty($day_course_schedules)): ?>
+                                                                        <?php foreach ($day_course_schedules as $schedule): ?>
+                                                                                <div class="mb-2 last:mb-0">
+                                                                                    <?php echo htmlspecialchars($schedule['subject'] ?? 'N/A'); ?>
+                                                                                </div>
+                                                                        <?php endforeach; ?>
+                                                                <?php else: ?>
+                                                                        -
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td class="px-4 py-4 text-sm text-gray-600 border-b">
+                                                                <?php if (!empty($day_course_schedules)): ?>
+                                                                        <?php foreach ($day_course_schedules as $schedule): ?>
+                                                                                <div class="mb-2 last:mb-0">
+                                                                                    <i class="fas fa-map-marker-alt mr-1 text-green-500"></i>
+                                                                                    <?php echo htmlspecialchars($schedule['classroom_name']); ?>
+                                                                                </div>
+                                                                        <?php endforeach; ?>
+                                                                <?php else: ?>
+                                                                        -
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td class="px-4 py-4 text-sm text-gray-600 border-b">
+                                                                <?php if (!empty($day_course_schedules)): ?>
+                                                                        <?php foreach ($day_course_schedules as $schedule): ?>
+                                                                                <div class="mb-2 last:mb-0">
+                                                                                    <i class="fas fa-user mr-1 text-blue-500"></i>
+                                                                                    <?php echo htmlspecialchars($schedule['teacher_name']); ?>
+                                                                                </div>
+                                                                        <?php endforeach; ?>
+                                                                <?php else: ?>
+                                                                        -
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td class="px-4 py-4 text-sm border-b">
+                                                                <?php if (!empty($day_course_schedules)): ?>
+                                                                        <?php foreach ($day_course_schedules as $schedule): ?>
+                                                                                <div class="mb-2 last:mb-0">
+                                                                                    <span class="px-2 py-1 text-xs rounded-full
                                                                 <?php
                                                                 echo $schedule['status'] == 'active' ? 'bg-green-100 text-green-800' :
                                                                     ($schedule['status'] == 'cancelled' ? 'bg-red-100 text-red-800' :
                                                                         ($schedule['status'] == 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'));
                                                                 ?>">
-                                                                <?php echo ucfirst($schedule['status']); ?>
-                                                            </span>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    -
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="px-4 py-4 text-sm border-b">
-                                                <?php if (!empty($day_course_schedules)): ?>
-                                                    <?php foreach ($day_course_schedules as $schedule): ?>
-                                                        <div class="mb-2 last:mb-0 flex space-x-1">
-                                                            <button
-                                                                onclick="openScheduleModal(<?php echo $schedule['id']; ?>, '<?php echo $day_key; ?>', '<?php echo $schedule['start_time']; ?>', '<?php echo $schedule['end_time']; ?>', <?php echo $schedule['classroom_id']; ?>, <?php echo $course['id']; ?>, <?php echo $schedule['teacher_id']; ?>)"
-                                                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs transition duration-200">
-                                                                <i class="fas fa-edit mr-1"></i>
-                                                                Cambiar
-                                                            </button>
-                                                            <button
-                                                                onclick="deleteSchedule(<?php echo $schedule['id']; ?>, '<?php echo htmlspecialchars($schedule['course_name']); ?>', '<?php echo $day_name; ?>')"
-                                                                class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-xs transition duration-200">
-                                                                <i class="fas fa-trash mr-1"></i>
-                                                                Eliminar
-                                                            </button>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    -
-                                                <?php endif; ?>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
+                                                                                        <?php echo ucfirst($schedule['status']); ?>
+                                                                                    </span>
+                                                                                </div>
+                                                                        <?php endforeach; ?>
+                                                                <?php else: ?>
+                                                                        -
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td class="px-4 py-4 text-sm border-b">
+                                                                <?php if (!empty($day_course_schedules)): ?>
+                                                                        <?php foreach ($day_course_schedules as $schedule): ?>
+                                                                                <div class="mb-2 last:mb-0 flex space-x-1">
+                                                                                    <button
+                                                                                        onclick="openScheduleModal(<?php echo $schedule['id']; ?>, '<?php echo $day_key; ?>', '<?php echo $schedule['start_time']; ?>', '<?php echo $schedule['end_time']; ?>', <?php echo $schedule['classroom_id']; ?>, <?php echo $course['id']; ?>, <?php echo $schedule['teacher_id']; ?>, '<?php echo addslashes($schedule['subject']); ?>')"
+                                                                                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs transition duration-200">
+                                                                                        <i class="fas fa-edit mr-1"></i>
+                                                                                        Cambiar
+                                                                                    </button>
+                                                                                    <button
+                                                                                        onclick="deleteSchedule(<?php echo $schedule['id']; ?>, '<?php echo htmlspecialchars($schedule['course_name']); ?>', '<?php echo $day_name; ?>')"
+                                                                                        class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-xs transition duration-200">
+                                                                                        <i class="fas fa-trash mr-1"></i>
+                                                                                        Eliminar
+                                                                                    </button>
+                                                                                </div>
+                                                                        <?php endforeach; ?>
+                                                                <?php else: ?>
+                                                                        -
+                                                                <?php endif; ?>
+                                                            </td>
+                                                        </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                        <?php endforeach; ?>
 
-            <?php else: ?>
-                <!-- Show specific course -->
-                <?php
-                $selected_course_data = null;
-                foreach ($courses as $course) {
-                    if ($course['id'] == $selected_course) {
-                        $selected_course_data = $course;
-                        break;
-                    }
-                }
-                $course_schedules = $schedules_by_course[$selected_course] ?? [];
-                ?>
+                <?php else: ?>
+                        <!-- Show specific course -->
+                        <?php
+                        $selected_course_data = null;
+                        foreach ($courses as $course) {
+                            if ($course['id'] == $selected_course) {
+                                $selected_course_data = $course;
+                                break;
+                            }
+                        }
+                        $course_schedules = $schedules_by_course[$selected_course] ?? [];
+                        ?>
 
-                <?php if ($selected_course_data): ?>
-                    <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-xl font-semibold flex items-center">
-                                <i class="fas fa-graduation-cap mr-3 text-primary"></i>
-                                <?php echo htmlspecialchars($selected_course_data['name']); ?>
-                                <span
-                                    class="ml-2 text-sm text-gray-600">(<?php echo htmlspecialchars($selected_course_data['code']); ?>)</span>
-                            </h3>
-                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                                <?php echo count($course_schedules); ?> horarios
-                            </span>
-                        </div>
+                        <?php if ($selected_course_data): ?>
+                                <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up">
+                                    <div class="flex items-center justify-between mb-6">
+                                        <h3 class="text-xl font-semibold flex items-center">
+                                            <i class="fas fa-graduation-cap mr-3 text-primary"></i>
+                                            <?php echo htmlspecialchars($selected_course_data['name']); ?>
+                                            <span
+                                                class="ml-2 text-sm text-gray-600">(<?php echo htmlspecialchars($selected_course_data['code']); ?>)</span>
+                                        </h3>
+                                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                                            <?php echo count($course_schedules); ?> horarios
+                                        </span>
+                                    </div>
 
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full table-auto border-collapse">
-                                <thead>
-                                    <tr class="bg-gray-50">
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Día</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Horario</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Aula</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Docente</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Estado</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200">
-                                    <?php
-                                    $day_schedules = [];
-                                    foreach ($course_schedules as $schedule) {
-                                        $day_schedules[$schedule['day_of_week']][] = $schedule;
-                                    }
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full table-auto border-collapse">
+                                            <thead>
+                                                <tr class="bg-gray-50">
+                                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Día</th>
+                                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Horario</th>
+                                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Mención</th>
+                                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Aula</th>
+                                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Docente</th>
+                                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Estado</th>
+                                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-gray-200">
+                                                <?php
+                                                $day_schedules = [];
+                                                foreach ($course_schedules as $schedule) {
+                                                    $day_schedules[$schedule['day_of_week']][] = $schedule;
+                                                }
 
-                                    foreach ($days as $day_key => $day_name):
-                                        $day_course_schedules = $day_schedules[$day_key] ?? [];
-                                        ?>
-                                        <tr class="hover:bg-gray-50 transition duration-200">
-                                            <td class="px-4 py-4 text-sm font-medium text-gray-900 border-b">
-                                                <?php echo $day_name; ?>
-                                            </td>
-                                            <td class="px-4 py-4 text-sm text-gray-600 border-b">
-                                                <?php if (!empty($day_course_schedules)): ?>
-                                                    <?php foreach ($day_course_schedules as $schedule): ?>
-                                                        <div class="mb-2 last:mb-0 schedule-item"
-                                                            data-schedule-id="<?php echo $schedule['id']; ?>">
-                                                            <div class="font-medium">
-                                                                <?php echo date('h:i A', strtotime($schedule['start_time'])); ?> -
-                                                                <?php echo date('h:i A', strtotime($schedule['end_time'])); ?>
-                                                            </div>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    <span class="text-gray-400 italic">Sin clases</span>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="px-4 py-4 text-sm text-gray-600 border-b">
-                                                <?php if (!empty($day_course_schedules)): ?>
-                                                    <?php foreach ($day_course_schedules as $schedule): ?>
-                                                        <div class="mb-2 last:mb-0">
-                                                            <i class="fas fa-map-marker-alt mr-1 text-green-500"></i>
-                                                            <?php echo htmlspecialchars($schedule['classroom_name']); ?>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    -
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="px-4 py-4 text-sm text-gray-600 border-b">
-                                                <?php if (!empty($day_course_schedules)): ?>
-                                                    <?php foreach ($day_course_schedules as $schedule): ?>
-                                                        <div class="mb-2 last:mb-0">
-                                                            <i class="fas fa-user mr-1 text-blue-500"></i>
-                                                            <?php echo htmlspecialchars($schedule['teacher_name']); ?>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    -
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="px-4 py-4 text-sm border-b">
-                                                <?php if (!empty($day_course_schedules)): ?>
-                                                    <?php foreach ($day_course_schedules as $schedule): ?>
-                                                        <div class="mb-2 last:mb-0">
-                                                            <span class="px-2 py-1 text-xs rounded-full
+                                                foreach ($days as $day_key => $day_name):
+                                                    $day_course_schedules = $day_schedules[$day_key] ?? [];
+                                                    ?>
+                                                        <tr class="hover:bg-gray-50 transition duration-200">
+                                                            <td class="px-4 py-4 text-sm font-medium text-gray-900 border-b">
+                                                                <?php echo $day_name; ?>
+                                                            </td>
+                                                            <td class="px-4 py-4 text-sm text-gray-600 border-b">
+                                                                <?php if (!empty($day_course_schedules)): ?>
+                                                                        <?php foreach ($day_course_schedules as $schedule): ?>
+                                                                                <div class="mb-2 last:mb-0 schedule-item"
+                                                                                    data-schedule-id="<?php echo $schedule['id']; ?>">
+                                                                                    <div class="font-medium">
+                                                                                        <?php echo date('h:i A', strtotime($schedule['start_time'])); ?> -
+                                                                                        <?php echo date('h:i A', strtotime($schedule['end_time'])); ?>
+                                                                                    </div>
+                                                                                </div>
+                                                                        <?php endforeach; ?>
+                                                                <?php else: ?>
+                                                                        <span class="text-gray-400 italic">Sin clases</span>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td class="px-4 py-4 text-sm text-gray-600 border-b">
+                                                                <?php if (!empty($day_course_schedules)): ?>
+                                                                        <?php foreach ($day_course_schedules as $schedule): ?>
+                                                                                <div class="mb-2 last:mb-0">
+                                                                                    <?php echo htmlspecialchars($schedule['subject'] ?? 'N/A'); ?>
+                                                                                </div>
+                                                                        <?php endforeach; ?>
+                                                                <?php else: ?>
+                                                                        -
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td class="px-4 py-4 text-sm text-gray-600 border-b">
+                                                                <?php if (!empty($day_course_schedules)): ?>
+                                                                        <?php foreach ($day_course_schedules as $schedule): ?>
+                                                                                <div class="mb-2 last:mb-0">
+                                                                                    <i class="fas fa-map-marker-alt mr-1 text-green-500"></i>
+                                                                                    <?php echo htmlspecialchars($schedule['classroom_name']); ?>
+                                                                                </div>
+                                                                        <?php endforeach; ?>
+                                                                <?php else: ?>
+                                                                        -
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td class="px-4 py-4 text-sm text-gray-600 border-b">
+                                                                <?php if (!empty($day_course_schedules)): ?>
+                                                                        <?php foreach ($day_course_schedules as $schedule): ?>
+                                                                                <div class="mb-2 last:mb-0">
+                                                                                    <i class="fas fa-user mr-1 text-blue-500"></i>
+                                                                                    <?php echo htmlspecialchars($schedule['teacher_name']); ?>
+                                                                                </div>
+                                                                        <?php endforeach; ?>
+                                                                <?php else: ?>
+                                                                        -
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td class="px-4 py-4 text-sm border-b">
+                                                                <?php if (!empty($day_course_schedules)): ?>
+                                                                        <?php foreach ($day_course_schedules as $schedule): ?>
+                                                                                <div class="mb-2 last:mb-0">
+                                                                                    <span class="px-2 py-1 text-xs rounded-full
                                                                 <?php
                                                                 echo $schedule['status'] == 'active' ? 'bg-green-100 text-green-800' :
                                                                     ($schedule['status'] == 'cancelled' ? 'bg-red-100 text-red-800' :
                                                                         ($schedule['status'] == 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'));
                                                                 ?>">
-                                                                <?php echo ucfirst($schedule['status']); ?>
-                                                            </span>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    -
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="px-4 py-4 text-sm border-b">
-                                                <?php if (!empty($day_course_schedules)): ?>
-                                                    <?php foreach ($day_course_schedules as $schedule): ?>
-                                                        <div class="mb-2 last:mb-0">
-                                                            <button
-                                                                onclick="openScheduleModal(<?php echo $schedule['id']; ?>, '<?php echo $day_key; ?>', '<?php echo $schedule['start_time']; ?>', '<?php echo $schedule['end_time']; ?>', <?php echo $schedule['classroom_id']; ?>, <?php echo $selected_course_data['id']; ?>, <?php echo $schedule['teacher_id']; ?>)"
-                                                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-xs transition duration-200">
-                                                                <i class="fas fa-edit mr-1"></i>
-                                                                Cambiar
-                                                            </button>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    -
-                                                <?php endif; ?>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                                                                                        <?php echo ucfirst($schedule['status']); ?>
+                                                                                    </span>
+                                                                                </div>
+                                                                        <?php endforeach; ?>
+                                                                <?php else: ?>
+                                                                        -
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td class="px-4 py-4 text-sm border-b">
+                                                                <?php if (!empty($day_course_schedules)): ?>
+                                                                        <?php foreach ($day_course_schedules as $schedule): ?>
+                                                                                <div class="mb-2 last:mb-0">
+                                                                                    <button
+                                                                                        onclick="openScheduleModal(<?php echo $schedule['id']; ?>, '<?php echo $day_key; ?>', '<?php echo $schedule['start_time']; ?>', '<?php echo $schedule['end_time']; ?>', <?php echo $schedule['classroom_id']; ?>, <?php echo $selected_course_data['id']; ?>, <?php echo $schedule['teacher_id']; ?>, '<?php echo addslashes($schedule['subject']); ?>')"
+                                                                                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-xs transition duration-200">
+                                                                                        <i class="fas fa-edit mr-1"></i>
+                                                                                        Cambiar
+                                                                                    </button>
+                                                                                </div>
+                                                                        <?php endforeach; ?>
+                                                                <?php else: ?>
+                                                                        -
+                                                                <?php endif; ?>
+                                                            </td>
+                                                        </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                        <?php endif; ?>
                 <?php endif; ?>
-            <?php endif; ?>
         <?php endif; ?>
     </div>
 
@@ -777,17 +802,24 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
                 </h3>
                 <form id="createScheduleForm" class="space-y-4">
                     <div class="grid md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label for="create_subject" class="block text-sm font-medium text-gray-700 mb-2">Mención
+                                (Nombre manual)</label>
+                            <input type="text" id="create_subject" name="subject" required
+                                placeholder="Ej: Programación Avanzada I"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
                         <div>
                             <label for="create_course_id"
-                                class="block text-sm font-medium text-gray-700 mb-2">Materia</label>
+                                class="block text-sm font-medium text-gray-700 mb-2">Mención</label>
                             <select id="create_course_id" name="course_id" required
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                                <option value="">Seleccionar materia</option>
+                                <option value="">Seleccionar mención</option>
                                 <?php foreach ($courses as $course): ?>
-                                    <option value="<?php echo $course['id']; ?>">
-                                        <?php echo htmlspecialchars($course['name']); ?>
-                                        (<?php echo htmlspecialchars($course['code']); ?>)
-                                    </option>
+                                        <option value="<?php echo $course['id']; ?>">
+                                            <?php echo htmlspecialchars($course['name']); ?>
+                                            (<?php echo htmlspecialchars($course['code']); ?>)
+                                        </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -813,10 +845,10 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
                                 <?php
                                 $classrooms = $pdo->query("SELECT * FROM classrooms ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
                                 foreach ($classrooms as $classroom): ?>
-                                    <option value="<?php echo $classroom['id']; ?>">
-                                        <?php echo htmlspecialchars($classroom['name']); ?>
-                                        (<?php echo $classroom['capacity']; ?> personas)
-                                    </option>
+                                        <option value="<?php echo $classroom['id']; ?>">
+                                            <?php echo htmlspecialchars($classroom['name']); ?>
+                                            (<?php echo $classroom['capacity']; ?> personas)
+                                        </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -827,9 +859,9 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                                 <option value="">Seleccionar docente</option>
                                 <?php foreach ($teachers as $teacher): ?>
-                                    <option value="<?php echo $teacher['id']; ?>">
-                                        <?php echo htmlspecialchars($teacher['name']); ?>
-                                    </option>
+                                        <option value="<?php echo $teacher['id']; ?>">
+                                            <?php echo htmlspecialchars($teacher['name']); ?>
+                                        </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -850,7 +882,7 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
                     <div id="create-availability-preview" class="mt-4 p-4 bg-gray-50 rounded-lg">
                         <h4 class="text-sm font-medium text-gray-700 mb-2">Disponibilidad del aula seleccionada:</h4>
                         <div id="create-availability-status" class="text-sm text-gray-600">
-                            Selecciona materia, día, aula y horario para verificar disponibilidad...
+                            Selecciona mención, día, aula y horario para verificar disponibilidad...
                         </div>
                         <div id="create-available-classrooms" class="mt-3 hidden">
                             <h5 class="text-sm font-medium text-gray-700 mb-2">Aulas disponibles para este horario:</h5>
@@ -880,11 +912,14 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
                     Cambiar Horario de Clase
                 </h3>
                 <form id="scheduleForm" class="space-y-4">
-                    <input type="hidden" id="modal_schedule_id" name="schedule_id">
-                    <input type="hidden" id="modal_course_id" name="course_id">
-                    <input type="hidden" id="modal_teacher_id" name="teacher_id">
-
                     <div class="grid md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label for="modal_subject" class="block text-sm font-medium text-gray-700 mb-2">Mención
+                                (Nombre manual)</label>
+                            <input type="text" id="modal_subject" name="subject" required
+                                placeholder="Ej: Programación Avanzada I"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
                         <div>
                             <label for="modal_day" class="block text-sm font-medium text-gray-700 mb-2">Día</label>
                             <select id="modal_day" name="day" required
@@ -904,10 +939,10 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
                             <select id="modal_classroom" name="classroom_id" required
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                                 <?php foreach ($classrooms as $classroom): ?>
-                                    <option value="<?php echo $classroom['id']; ?>">
-                                        <?php echo htmlspecialchars($classroom['name']); ?>
-                                        (<?php echo $classroom['capacity']; ?> personas)
-                                    </option>
+                                        <option value="<?php echo $classroom['id']; ?>">
+                                            <?php echo htmlspecialchars($classroom['name']); ?>
+                                            (<?php echo $classroom['capacity']; ?> personas)
+                                        </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -1148,7 +1183,7 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
 
             // Reset form
             document.getElementById('createScheduleForm').reset();
-            document.getElementById('create-availability-status').innerHTML = 'Selecciona materia, día, aula y horario para verificar disponibilidad...';
+            document.getElementById('create-availability-status').innerHTML = 'Selecciona mención, día, aula y horario para verificar disponibilidad...';
         }
 
         function closeCreateScheduleModal() {
@@ -1190,16 +1225,38 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
                     const statusDiv = document.getElementById('create-availability-status');
                     const classroomsDiv = document.getElementById('create-available-classrooms');
                     const classroomsList = document.getElementById('create-classrooms-list');
+                    const submitBtn = document.querySelector('#createScheduleForm button[type="submit"]');
 
-                    if (data.available) {
-                        statusDiv.innerHTML = '<div class="flex items-center text-green-600 font-bold p-2 bg-green-50 rounded-lg border border-green-200"><i class="fas fa-check-circle mr-2"></i>Aula disponible para el horario seleccionado</div>';
+                    let statusHtml = '';
+
+                    if (data.classroom_available && data.teacher_available) {
+                        statusHtml = '<div class="flex items-center text-green-600 font-bold p-2 bg-green-50 rounded-lg border border-green-200"><i class="fas fa-check-circle mr-2"></i>Aula y horario disponibles</div>';
                         classroomsDiv.classList.add('hidden');
-                        document.querySelector('#createScheduleForm button[type="submit"]').disabled = false;
-                        document.querySelector('#createScheduleForm button[type="submit"]').classList.remove('opacity-50', 'cursor-not-allowed');
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                     } else {
-                        statusDiv.innerHTML = '<div class="flex flex-col text-red-600 font-bold p-3 bg-red-50 rounded-lg border border-red-200"><div class="flex items-center mb-1"><i class="fas fa-times-circle mr-2 text-xl"></i>¡CONFLICTO DETECTADO!</div><span class="text-xs font-medium opacity-90">' + data.conflict_info + '</span></div>';
-                        document.querySelector('#createScheduleForm button[type="submit"]').disabled = true;
-                        document.querySelector('#createScheduleForm button[type="submit"]').classList.add('opacity-50', 'cursor-not-allowed');
+                        statusHtml = '<div class="flex flex-col space-y-2">';
+
+                        // Classroom status
+                        if (data.classroom_available) {
+                            statusHtml += '<div class="flex items-center text-green-600 font-bold p-2 bg-green-50 rounded-lg border border-green-200"><i class="fas fa-check-circle mr-2 text-lg"></i>Aula disponible</div>';
+                        } else {
+                            statusHtml += '<div class="flex flex-col text-red-600 font-bold p-3 bg-red-50 rounded-lg border border-red-200"><div class="flex items-center mb-1"><i class="fas fa-times-circle mr-2 text-xl"></i>AULA OCUPADA</div><span class="text-xs font-medium opacity-90">' + data.classroom_conflict_info + '</span></div>';
+                        }
+
+                        // Teacher status
+                        if (!data.teacher_available) {
+                            statusHtml += '<div class="flex flex-col text-orange-600 font-bold p-3 bg-orange-50 rounded-lg border border-orange-200"><div class="flex items-center mb-1"><i class="fas fa-exclamation-triangle mr-2 text-xl"></i>DOCENTE OCUPADO</div><span class="text-xs font-medium opacity-90">' + data.teacher_conflict_info + '</span></div>';
+                        }
+
+                        statusHtml += '</div>';
+
+                        submitBtn.disabled = !data.classroom_available || !data.teacher_available;
+                        if (submitBtn.disabled) {
+                            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                        } else {
+                            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        }
 
                         // Show available classrooms
                         if (data.available_classrooms && data.available_classrooms.length > 0) {
@@ -1216,6 +1273,7 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
                             classroomsDiv.classList.remove('hidden');
                         }
                     }
+                    statusDiv.innerHTML = statusHtml;
                 })
                 .catch(error => {
                     console.error('Error checking availability:', error);
@@ -1274,10 +1332,11 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
         });
 
         // Schedule modification modal functions
-        function openScheduleModal(scheduleId, currentDay, currentStartTime, currentEndTime, currentClassroomId, courseId, teacherId) {
+        function openScheduleModal(scheduleId, currentDay, currentStartTime, currentEndTime, currentClassroomId, courseId, teacherId, subject) {
             document.getElementById('modal_schedule_id').value = scheduleId;
             document.getElementById('modal_course_id').value = courseId;
             document.getElementById('modal_teacher_id').value = teacherId || '';
+            document.getElementById('modal_subject').value = subject || '';
             document.getElementById('modal_day').value = currentDay;
             document.getElementById('modal_start_time').value = currentStartTime;
             document.getElementById('modal_end_time').value = currentEndTime;
@@ -1329,16 +1388,38 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
                     const statusDiv = document.getElementById('availability-status');
                     const classroomsDiv = document.getElementById('available-classrooms');
                     const classroomsList = document.getElementById('classrooms-list');
+                    const submitBtn = document.querySelector('#scheduleForm button[type="submit"]');
 
-                    if (data.available) {
-                        statusDiv.innerHTML = '<div class="flex items-center text-green-600 font-bold p-2 bg-green-50 rounded-lg border border-green-200"><i class="fas fa-check-circle mr-2"></i>Aula disponible para el horario seleccionado</div>';
+                    let statusHtml = '';
+
+                    if (data.classroom_available && data.teacher_available) {
+                        statusHtml = '<div class="flex items-center text-green-600 font-bold p-2 bg-green-50 rounded-lg border border-green-200"><i class="fas fa-check-circle mr-2"></i>Aula y horario disponibles</div>';
                         classroomsDiv.classList.add('hidden');
-                        document.querySelector('#scheduleForm button[type="submit"]').disabled = false;
-                        document.querySelector('#scheduleForm button[type="submit"]').classList.remove('opacity-50', 'cursor-not-allowed');
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                     } else {
-                        statusDiv.innerHTML = '<div class="flex flex-col text-red-600 font-bold p-3 bg-red-50 rounded-lg border border-red-200"><div class="flex items-center mb-1"><i class="fas fa-times-circle mr-2 text-xl"></i>¡CONFLICTO DETECTADO!</div><span class="text-xs font-medium opacity-90">' + data.conflict_info + '</span></div>';
-                        document.querySelector('#scheduleForm button[type="submit"]').disabled = true;
-                        document.querySelector('#scheduleForm button[type="submit"]').classList.add('opacity-50', 'cursor-not-allowed');
+                        statusHtml = '<div class="flex flex-col space-y-2">';
+
+                        // Classroom status
+                        if (data.classroom_available) {
+                            statusHtml += '<div class="flex items-center text-green-600 font-bold p-2 bg-green-50 rounded-lg border border-green-200"><i class="fas fa-check-circle mr-2 text-lg"></i>Aula disponible</div>';
+                        } else {
+                            statusHtml += '<div class="flex flex-col text-red-600 font-bold p-3 bg-red-50 rounded-lg border border-red-200"><div class="flex items-center mb-1"><i class="fas fa-times-circle mr-2 text-xl"></i>AULA OCUPADA</div><span class="text-xs font-medium opacity-90">' + data.classroom_conflict_info + '</span></div>';
+                        }
+
+                        // Teacher status
+                        if (!data.teacher_available) {
+                            statusHtml += '<div class="flex flex-col text-orange-600 font-bold p-3 bg-orange-50 rounded-lg border border-orange-200"><div class="flex items-center mb-1"><i class="fas fa-exclamation-triangle mr-2 text-xl"></i>DOCENTE OCUPADO</div><span class="text-xs font-medium opacity-90">' + data.teacher_conflict_info + '</span></div>';
+                        }
+
+                        statusHtml += '</div>';
+
+                        submitBtn.disabled = !data.classroom_available || !data.teacher_available;
+                        if (submitBtn.disabled) {
+                            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                        } else {
+                            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        }
 
                         // Show available classrooms
                         if (data.available_classrooms && data.available_classrooms.length > 0) {
@@ -1355,6 +1436,7 @@ $conflicts_count = $pdo->query("SELECT COUNT(*) FROM schedule_conflicts WHERE DA
                             classroomsDiv.classList.remove('hidden');
                         }
                     }
+                    statusDiv.innerHTML = statusHtml;
                 })
                 .catch(error => {
                     console.error('Error checking availability:', error);

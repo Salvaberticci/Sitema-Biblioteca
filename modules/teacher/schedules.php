@@ -5,17 +5,15 @@
 <?php
 $teacher_id = $_SESSION['user_id'];
 
-// Get all courses taught by this teacher (both scheduled and self-assigned)
+// Get all courses taught by this teacher (only actively assigned)
 $stmt = $pdo->prepare("
-    SELECT DISTINCT c.id, c.name, c.code,
-           CASE WHEN tc.id IS NOT NULL THEN 'Auto-asignado' ELSE 'Programado' END as assignment_type
+    SELECT c.id, c.name, c.code, 'Asignado' as assignment_type
     FROM courses c
-    LEFT JOIN schedules s ON c.id = s.course_id AND s.teacher_id = ?
-    LEFT JOIN teacher_courses tc ON c.id = tc.course_id AND tc.teacher_id = ? AND tc.status = 'active'
-    WHERE (s.teacher_id = ? OR tc.teacher_id = ?)
+    INNER JOIN teacher_courses tc ON c.id = tc.course_id
+    WHERE tc.teacher_id = ? AND tc.status = 'active'
     ORDER BY c.name
 ");
-$stmt->execute([$teacher_id, $teacher_id, $teacher_id, $teacher_id]);
+$stmt->execute([$teacher_id]);
 $teacher_courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Get selected course filter
@@ -67,6 +65,42 @@ $days = [
         <i class="fas fa-calendar-week mr-4 text-primary"></i>
         Horarios de Clases por Mención
     </h2>
+
+
+    <!-- AJAX Alert Messages -->
+    <div id="ajax-success-message" class="hidden mb-6 animate-fade-in-up">
+        <div
+            class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg shadow-md flex items-center justify-between">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-3 text-2xl"></i>
+                <div>
+                    <p class="font-bold">¡Éxito!</p>
+                    <p id="ajax-success-text" class="text-sm">Operación completada exitosamente.</p>
+                </div>
+            </div>
+            <button onclick="this.parentElement.parentElement.classList.add('hidden')"
+                class="text-green-700 hover:text-green-900">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="ajax-error-message" class="hidden mb-6 animate-fade-in-up">
+        <div
+            class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md flex items-center justify-between">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-circle mr-3 text-2xl"></i>
+                <div>
+                    <p class="font-bold">Error</p>
+                    <p id="ajax-error-text" class="text-sm">Ha ocurrido un problema al procesar la solicitud.</p>
+                </div>
+            </div>
+            <button onclick="this.parentElement.parentElement.classList.add('hidden')"
+                class="text-red-700 hover:text-red-900">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
 
     <!-- Navigation Tabs -->
     <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 animate-fade-in-up">
@@ -229,10 +263,10 @@ $days = [
                                     <tr class="bg-gray-50">
                                         <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Día</th>
                                         <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Horario</th>
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Mención</th>
                                         <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Aula</th>
                                         <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Profesor</th>
                                         <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Estado</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">
@@ -268,6 +302,17 @@ $days = [
                                                 <?php if (!empty($day_course_schedules)): ?>
                                                     <?php foreach ($day_course_schedules as $schedule): ?>
                                                         <div class="mb-2 last:mb-0">
+                                                            <?php echo htmlspecialchars($schedule['subject'] ?? 'N/A'); ?>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                <?php else: ?>
+                                                    -
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="px-4 py-4 text-sm text-gray-600 border-b">
+                                                <?php if (!empty($day_course_schedules)): ?>
+                                                    <?php foreach ($day_course_schedules as $schedule): ?>
+                                                        <div class="mb-2 last:mb-0">
                                                             <i class="fas fa-map-marker-alt mr-1 text-green-500"></i>
                                                             <?php echo htmlspecialchars($schedule['classroom_name']); ?>
                                                         </div>
@@ -292,7 +337,7 @@ $days = [
                                                 <?php if (!empty($day_course_schedules)): ?>
                                                     <?php foreach ($day_course_schedules as $schedule): ?>
                                                         <div class="mb-2 last:mb-0">
-                                                            <span class="px-2 py-1 text-xs rounded-full
+                                                            <span class="px-2 py-1 text-xs rounded-full 
                                                                 <?php
                                                                 echo $schedule['status'] == 'active' ? 'bg-green-100 text-green-800' :
                                                                     ($schedule['status'] == 'cancelled' ? 'bg-red-100 text-red-800' :
@@ -300,28 +345,6 @@ $days = [
                                                                 ?>">
                                                                 <?php echo ucfirst($schedule['status']); ?>
                                                             </span>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    -
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="px-4 py-4 text-sm border-b">
-                                                <?php if (!empty($day_course_schedules)): ?>
-                                                    <?php foreach ($day_course_schedules as $schedule): ?>
-                                                        <div class="mb-2 last:mb-0 flex space-x-1">
-                                                            <button
-                                                                onclick="openScheduleModal(<?php echo $schedule['id']; ?>, '<?php echo $day_key; ?>', '<?php echo $schedule['start_time']; ?>', '<?php echo $schedule['end_time']; ?>', <?php echo $schedule['classroom_id']; ?>, <?php echo $course['id']; ?>)"
-                                                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs transition duration-200">
-                                                                <i class="fas fa-edit mr-1"></i>
-                                                                Cambiar
-                                                            </button>
-                                                            <button
-                                                                onclick="deleteSchedule(<?php echo $schedule['id']; ?>, '<?php echo htmlspecialchars($schedule['course_name']); ?>', '<?php echo $day_name; ?>')"
-                                                                class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-xs transition duration-200">
-                                                                <i class="fas fa-trash mr-1"></i>
-                                                                Eliminar
-                                                            </button>
                                                         </div>
                                                     <?php endforeach; ?>
                                                 <?php else: ?>
@@ -369,10 +392,10 @@ $days = [
                                     <tr class="bg-gray-50">
                                         <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Día</th>
                                         <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Horario</th>
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Mención</th>
                                         <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Aula</th>
                                         <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Profesor</th>
                                         <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Estado</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 border-b">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">
@@ -408,6 +431,17 @@ $days = [
                                                 <?php if (!empty($day_course_schedules)): ?>
                                                     <?php foreach ($day_course_schedules as $schedule): ?>
                                                         <div class="mb-2 last:mb-0">
+                                                            <?php echo htmlspecialchars($schedule['subject'] ?? 'N/A'); ?>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                <?php else: ?>
+                                                    -
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="px-4 py-4 text-sm text-gray-600 border-b">
+                                                <?php if (!empty($day_course_schedules)): ?>
+                                                    <?php foreach ($day_course_schedules as $schedule): ?>
+                                                        <div class="mb-2 last:mb-0">
                                                             <i class="fas fa-map-marker-alt mr-1 text-green-500"></i>
                                                             <?php echo htmlspecialchars($schedule['classroom_name']); ?>
                                                         </div>
@@ -432,7 +466,7 @@ $days = [
                                                 <?php if (!empty($day_course_schedules)): ?>
                                                     <?php foreach ($day_course_schedules as $schedule): ?>
                                                         <div class="mb-2 last:mb-0">
-                                                            <span class="px-2 py-1 text-xs rounded-full
+                                                            <span class="px-2 py-1 text-xs rounded-full 
                                                                 <?php
                                                                 echo $schedule['status'] == 'active' ? 'bg-green-100 text-green-800' :
                                                                     ($schedule['status'] == 'cancelled' ? 'bg-red-100 text-red-800' :
@@ -440,22 +474,6 @@ $days = [
                                                                 ?>">
                                                                 <?php echo ucfirst($schedule['status']); ?>
                                                             </span>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    -
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="px-4 py-4 text-sm border-b">
-                                                <?php if (!empty($day_course_schedules)): ?>
-                                                    <?php foreach ($day_course_schedules as $schedule): ?>
-                                                        <div class="mb-2 last:mb-0">
-                                                            <button
-                                                                onclick="openScheduleModal(<?php echo $schedule['id']; ?>, '<?php echo $day_key; ?>', '<?php echo $schedule['start_time']; ?>', '<?php echo $schedule['end_time']; ?>', <?php echo $schedule['classroom_id']; ?>, <?php echo $selected_course_data['id']; ?>)"
-                                                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-xs transition duration-200">
-                                                                <i class="fas fa-edit mr-1"></i>
-                                                                Cambiar
-                                                            </button>
                                                         </div>
                                                     <?php endforeach; ?>
                                                 <?php else: ?>
@@ -497,6 +515,14 @@ $days = [
                 </h3>
                 <form id="createScheduleForm" class="space-y-4">
                     <div class="grid md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label for="create_subject" class="block text-sm font-medium text-gray-700 mb-2">Mención
+                                (Nombre
+                                manual)</label>
+                            <input type="text" id="create_subject" name="subject" required
+                                placeholder="Ej: Programación Avanzada I"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
                         <div>
                             <label for="create_course_id"
                                 class="block text-sm font-medium text-gray-700 mb-2">Mención</label>
@@ -663,6 +689,8 @@ $days = [
         const schedulesFilters = document.getElementById('schedules-filters');
         const availabilityFilters = document.getElementById('availability-filters');
 
+        if (!schedulesTab || !availabilityTab || !schedulesContent || !availabilityContent || !schedulesFilters || !availabilityFilters) return;
+
         if (tabName === 'schedules') {
             schedulesTab.className = 'px-6 py-3 rounded-lg font-medium transition duration-300 bg-primary text-white';
             availabilityTab.className = 'px-6 py-3 rounded-lg font-medium transition duration-300 bg-gray-200 text-gray-700 hover:bg-gray-300';
@@ -680,14 +708,34 @@ $days = [
         }
     }
 
+    // Helper function to get day names
+    function getDayName(dayKey) {
+        const days = {
+            'monday': 'Lunes',
+            'tuesday': 'Martes',
+            'wednesday': 'Miércoles',
+            'thursday': 'Jueves',
+            'friday': 'Viernes',
+            'saturday': 'Sábado',
+            'sunday': 'Domingo'
+        };
+        return days[dayKey] || dayKey;
+    }
+
     // Load classroom availability
     function loadAvailability() {
-        const classroomId = document.getElementById('filter_classroom').value;
-        const day = document.getElementById('filter_day').value;
-        const startTime = document.getElementById('filter_start_time').value;
-        const endTime = document.getElementById('filter_end_time').value;
-
+        const classroomIdEl = document.getElementById('filter_classroom');
+        const dayEl = document.getElementById('filter_day');
+        const startTimeEl = document.getElementById('filter_start_time');
+        const endTimeEl = document.getElementById('filter_end_time');
         const resultsDiv = document.getElementById('availability-results');
+
+        if (!classroomIdEl || !dayEl || !startTimeEl || !endTimeEl || !resultsDiv) return;
+
+        const classroomId = classroomIdEl.value;
+        const day = dayEl.value;
+        const startTime = startTimeEl.value;
+        const endTime = endTimeEl.value;
 
         // Show loading
         resultsDiv.innerHTML = `
@@ -730,6 +778,7 @@ $days = [
     // Display availability results
     function displayAvailability(data, classroomId, day, startTime, endTime) {
         const resultsDiv = document.getElementById('availability-results');
+        if (!resultsDiv) return;
 
         let html = `
         <div class="mb-6">
@@ -797,71 +846,75 @@ $days = [
 
     // Reset filters
     function resetFilters() {
-        document.getElementById('filter_classroom').value = 'all';
-        document.getElementById('filter_day').value = 'all';
-        document.getElementById('filter_start_time').value = '08:00';
-        document.getElementById('filter_end_time').value = '18:00';
+        const classroom = document.getElementById('filter_classroom');
+        const day = document.getElementById('filter_day');
+        const start = document.getElementById('filter_start_time');
+        const end = document.getElementById('filter_end_time');
+        const results = document.getElementById('availability-results');
 
-        const resultsDiv = document.getElementById('availability-results');
-        resultsDiv.innerHTML = `
-        <div class="text-center py-12">
-            <div class="text-6xl text-gray-300 mb-4">
-                <i class="fas fa-building"></i>
+        if (classroom) classroom.value = 'all';
+        if (day) day.value = 'all';
+        if (start) start.value = '08:00';
+        if (end) end.value = '18:00';
+
+        if (results) {
+            results.innerHTML = `
+            <div class="text-center py-12">
+                <div class="text-6xl text-gray-300 mb-4">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">Disponibilidad de Aulas</h3>
+                <p class="text-gray-500">Selecciona los filtros y haz clic en "Buscar Disponibilidad"</p>
             </div>
-            <h3 class="text-xl font-semibold text-gray-600 mb-2">Disponibilidad de Aulas</h3>
-            <p class="text-gray-500">Selecciona los filtros y haz clic en "Buscar Disponibilidad"</p>
-        </div>
-    `;
-    }
-
-    // Helper function to get day names
-    function getDayName(dayKey) {
-        const days = {
-            'monday': 'Lunes',
-            'tuesday': 'Martes',
-            'wednesday': 'Miércoles',
-            'thursday': 'Jueves',
-            'friday': 'Viernes',
-            'saturday': 'Sábado',
-            'sunday': 'Domingo'
-        };
-        return days[dayKey] || dayKey;
+        `;
+        }
     }
 
     // Create schedule modal functions
     function openCreateScheduleModal() {
-        document.getElementById('createScheduleModal').classList.remove('hidden');
+        const modal = document.getElementById('createScheduleModal');
+        const form = document.getElementById('createScheduleForm');
+        const status = document.getElementById('create-availability-status');
+        const classroomsDiv = document.getElementById('create-available-classrooms');
 
-        // Reset form
-        document.getElementById('createScheduleForm').reset();
-        document.getElementById('create-availability-status').innerHTML = 'Selecciona mención, día, aula y horario para verificar disponibilidad...';
+        if (modal) modal.classList.remove('hidden');
+        if (form) form.reset();
+        if (status) status.innerHTML = 'Selecciona mención, día, aula y horario para verificar disponibilidad...';
+        if (classroomsDiv) classroomsDiv.classList.add('hidden');
     }
 
     function closeCreateScheduleModal() {
-        document.getElementById('createScheduleModal').classList.add('hidden');
+        const modal = document.getElementById('createScheduleModal');
+        if (modal) modal.classList.add('hidden');
     }
 
     // Check availability for create schedule form
     function checkCreateAvailability() {
-        const classroomId = document.getElementById('create_classroom').value;
-        const day = document.getElementById('create_day').value;
-        const startTime = document.getElementById('create_start_time').value;
-        const endTime = document.getElementById('create_end_time').value;
+        const classroomEl = document.getElementById('create_classroom');
+        const dayEl = document.getElementById('create_day');
+        const startTimeEl = document.getElementById('create_start_time');
+        const endTimeEl = document.getElementById('create_end_time');
+        const statusDiv = document.getElementById('create-availability-status');
+        const classroomsDiv = document.getElementById('create-available-classrooms');
+        const classroomsList = document.getElementById('create-classrooms-list');
+
+        if (!classroomEl || !dayEl || !startTimeEl || !endTimeEl || !statusDiv) return;
+
+        const classroomId = classroomEl.value;
+        const day = dayEl.value;
+        const startTime = startTimeEl.value;
+        const endTime = endTimeEl.value;
         const teacherId = '<?php echo $_SESSION['user_id']; ?>';
 
         if (!classroomId || !day || !startTime || !endTime) {
-            document.getElementById('create-availability-status').innerHTML = '<span class="text-gray-500">Selecciona aula, día y horario para verificar disponibilidad...</span>';
-            document.getElementById('create-available-classrooms').classList.add('hidden');
-            document.querySelector('#createScheduleForm button[type="submit"]').disabled = false;
+            statusDiv.innerHTML = '<span class="text-gray-500">Selecciona aula, día y horario para verificar disponibilidad...</span>';
+            if (classroomsDiv) classroomsDiv.classList.add('hidden');
             return;
         }
 
-        // AJAX request to check availability
         fetch('../schedules/check_availability.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 classroom_id: classroomId,
                 teacher_id: teacherId,
@@ -872,99 +925,68 @@ $days = [
         })
             .then(response => response.json())
             .then(data => {
-                const statusDiv = document.getElementById('create-availability-status');
                 const classroomsDiv = document.getElementById('create-available-classrooms');
                 const classroomsList = document.getElementById('create-classrooms-list');
+                const submitBtn = document.querySelector('#createScheduleForm button[type="submit"]');
 
-                if (data.available) {
-                    statusDiv.innerHTML = '<div class="flex items-center text-green-600 font-bold p-2 bg-green-50 rounded-lg border border-green-200"><i class="fas fa-check-circle mr-2"></i>Aula disponible para el horario seleccionado</div>';
-                    classroomsDiv.classList.add('hidden');
-                    document.querySelector('#createScheduleForm button[type="submit"]').disabled = false;
-                    document.querySelector('#createScheduleForm button[type="submit"]').classList.remove('opacity-50', 'cursor-not-allowed');
+                let statusHtml = '';
+
+                if (data.classroom_available && data.teacher_available) {
+                    statusHtml = '<div class="flex items-center text-green-600 font-bold p-2 bg-green-50 rounded-lg border border-green-200"><i class="fas fa-check-circle mr-2"></i>Aula y horario disponibles</div>';
+                    if (classroomsDiv) classroomsDiv.classList.add('hidden');
+                    if (submitBtn) submitBtn.disabled = false;
                 } else {
-                    statusDiv.innerHTML = '<div class="flex flex-col text-red-600 font-bold p-3 bg-red-50 rounded-lg border border-red-200"><div class="flex items-center mb-1"><i class="fas fa-times-circle mr-2 text-xl"></i>¡CONFLICTO DETECTADO!</div><span class="text-xs font-medium opacity-90">' + data.conflict_info + '</span></div>';
-                    document.querySelector('#createScheduleForm button[type="submit"]').disabled = true;
-                    document.querySelector('#createScheduleForm button[type="submit"]').classList.add('opacity-50', 'cursor-not-allowed');
+                    statusHtml = '<div class="flex flex-col space-y-2">';
 
-                    // Show available classrooms
-                    if (data.available_classrooms && data.available_classrooms.length > 0) {
+                    if (data.classroom_available) {
+                        statusHtml += '<div class="flex items-center text-green-600 font-bold p-2 bg-green-50 rounded-lg border border-green-200"><i class="fas fa-check-circle mr-2 text-lg"></i>Aula disponible</div>';
+                    } else {
+                        statusHtml += '<div class="flex flex-col text-red-600 font-bold p-3 bg-red-50 rounded-lg border border-red-200"><div class="flex items-center mb-1"><i class="fas fa-times-circle mr-2 text-xl"></i>AULA OCUPADA</div><span class="text-xs font-medium">' + (data.classroom_conflict_info || '') + '</span></div>';
+                    }
+
+                    if (!data.teacher_available) {
+                        statusHtml += '<div class="flex flex-col text-orange-600 font-bold p-3 bg-orange-50 rounded-lg border border-orange-200"><div class="flex items-center mb-1"><i class="fas fa-exclamation-triangle mr-2 text-xl"></i>DOCENTE OCUPADO</div><span class="text-xs font-medium">' + (data.teacher_conflict_info || '') + '</span></div>';
+                    }
+                    statusHtml += '</div>';
+
+                    if (submitBtn) submitBtn.disabled = !data.classroom_available || !data.teacher_available;
+
+                    if (data.available_classrooms && data.available_classrooms.length > 0 && classroomsList && classroomsDiv) {
                         classroomsList.innerHTML = data.available_classrooms.map(classroom =>
                             `<button type="button" onclick="selectAvailableClassroom('${classroom.id}', '${classroom.name}')"
-                             class="text-left p-2 bg-blue-50 hover:bg-blue-100 rounded border text-sm transition duration-200">
-                        <i class="fas fa-building mr-1 text-blue-500"></i>
-                         ${classroom.name} (${classroom.capacity} personas)
+                     class="text-left p-2 bg-blue-50 hover:bg-blue-100 rounded border text-sm transition duration-200">
+                    <i class="fas fa-building mr-1 text-blue-500"></i> ${classroom.name}
                     </button>`
                         ).join('');
                         classroomsDiv.classList.remove('hidden');
-                    } else {
-                        classroomsList.innerHTML = '<p class="text-sm text-gray-500 italic">No hay aulas disponibles para este horario</p>';
-                        classroomsDiv.classList.remove('hidden');
                     }
                 }
+                statusDiv.innerHTML = statusHtml;
             })
             .catch(error => {
-                console.error('Error checking availability:', error);
-                document.getElementById('create-availability-status').innerHTML = '<span class="text-yellow-600"><i class="fas fa-exclamation-triangle mr-1"></i>Error al verificar disponibilidad</span>';
-                document.getElementById('create-available-classrooms').classList.add('hidden');
+                console.error('Error:', error);
+                if (statusDiv) statusDiv.innerHTML = '<span class="text-yellow-600">Error al verificar disponibilidad</span>';
             });
     }
 
-    // Event listeners for create schedule availability checking
-    ['create_classroom', 'create_day', 'create_start_time', 'create_end_time'].forEach(id => {
-        document.getElementById(id).addEventListener('change', checkCreateAvailability);
-        if (id.includes('time')) {
-            document.getElementById(id).addEventListener('input', checkCreateAvailability);
-        }
-    });
-
-    // Handle create schedule form submission
-    document.getElementById('createScheduleForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-
-        // Show loading
-        const submitBtn = this.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creando...';
-        submitBtn.disabled = true;
-
-        fetch('create_schedule.php', {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    closeCreateScheduleModal();
-                    // Show success message
-                    showAjaxMessage('Horario creado exitosamente', 'success');
-                    // Reload the page after a short delay to show the message
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 2000);
-                } else {
-                    showAjaxMessage('Error: ' + data.message, 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error creating schedule:', error);
-                showAjaxMessage('Error al crear el horario', 'error');
-            })
-            .finally(() => {
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            });
-    });
 
     // Schedule modification modal functions
-    function openScheduleModal(scheduleId, currentDay, currentStartTime, currentEndTime, currentClassroomId, courseId) {
-        document.getElementById('modal_schedule_id').value = scheduleId;
-        document.getElementById('modal_course_id').value = courseId;
-        document.getElementById('modal_day').value = currentDay;
-        document.getElementById('modal_start_time').value = currentStartTime;
-        document.getElementById('modal_end_time').value = currentEndTime;
-        document.getElementById('modal_classroom').value = currentClassroomId;
+    function openScheduleModal(scheduleId, currentDay, currentStartTime, currentEndTime, currentClassroomId, courseId, subject) {
+        const scheduleIdEl = document.getElementById('modal_schedule_id');
+        const courseIdEl = document.getElementById('modal_course_id');
+        const dayEl = document.getElementById('modal_day');
+        const startTimeEl = document.getElementById('modal_start_time');
+        const endTimeEl = document.getElementById('modal_end_time');
+        const classroomEl = document.getElementById('modal_classroom');
+        const subjectEl = document.getElementById('modal_subject');
+
+        if (scheduleIdEl) scheduleIdEl.value = scheduleId;
+        if (courseIdEl) courseIdEl.value = courseId;
+        if (dayEl) dayEl.value = currentDay;
+        if (startTimeEl) startTimeEl.value = currentStartTime;
+        if (endTimeEl) endTimeEl.value = currentEndTime;
+        if (classroomEl) classroomEl.value = currentClassroomId;
+        if (subjectEl) subjectEl.value = subject || '';
 
         document.getElementById('scheduleModal').classList.remove('hidden');
 
@@ -978,20 +1000,29 @@ $days = [
 
     // Check classroom availability for selected time
     function checkAvailability() {
-        const classroomId = document.getElementById('modal_classroom').value;
-        const day = document.getElementById('modal_day').value;
-        const startTime = document.getElementById('modal_start_time').value;
-        const endTime = document.getElementById('modal_end_time').value;
-        const scheduleId = document.getElementById('modal_schedule_id').value;
+        const classroomEl = document.getElementById('modal_classroom');
+        const dayEl = document.getElementById('modal_day');
+        const startTimeEl = document.getElementById('modal_start_time');
+        const endTimeEl = document.getElementById('modal_end_time');
+        const scheduleIdEl = document.getElementById('modal_schedule_id');
+        const statusDiv = document.getElementById('availability-status');
+        const classroomsDiv = document.getElementById('available-classrooms');
+        const classroomsList = document.getElementById('classrooms-list');
+
+        if (!classroomEl || !dayEl || !startTimeEl || !endTimeEl || !statusDiv) return;
+
+        const classroomId = classroomEl.value;
+        const day = dayEl.value;
+        const startTime = startTimeEl.value;
+        const endTime = endTimeEl.value;
+        const scheduleId = scheduleIdEl ? scheduleIdEl.value : null;
 
         if (!classroomId || !day || !startTime || !endTime) {
-            document.getElementById('availability-status').innerHTML = '<span class="text-gray-500">Selecciona aula, día y horario para verificar disponibilidad...</span>';
-            document.getElementById('available-classrooms').classList.add('hidden');
-            document.querySelector('#scheduleForm button[type="submit"]').disabled = false;
+            statusDiv.innerHTML = '<span class="text-gray-500">Selecciona aula, día y horario...</span>';
+            if (classroomsDiv) classroomsDiv.classList.add('hidden');
             return;
         }
 
-        // AJAX request to check availability
         fetch('../schedules/check_availability.php', {
             method: 'POST',
             headers: {
@@ -1008,146 +1039,63 @@ $days = [
         })
             .then(response => response.json())
             .then(data => {
-                const statusDiv = document.getElementById('availability-status');
-                const classroomsDiv = document.getElementById('available-classrooms');
-                const classroomsList = document.getElementById('classrooms-list');
+                const submitBtn = document.querySelector('#scheduleForm button[type="submit"]');
+                let statusHtml = '';
 
-                if (data.available) {
-                    statusDiv.innerHTML = '<div class="flex items-center text-green-600 font-bold p-2 bg-green-50 rounded-lg border border-green-200"><i class="fas fa-check-circle mr-2"></i>Aula disponible para el horario seleccionado</div>';
-                    classroomsDiv.classList.add('hidden');
-                    document.querySelector('#scheduleForm button[type="submit"]').disabled = false;
-                    document.querySelector('#scheduleForm button[type="submit"]').classList.remove('opacity-50', 'cursor-not-allowed');
+                if (data.classroom_available && data.teacher_available) {
+                    statusHtml = '<div class="flex items-center text-green-600 font-bold p-2 bg-green-50 rounded-lg border border-green-200"><i class="fas fa-check-circle mr-2"></i>Aula y horario disponibles</div>';
+                    if (classroomsDiv) classroomsDiv.classList.add('hidden');
+                    if (submitBtn) submitBtn.disabled = false;
                 } else {
-                    statusDiv.innerHTML = '<div class="flex flex-col text-red-600 font-bold p-3 bg-red-50 rounded-lg border border-red-200"><div class="flex items-center mb-1"><i class="fas fa-times-circle mr-2 text-xl"></i>¡CONFLICTO DETECTADO!</div><span class="text-xs font-medium opacity-90">' + data.conflict_info + '</span></div>';
-                    document.querySelector('#scheduleForm button[type="submit"]').disabled = true;
-                    document.querySelector('#scheduleForm button[type="submit"]').classList.add('opacity-50', 'cursor-not-allowed');
+                    statusHtml = '<div class="flex flex-col space-y-2">';
 
-                    // Show available classrooms
-                    if (data.available_classrooms && data.available_classrooms.length > 0) {
+                    if (data.classroom_available) {
+                        statusHtml += '<div class="flex items-center text-green-600 font-bold p-2 bg-green-50 rounded-lg border border-green-200"><i class="fas fa-check-circle mr-2 text-lg"></i>Aula disponible</div>';
+                    } else {
+                        statusHtml += '<div class="flex flex-col text-red-600 font-bold p-3 bg-red-50 rounded-lg border border-red-200"><div class="flex items-center mb-1"><i class="fas fa-times-circle mr-2 text-xl"></i>AULA OCUPADA</div><span class="text-xs font-medium">' + (data.classroom_conflict_info || '') + '</span></div>';
+                    }
+
+                    if (!data.teacher_available) {
+                        statusHtml += '<div class="flex flex-col text-orange-600 font-bold p-3 bg-orange-50 rounded-lg border border-orange-200"><div class="flex items-center mb-1"><i class="fas fa-exclamation-triangle mr-2 text-xl"></i>DOCENTE OCUPADO</div><span class="text-xs font-medium">' + (data.teacher_conflict_info || '') + '</span></div>';
+                    }
+                    statusHtml += '</div>';
+
+                    if (submitBtn) submitBtn.disabled = !data.classroom_available || !data.teacher_available;
+
+                    if (data.available_classrooms && data.available_classrooms.length > 0 && classroomsList && classroomsDiv) {
                         classroomsList.innerHTML = data.available_classrooms.map(classroom =>
                             `<button type="button" onclick="selectAvailableClassroom('${classroom.id}', '${classroom.name}')"
-                             class="text-left p-2 bg-blue-50 hover:bg-blue-100 rounded border text-sm transition duration-200">
-                        <i class="fas fa-building mr-1 text-blue-500"></i>
-                        ${classroom.name} (${classroom.capacity} personas)
+                     class="text-left p-2 bg-blue-50 hover:bg-blue-100 rounded border text-sm transition duration-200">
+                    <i class="fas fa-building mr-1 text-blue-500"></i> ${classroom.name}
                     </button>`
                         ).join('');
                         classroomsDiv.classList.remove('hidden');
-                    } else {
-                        classroomsList.innerHTML = '<p class="text-sm text-gray-500 italic">No hay aulas disponibles para este horario</p>';
-                        classroomsDiv.classList.remove('hidden');
                     }
                 }
+                statusDiv.innerHTML = statusHtml;
             })
             .catch(error => {
-                console.error('Error checking availability:', error);
-                document.getElementById('availability-status').innerHTML = '<span class="text-yellow-600"><i class="fas fa-exclamation-triangle mr-1"></i>Error al verificar disponibilidad</span>';
-                document.getElementById('available-classrooms').classList.add('hidden');
+                console.error('Error:', error);
+                if (statusDiv) statusDiv.innerHTML = '<span class="text-yellow-600">Error al verificar disponibilidad</span>';
             });
-    }
-
-    // Event listeners for availability checking
-    ['modal_classroom', 'modal_day', 'modal_start_time', 'modal_end_time'].forEach(id => {
-        document.getElementById(id).addEventListener('change', checkAvailability);
-        if (id.includes('time')) {
-            document.getElementById(id).addEventListener('input', checkAvailability);
-        }
-    });
-
-    // Handle schedule form submission
-    document.getElementById('scheduleForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-
-        // Show loading
-        const submitBtn = this.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Actualizando...';
-        submitBtn.disabled = true;
-
-        fetch('update_schedule.php', {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    closeScheduleModal();
-                    // Show success message
-                    showAjaxMessage('Horario actualizado exitosamente', 'success');
-                    // Reload the page after a short delay to show the message
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 2000);
-                } else {
-                    showAjaxMessage('Error: ' + data.message, 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error updating schedule:', error);
-                showAjaxMessage('Error al actualizar el horario', 'error');
-            })
-            .finally(() => {
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            });
-    });
-
-    // Function to show AJAX messages
-    function showAjaxMessage(message, type) {
-        const successDiv = document.getElementById('ajax-success-message');
-        const errorDiv = document.getElementById('ajax-error-message');
-        const successText = document.getElementById('ajax-success-text');
-        const errorText = document.getElementById('ajax-error-text');
-
-        // Check if elements exist
-        if (!successDiv || !errorDiv || !successText || !errorText) {
-            console.error('AJAX message elements not found');
-            return;
-        }
-
-        // Hide both messages first
-        successDiv.classList.add('hidden');
-        errorDiv.classList.add('hidden');
-
-        // Show the appropriate message
-        if (type === 'success') {
-            successText.textContent = message;
-            successDiv.classList.remove('hidden');
-            // Auto-hide after 3 seconds
-            setTimeout(() => {
-                if (successDiv) successDiv.classList.add('hidden');
-            }, 3000);
-        } else {
-            errorText.textContent = message;
-            errorDiv.classList.remove('hidden');
-            // Auto-hide after 5 seconds for errors
-            setTimeout(() => {
-                if (errorDiv) errorDiv.classList.add('hidden');
-            }, 5000);
-        }
-
-        // Scroll to top to show the message
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // Function to select an available classroom
     function selectAvailableClassroom(classroomId, classroomName) {
-        // Find the active modal
+        const createModal = document.getElementById('createScheduleModal');
+        const editModal = document.getElementById('scheduleModal');
         let modal = null;
-        if (document.getElementById('createScheduleModal').classList.contains('hidden') === false) {
-            modal = document.getElementById('createScheduleModal');
-        } else if (document.getElementById('scheduleModal').classList.contains('hidden') === false) {
-            modal = document.getElementById('scheduleModal');
+
+        if (createModal && !createModal.classList.contains('hidden')) {
+            modal = createModal;
+        } else if (editModal && !editModal.classList.contains('hidden')) {
+            modal = editModal;
         }
 
         if (modal) {
-            // Update the classroom select dropdown
             const classroomSelect = modal.querySelector('select[name="classroom_id"]');
             if (classroomSelect) {
                 classroomSelect.value = classroomId;
-
-                // Trigger availability check
                 if (modal.id === 'createScheduleModal') {
                     checkCreateAvailability();
                 } else {
@@ -1157,62 +1105,137 @@ $days = [
         }
     }
 
+    // Function to show AJAX messages
+    function showAjaxMessage(message, type) {
+        const successDiv = document.getElementById('ajax-success-message');
+        const errorDiv = document.getElementById('ajax-error-message');
+        const successText = document.getElementById('ajax-success-text');
+        const errorText = document.getElementById('ajax-error-text');
+
+        if (!successDiv || !errorDiv || !successText || !errorText) return;
+
+        successDiv.classList.add('hidden');
+        errorDiv.classList.add('hidden');
+
+        if (type === 'success') {
+            successText.textContent = message;
+            successDiv.classList.remove('hidden');
+            setTimeout(() => { if (successDiv) successDiv.classList.add('hidden'); }, 3000);
+        } else {
+            errorText.textContent = message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => { if (errorDiv) errorDiv.classList.add('hidden'); }, 5000);
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     // Function to delete a schedule
     function deleteSchedule(scheduleId, courseName, dayName) {
-        const confirmMessage = `¿Está seguro de eliminar el horario de "${courseName}" para ${dayName}?\n\nEsta acción no se puede deshacer.`;
+        if (!confirm(`¿Está seguro de eliminar el horario de "${courseName}" para ${dayName}?\n\nEsta acción no se puede deshacer.`)) return;
 
-        if (!confirm(confirmMessage)) {
-            return;
-        }
-
-        // Show loading state
         const deleteBtn = event.target.closest('button');
         const originalText = deleteBtn.innerHTML;
-        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Eliminando...';
+        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>';
         deleteBtn.disabled = true;
 
-        // AJAX request to delete schedule
         fetch('delete_schedule.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `schedule_id=${scheduleId}`
         })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     showAjaxMessage('Horario eliminado exitosamente', 'success');
-                    // Reload the page after a short delay to show the message
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 2000);
+                    setTimeout(() => { window.location.reload(); }, 1500);
                 } else {
                     showAjaxMessage('Error: ' + data.message, 'error');
                 }
             })
             .catch(error => {
-                console.error('Error deleting schedule:', error);
+                console.error('Error:', error);
                 showAjaxMessage('Error al eliminar el horario', 'error');
             })
             .finally(() => {
-                deleteBtn.innerHTML = originalText;
-                deleteBtn.disabled = false;
+                if (deleteBtn) {
+                    deleteBtn.innerHTML = originalText;
+                    deleteBtn.disabled = false;
+                }
             });
     }
 
-    // Close modals when clicking outside
-    document.addEventListener('click', function (event) {
-        const createModal = document.getElementById('createScheduleModal');
-        const editModal = document.getElementById('scheduleModal');
+    // Initialization
+    document.addEventListener('DOMContentLoaded', function () {
+        // Availability check listeners
+        ['modal_classroom', 'modal_day', 'modal_start_time', 'modal_end_time'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('change', checkAvailability);
+        });
 
-        if (event.target === createModal) {
-            closeCreateScheduleModal();
+        ['create_classroom', 'create_day', 'create_start_time', 'create_end_time'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('change', checkCreateAvailability);
+        });
+
+        // Form submissions
+        const createForm = document.getElementById('createScheduleForm');
+        if (createForm) {
+            createForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const btn = this.querySelector('button[type="submit"]');
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creando...';
+                btn.disabled = true;
+
+                fetch('create_schedule.php', { method: 'POST', body: new FormData(this) })
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.success) {
+                            closeCreateScheduleModal();
+                            showAjaxMessage(d.message, 'success');
+                            setTimeout(() => window.location.reload(), 1500);
+                        } else {
+                            showAjaxMessage('Error: ' + d.message, 'error');
+                        }
+                    })
+                    .catch(e => showAjaxMessage('Error al crear', 'error'))
+                    .finally(() => { btn.innerHTML = orig; btn.disabled = false; });
+            });
         }
-        if (event.target === editModal) {
-            closeScheduleModal();
+
+        const editForm = document.getElementById('scheduleForm');
+        if (editForm) {
+            editForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const btn = this.querySelector('button[type="submit"]');
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Actualizando...';
+                btn.disabled = true;
+
+                fetch('update_schedule.php', { method: 'POST', body: new FormData(this) })
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.success) {
+                            closeScheduleModal();
+                            showAjaxMessage(d.message, 'success');
+                            setTimeout(() => window.location.reload(), 1500);
+                        } else {
+                            showAjaxMessage('Error: ' + d.message, 'error');
+                        }
+                    })
+                    .catch(e => showAjaxMessage('Error al actualizar', 'error'))
+                    .finally(() => { btn.innerHTML = orig; btn.disabled = false; });
+            });
         }
     });
+
+    // Outside click closer
+    window.onclick = function (event) {
+        const createModal = document.getElementById('createScheduleModal');
+        const editModal = document.getElementById('scheduleModal');
+        if (event.target == createModal) closeCreateScheduleModal();
+        if (event.target == editModal) closeScheduleModal();
+    }
 </script>
 
 <?php include '../../templates/footer.php'; ?>

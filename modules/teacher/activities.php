@@ -40,6 +40,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt = $pdo->prepare("UPDATE submissions SET grade = ?, comments = ? WHERE id = ?");
         $stmt->execute([$grade, $comments, $submission_id]);
         $success = "Calificación guardada exitosamente.";
+    } elseif (isset($_POST['grade_np'])) {
+        $activity_id = (int) $_POST['activity_id'];
+        $student_id = (int) $_POST['student_id'];
+        $grade = !empty($_POST['grade']) ? (float) $_POST['grade'] : null;
+        $comments = sanitize($_POST['comments']);
+
+        // Double check if submission already exists (race condition)
+        $check = $pdo->prepare("SELECT id FROM submissions WHERE activity_id = ? AND student_id = ?");
+        $check->execute([$activity_id, $student_id]);
+        $existing = $check->fetch();
+
+        if ($existing) {
+            $stmt = $pdo->prepare("UPDATE submissions SET grade = ?, comments = ? WHERE id = ?");
+            $stmt->execute([$grade, $comments, $existing['id']]);
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO submissions (activity_id, student_id, grade, comments, file_path) VALUES (?, ?, ?, ?, NULL)");
+            $stmt->execute([$activity_id, $student_id, $grade, $comments]);
+        }
+        $success = "Calificación guardada exitosamente.";
     } elseif (isset($_POST['delete_activity']) || isset($_POST['submit_delete_activity'])) {
         // CSRF check
         if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
@@ -119,14 +138,17 @@ if (isset($_GET['activity_id'])) {
     $selected_activity = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($selected_activity) {
+        // Fetch all enrolled students and their submissions
         $stmt = $pdo->prepare("
-            SELECT s.*, u.name as student_name, u.username
-            FROM submissions s
-            JOIN users u ON s.student_id = u.id
-            WHERE s.activity_id = ?
-            ORDER BY s.submitted_at DESC
+            SELECT u.id as student_id, u.name as student_name, u.username,
+                   s.id as submission_id, s.file_path, s.grade, s.comments, s.submitted_at
+            FROM users u
+            JOIN enrollments e ON u.id = e.student_id
+            LEFT JOIN submissions s ON s.activity_id = ? AND s.student_id = u.id
+            WHERE e.course_id = ? AND e.status = 'enrolled' AND u.role = 'student'
+            ORDER BY u.name ASC
         ");
-        $stmt->execute([$activity_id]);
+        $stmt->execute([$activity_id, $selected_activity['course_id']]);
         $submissions = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
@@ -337,8 +359,12 @@ if (isset($_GET['activity_id'])) {
                 </div>
             <?php else: ?>
                 <div class="space-y-4">
-                    <?php foreach ($submissions as $submission): ?>
-                        <div class="border border-gray-200 rounded-lg p-6">
+                    <?php foreach ($submissions as $submission):
+                        $is_overdue = new DateTime() > new DateTime($selected_activity['due_date']);
+                        $has_submitted = !empty($submission['submission_id']);
+                        ?>
+                        <div
+                            class="border border-gray-200 rounded-lg p-6 <?php echo !$has_submitted && $is_overdue ? 'bg-red-50 border-red-200' : ''; ?>">
                             <div class="flex justify-between items-start mb-4">
                                 <div>
                                     <h4 class="font-semibold text-gray-800">
@@ -347,7 +373,14 @@ if (isset($_GET['activity_id'])) {
                                     <p class="text-sm text-gray-500"><?php echo htmlspecialchars($submission['username']); ?></p>
                                     <p class="text-sm text-gray-500">
                                         <i class="fas fa-clock mr-1"></i>
-                                        Entregado: <?php echo date('d/m/Y H:i', strtotime($submission['submitted_at'])); ?>
+                                        <?php if ($has_submitted): ?>
+                                            Entregado: <?php echo date('d/m/Y H:i', strtotime($submission['submitted_at'])); ?>
+                                        <?php elseif ($is_overdue): ?>
+                                            <span class="text-red-600 font-bold">NP - No realizó la actividad en la fecha
+                                                asignada</span>
+                                        <?php else: ?>
+                                            Pediente de entrega
+                                        <?php endif; ?>
                                     </p>
                                 </div>
                                 <div class="text-right">
@@ -355,15 +388,19 @@ if (isset($_GET['activity_id'])) {
                                         <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
                                             Calificado: <?php echo $submission['grade']; ?>/20
                                         </span>
-                                    <?php else: ?>
+                                    <?php elseif ($has_submitted): ?>
                                         <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
                                             Pendiente de calificar
+                                        </span>
+                                    <?php elseif ($is_overdue): ?>
+                                        <span class="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                                            NP
                                         </span>
                                     <?php endif; ?>
                                 </div>
                             </div>
 
-                            <?php if ($submission['file_path']): ?>
+                            <?php if ($has_submitted && $submission['file_path']): ?>
                                 <div class="mb-4">
                                     <a href="/biblioteca/<?php echo htmlspecialchars($submission['file_path']); ?>" target="_blank"
                                         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm inline-flex items-center">
@@ -374,8 +411,15 @@ if (isset($_GET['activity_id'])) {
                             <?php endif; ?>
 
                             <form method="POST" class="bg-gray-50 p-4 rounded-lg">
-                                <input type="hidden" name="submission_id" value="<?php echo $submission['id']; ?>">
-                                <input type="hidden" name="grade_submission" value="1">
+                                <?php if ($has_submitted): ?>
+                                    <input type="hidden" name="submission_id" value="<?php echo $submission['submission_id']; ?>">
+                                    <input type="hidden" name="grade_submission" value="1">
+                                <?php else: ?>
+                                    <input type="hidden" name="create_late_grade" value="1">
+                                    <input type="hidden" name="activity_id" value="<?php echo $selected_activity['id']; ?>">
+                                    <input type="hidden" name="student_id" value="<?php echo $submission['student_id']; ?>">
+                                <?php endif; ?>
+
                                 <div class="grid md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Calificación (0-20)</label>
@@ -390,7 +434,7 @@ if (isset($_GET['activity_id'])) {
                                     </div>
                                 </div>
                                 <div class="mt-4">
-                                    <button type="submit" name="grade_submission"
+                                    <button type="submit" name="<?php echo $has_submitted ? 'grade_submission' : 'grade_np'; ?>"
                                         class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-200">
                                         <i class="fas fa-save mr-2"></i>
                                         Guardar Calificación

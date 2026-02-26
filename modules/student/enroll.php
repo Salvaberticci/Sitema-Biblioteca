@@ -5,63 +5,41 @@
 <?php
 $user_id = $_SESSION['user_id'];
 
-// Debug output (visible on page)
-$debug_info = [];
-$debug_info[] = "User ID: " . ($user_id ?? 'not set');
-$debug_info[] = "Role: " . (getUserRole() ?? 'not set');
-$debug_info[] = "Request Method: " . $_SERVER['REQUEST_METHOD'];
-$debug_info[] = "POST data: " . (isset($_POST['enroll_course']) ? 'enroll_course set' : 'enroll_course not set');
-$debug_info[] = "All POST keys: " . implode(', ', array_keys($_POST));
-$debug_info[] = "Course ID in POST: " . ($_POST['course_id'] ?? 'not set');
-$debug_info[] = "Period in POST: " . ($_POST['period'] ?? 'not set');
+// Check if student is already enrolled in ANY course
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM enrollments WHERE student_id = ?");
+$stmt->execute([$user_id]);
+$is_already_enrolled = $stmt->fetchColumn() > 0;
 
 // Handle enrollment request
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['enroll_course'])) {
-    $debug_info[] = "Processing enrollment request";
-    $debug_info[] = "Course ID: " . ($_POST['course_id'] ?? 'not set');
-    $debug_info[] = "Period: " . ($_POST['period'] ?? 'not set');
-    $course_id = (int)$_POST['course_id'];
-    $period = sanitize($_POST['period']) ?: date('Y-1');
+    if ($is_already_enrolled) {
+        $error = "Ya estás matriculado en una mención. Para realizar cambios, contacta a un administrador.";
+    } else {
+        $course_id = (int) $_POST['course_id'];
+        $period = sanitize($_POST['period']) ?: date('Y-1');
 
-    try {
-        // Check if student is already enrolled
-        $debug_info[] = "Checking enrollment for user $user_id in course $course_id";
-        $stmt = $pdo->prepare("SELECT id FROM enrollments WHERE student_id = ? AND course_id = ?");
-        $stmt->execute([$user_id, $course_id]);
-        $existing = $stmt->fetch();
-        $debug_info[] = "Existing enrollment check result: " . ($existing ? 'found' : 'not found');
-
-        if ($existing) {
-            $error = "Ya estás matriculado en esta mención.";
-            $debug_info[] = "Enrollment failed: already enrolled";
-        } else {
-            $debug_info[] = "Inserting enrollment for user $user_id in course $course_id with period $period";
+        try {
             $stmt = $pdo->prepare("INSERT INTO enrollments (student_id, course_id, period, status) VALUES (?, ?, ?, 'enrolled')");
             $result = $stmt->execute([$user_id, $course_id, $period]);
-            $debug_info[] = "Insert result: " . ($result ? 'success' : 'failed');
             if ($result) {
                 $success = "Te has matriculado exitosamente en la mención.";
+                $is_already_enrolled = true; // Update local state
             } else {
                 $error = "Error al insertar la matrícula en la base de datos.";
-                $debug_info[] = "Insert failed without exception";
             }
+        } catch (PDOException $e) {
+            $error = "Error al procesar la matrícula: " . $e->getMessage();
         }
-    } catch (PDOException $e) {
-        $debug_info[] = "PDO Exception during enrollment: " . $e->getMessage();
-        $error = "Error al procesar la matrícula: " . $e->getMessage();
     }
 }
 
-// Fetch available courses (not enrolled yet)
-$stmt = $pdo->prepare("
-    SELECT c.* FROM courses c
-    WHERE c.id NOT IN (
-        SELECT course_id FROM enrollments WHERE student_id = ?
-    )
-    ORDER BY c.name
-");
-$stmt->execute([$user_id]);
-$available_courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Fetch available courses (only if not already enrolled)
+$available_courses = [];
+if (!$is_already_enrolled) {
+    $stmt = $pdo->prepare("SELECT * FROM courses ORDER BY name");
+    $stmt->execute();
+    $available_courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 // Fetch current enrollments
 $stmt = $pdo->prepare("
@@ -129,10 +107,14 @@ $current_enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </div>
                             <span class="px-3 py-1 rounded-full text-xs font-medium
                                 <?php
-                                if ($enrollment['status'] == 'enrolled') echo 'bg-green-100 text-green-800';
-                                elseif ($enrollment['status'] == 'completed') echo 'bg-blue-100 text-blue-800';
-                                elseif ($enrollment['status'] == 'failed') echo 'bg-red-100 text-red-800';
-                                else echo 'bg-gray-100 text-gray-800';
+                                if ($enrollment['status'] == 'enrolled')
+                                    echo 'bg-green-100 text-green-800';
+                                elseif ($enrollment['status'] == 'completed')
+                                    echo 'bg-blue-100 text-blue-800';
+                                elseif ($enrollment['status'] == 'failed')
+                                    echo 'bg-red-100 text-red-800';
+                                else
+                                    echo 'bg-gray-100 text-gray-800';
                                 ?>">
                                 <?php echo ucfirst($enrollment['status']); ?>
                             </span>
@@ -141,7 +123,8 @@ $current_enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <div class="mt-3 pt-3 border-t border-blue-200">
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm font-medium text-gray-700">Calificación:</span>
-                                    <span class="font-bold <?php echo $enrollment['grade'] >= 10 ? 'text-green-600' : 'text-red-600'; ?>">
+                                    <span
+                                        class="font-bold <?php echo $enrollment['grade'] >= 10 ? 'text-green-600' : 'text-red-600'; ?>">
                                         <?php echo $enrollment['grade']; ?>/20
                                     </span>
                                 </div>
@@ -163,7 +146,8 @@ $current_enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php if (!empty($available_courses)): ?>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <?php foreach ($available_courses as $course): ?>
-                    <div class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-lg border-2 border-green-200 hover:shadow-xl transition duration-300">
+                    <div
+                        class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-lg border-2 border-green-200 hover:shadow-xl transition duration-300">
                         <div class="flex items-start justify-between mb-4">
                             <div>
                                 <h4 class="text-lg font-bold text-green-800 mb-1">
@@ -186,7 +170,8 @@ $current_enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <input type="hidden" name="enroll_course" value="1">
                             <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
                             <input type="hidden" name="period" value="<?php echo date('Y-1'); ?>">
-                            <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center justify-center">
+                            <button type="submit"
+                                class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center justify-center">
                                 <i class="fas fa-user-plus mr-2"></i>
                                 Matricularme
                             </button>
@@ -194,11 +179,17 @@ $current_enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                 <?php endforeach; ?>
             </div>
+        <?php elseif ($is_already_enrolled): ?>
+            <div class="text-center py-12 text-gray-500 bg-blue-50 border-blue-200 border-2 rounded-xl">
+                <i class="fas fa-info-circle text-6xl mb-4 text-blue-400"></i>
+                <h4 class="text-xl font-semibold mb-2 text-blue-800">Ya estás matriculado</h4>
+                <p class="text-blue-600">Has alcanzado el límite de matrículas permitidas (1 mención).<br>Si deseas realizar un cambio, por favor contacta con la coordinación o un administrador.</p>
+            </div>
         <?php else: ?>
             <div class="text-center py-12 text-gray-500">
                 <i class="fas fa-check-circle text-6xl mb-4 text-green-400"></i>
-                <h4 class="text-xl font-semibold mb-2">¡Felicitaciones!</h4>
-                <p>Ya estás matriculado en todas las menciones disponibles.</p>
+                <h4 class="text-xl font-semibold mb-2">¡Todo al día!</h4>
+                <p>No hay más menciones disponibles para matricular en este momento.</p>
             </div>
         <?php endif; ?>
     </div>

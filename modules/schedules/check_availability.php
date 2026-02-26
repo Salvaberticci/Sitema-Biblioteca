@@ -49,9 +49,12 @@ try {
     $stmt->execute($params);
     $classroom_conflicts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    $classroom_conflict_msg = null;
+    $teacher_conflict_msg = null;
+
     if (!empty($classroom_conflicts)) {
         $conflict = $classroom_conflicts[0];
-        $conflicts[] = "Aula ocupada por '{$conflict['course_name']}' con {$conflict['teacher_name']} ({$conflict['start_time']}-{$conflict['end_time']})";
+        $classroom_conflict_msg = "Aula ocupada por '{$conflict['course_name']}' con {$conflict['teacher_name']} ({$conflict['start_time']}-{$conflict['end_time']})";
     }
 
     // Check teacher conflicts if teacher_id is provided
@@ -85,7 +88,7 @@ try {
 
         if (!empty($teacher_conflicts)) {
             $conflict = $teacher_conflicts[0];
-            $conflicts[] = "Docente ocupado con '{$conflict['course_name']}' en {$conflict['classroom_name']} ({$conflict['start_time']}-{$conflict['end_time']})";
+            $teacher_conflict_msg = "Docente ocupado con '{$conflict['course_name']}' en {$conflict['classroom_name']} ({$conflict['start_time']}-{$conflict['end_time']})";
         }
     }
 
@@ -117,20 +120,15 @@ try {
     $stmt->execute($available_params);
     $available_classrooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    if (empty($conflicts)) {
-        echo json_encode([
-            'available' => true,
-            'message' => 'Aula disponible',
-            'available_classrooms' => $available_classrooms
-        ]);
-    } else {
-        echo json_encode([
-            'available' => false,
-            'conflict_info' => implode(", ", $conflicts),
-            'message' => 'Conflicto detectado',
-            'available_classrooms' => $available_classrooms
-        ]);
-    }
+    echo json_encode([
+        'available' => (empty($classroom_conflict_msg) && empty($teacher_conflict_msg)),
+        'classroom_available' => empty($classroom_conflict_msg),
+        'teacher_available' => empty($teacher_conflict_msg),
+        'classroom_conflict_info' => $classroom_conflict_msg,
+        'teacher_conflict_info' => $teacher_conflict_msg,
+        'message' => (empty($classroom_conflict_msg) && empty($teacher_conflict_msg)) ? 'Disponible' : 'Conflicto detectado',
+        'available_classrooms' => $available_classrooms
+    ]);
 
 } catch (Exception $e) {
     echo json_encode([

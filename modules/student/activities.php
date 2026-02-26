@@ -9,40 +9,49 @@ $user_id = $_SESSION['user_id'];
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_activity'])) {
     $activity_id = (int) $_POST['activity_id'];
 
-    // Handle file upload
-    $file_path = '';
-    if (isset($_FILES['file']) && $_FILES['file']['error'] == 0) {
-        $upload_dir = '../../uploads/submissions/';
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0777, true);
+    // Verify deadline
+    $stmt = $pdo->prepare("SELECT due_date FROM activities WHERE id = ?");
+    $stmt->execute([$activity_id]);
+    $activity_data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($activity_data && new DateTime() > new DateTime($activity_data['due_date'])) {
+        $error = "Error: ya la fecha y hora límite pasó. No se permiten más entregas.";
+    } else {
+        // Handle file upload
+        $file_path = '';
+        if (isset($_FILES['file']) && $_FILES['file']['error'] == 0) {
+            $upload_dir = '../../uploads/submissions/';
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+
+            $file_name = time() . '_' . $user_id . '_' . basename($_FILES['file']['name']);
+            $file_path = $upload_dir . $file_name;
+
+            if (move_uploaded_file($_FILES['file']['tmp_name'], $file_path)) {
+                $file_path = 'uploads/submissions/' . $file_name;
+            } else {
+                $error = "Error al subir el archivo.";
+            }
         }
 
-        $file_name = time() . '_' . $user_id . '_' . basename($_FILES['file']['name']);
-        $file_path = $upload_dir . $file_name;
+        if (!isset($error)) {
+            // Check if student already submitted
+            $stmt = $pdo->prepare("SELECT id FROM submissions WHERE activity_id = ? AND student_id = ?");
+            $stmt->execute([$activity_id, $user_id]);
+            $existing = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (move_uploaded_file($_FILES['file']['tmp_name'], $file_path)) {
-            $file_path = 'uploads/submissions/' . $file_name;
-        } else {
-            $error = "Error al subir el archivo.";
+            if ($existing) {
+                // Update existing submission
+                $stmt = $pdo->prepare("UPDATE submissions SET file_path = ?, submitted_at = CURRENT_TIMESTAMP WHERE id = ?");
+                $stmt->execute([$file_path, $existing['id']]);
+            } else {
+                // Create new submission
+                $stmt = $pdo->prepare("INSERT INTO submissions (activity_id, student_id, file_path) VALUES (?, ?, ?)");
+                $stmt->execute([$activity_id, $user_id, $file_path]);
+            }
+            $success = "Actividad enviada exitosamente.";
         }
-    }
-
-    if (!isset($error)) {
-        // Check if student already submitted
-        $stmt = $pdo->prepare("SELECT id FROM submissions WHERE activity_id = ? AND student_id = ?");
-        $stmt->execute([$activity_id, $user_id]);
-        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($existing) {
-            // Update existing submission
-            $stmt = $pdo->prepare("UPDATE submissions SET file_path = ?, submitted_at = CURRENT_TIMESTAMP WHERE id = ?");
-            $stmt->execute([$file_path, $existing['id']]);
-        } else {
-            // Create new submission
-            $stmt = $pdo->prepare("INSERT INTO submissions (activity_id, student_id, file_path) VALUES (?, ?, ?)");
-            $stmt->execute([$activity_id, $user_id, $file_path]);
-        }
-        $success = "Actividad enviada exitosamente.";
     }
 }
 
@@ -122,7 +131,8 @@ foreach ($activities as $activity) {
                     <p class="text-gray-600 text-sm font-medium">Actividades Calificadas</p>
                     <p class="text-3xl font-bold text-green-500">
                         <?php echo count(array_filter($completed_activities, function ($a) {
-                            return $a['grade'] !== null; })); ?>
+                            return $a['grade'] !== null;
+                        })); ?>
                     </p>
                 </div>
                 <div class="text-4xl text-green-500 opacity-70">
@@ -145,7 +155,8 @@ foreach ($activities as $activity) {
                         <div class="flex justify-between items-start mb-4">
                             <div class="flex-1">
                                 <h4 class="text-lg font-semibold text-gray-800 mb-2">
-                                    <?php echo htmlspecialchars($activity['title']); ?></h4>
+                                    <?php echo htmlspecialchars($activity['title']); ?>
+                                </h4>
                                 <p class="text-gray-600 mb-2">
                                     <i class="fas fa-graduation-cap mr-1"></i>
                                     <?php echo htmlspecialchars($activity['course_name']); ?>
@@ -174,8 +185,9 @@ foreach ($activities as $activity) {
                                         } else {
                                             $days_left = $diff->days;
                                             // Handle the "exactly 24h" edge case or just use days as is
-                                            if ($hours_left >= 24 && $days_left == 0) $days_left = 1; 
-                                            
+                                            if ($hours_left >= 24 && $days_left == 0)
+                                                $days_left = 1;
+
                                             $color_class = $days_left <= 3 ? 'text-orange-600' : 'text-green-600';
                                             $day_text = $days_left == 1 ? 'día restante' : 'días restantes';
                                             echo '<span class="ml-4 ' . $color_class . ' font-medium"><i class="fas fa-clock mr-1"></i>' . $days_left . ' ' . $day_text . '</span>';
@@ -184,7 +196,8 @@ foreach ($activities as $activity) {
                                     ?>
                                 </div>
                                 <p class="text-gray-700">
-                                    <?php echo htmlspecialchars(substr($activity['description'], 0, 150)); ?>...</p>
+                                    <?php echo htmlspecialchars(substr($activity['description'], 0, 150)); ?>...
+                                </p>
                             </div>
                         </div>
 
@@ -198,21 +211,36 @@ foreach ($activities as $activity) {
                             </div>
                         <?php endif; ?>
 
-                        <form method="POST" enctype="multipart/form-data" class="bg-white p-4 rounded-lg border">
-                            <input type="hidden" name="activity_id" value="<?php echo $activity['id']; ?>">
-                            <input type="hidden" name="submit_activity" value="1">
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Subir tu entrega</label>
-                                <input type="file" name="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.png,.zip" required
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
-                                <p class="text-sm text-gray-500 mt-1">Formatos permitidos: PDF, DOC, PPT, imágenes, ZIP</p>
+                        <?php if ($now <= $due_date): ?>
+                            <form method="POST" enctype="multipart/form-data" class="bg-white p-4 rounded-lg border">
+                                <input type="hidden" name="activity_id" value="<?php echo $activity['id']; ?>">
+                                <input type="hidden" name="submit_activity" value="1">
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Subir tu entrega</label>
+                                    <input type="file" name="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.png,.zip" required
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                                    <p class="text-sm text-gray-500 mt-1">Formatos permitidos: PDF, DOC, PPT, imágenes, ZIP</p>
+                                </div>
+                                <button type="submit" name="submit_activity"
+                                    class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center">
+                                    <i class="fas fa-paper-plane mr-2"></i>
+                                    Enviar Actividad
+                                </button>
+                            </form>
+                        <?php else: ?>
+                            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-times-circle text-red-500"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-red-700">
+                                            <strong>Entrega no permitida:</strong> Ya la fecha y hora límite pasó.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                            <button type="submit" name="submit_activity"
-                                class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 flex items-center">
-                                <i class="fas fa-paper-plane mr-2"></i>
-                                Enviar Actividad
-                            </button>
-                        </form>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -233,7 +261,8 @@ foreach ($activities as $activity) {
                         <div class="flex justify-between items-start mb-4">
                             <div class="flex-1">
                                 <h4 class="text-lg font-semibold text-gray-800 mb-2">
-                                    <?php echo htmlspecialchars($activity['title']); ?></h4>
+                                    <?php echo htmlspecialchars($activity['title']); ?>
+                                </h4>
                                 <p class="text-gray-600 mb-2">
                                     <i class="fas fa-graduation-cap mr-1"></i>
                                     <?php echo htmlspecialchars($activity['course_name']); ?>
@@ -268,19 +297,71 @@ foreach ($activities as $activity) {
                         <?php endif; ?>
 
                         <?php if ($activity['submission_file']): ?>
-                            <div>
+                            <div class="flex flex-wrap items-center gap-4">
                                 <a href="/biblioteca/<?php echo htmlspecialchars($activity['submission_file']); ?>" target="_blank"
                                     class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm inline-flex items-center">
                                     <i class="fas fa-download mr-2"></i>
                                     Ver mi entrega
                                 </a>
+
+                                <?php if (new DateTime() <= new DateTime($activity['due_date'])): ?>
+                                    <button onclick="toggleEditForm(<?php echo $activity['id']; ?>)"
+                                        class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded text-sm inline-flex items-center transition duration-200">
+                                        <i class="fas fa-edit mr-2"></i>
+                                        Editar mi entrega
+                                    </button>
+                                <?php endif; ?>
                             </div>
+
+                            <!-- Formulario de edición oculto -->
+                            <?php if (new DateTime() <= new DateTime($activity['due_date'])): ?>
+                                <div id="edit-form-<?php echo $activity['id']; ?>"
+                                    class="hidden mt-6 bg-white p-6 rounded-xl border-2 border-primary animate-fade-in-up">
+                                    <h5 class="font-bold text-gray-800 mb-4 flex items-center">
+                                        <i class="fas fa-file-upload mr-2 text-primary"></i>
+                                        Reemplazar archivo de entrega
+                                    </h5>
+                                    <form method="POST" enctype="multipart/form-data">
+                                        <input type="hidden" name="activity_id" value="<?php echo $activity['id']; ?>">
+                                        <input type="hidden" name="submit_activity" value="1">
+                                        <div class="mb-4">
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Selecciona el nuevo
+                                                archivo</label>
+                                            <input type="file" name="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.png,.zip" required
+                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+                                            <p class="text-xs text-gray-500 mt-2">Al subir un nuevo archivo, el anterior será
+                                                reemplazado permanentemente.</p>
+                                        </div>
+                                        <div class="flex gap-3">
+                                            <button type="submit"
+                                                class="bg-primary hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-lg transition duration-200">
+                                                Subir Nuevo Archivo
+                                            </button>
+                                            <button type="button" onclick="toggleEditForm(<?php echo $activity['id']; ?>)"
+                                                class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-6 rounded-lg transition duration-200">
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             </div>
         </div>
     <?php endif; ?>
+
+    <script>
+        function toggleEditForm(activityId) {
+            const form = document.getElementById('edit-form-' + activityId);
+            if (form.classList.contains('hidden')) {
+                form.classList.remove('hidden');
+            } else {
+                form.classList.add('hidden');
+            }
+        }
+    </script>
 
     <?php if (empty($pending_activities) && empty($completed_activities)): ?>
         <div class="bg-white p-12 rounded-2xl shadow-xl text-center animate-fade-in-up">

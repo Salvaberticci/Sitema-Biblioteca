@@ -111,8 +111,54 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Fetch all users
-$stmt = $pdo->query("SELECT * FROM users ORDER BY name");
+// Handle role filter and search
+$role_filter = isset($_GET['role']) ? sanitize($_GET['role']) : '';
+$search_query = isset($_GET['search']) ? sanitize($_GET['search']) : '';
+
+// Pagination settings
+$results_per_page = 10;
+$current_page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+if ($current_page < 1)
+    $current_page = 1;
+
+// Build query dynamically
+$where_clauses = [];
+$params = [];
+
+if ($role_filter && in_array($role_filter, ['admin', 'teacher', 'student'])) {
+    $where_clauses[] = "role = ?";
+    $params[] = $role_filter;
+}
+
+if ($search_query) {
+    $where_clauses[] = "(name LIKE ? OR username LIKE ? OR email LIKE ?)";
+    $search_term = "%$search_query%";
+    $params[] = $search_term;
+    $params[] = $search_term;
+    $params[] = $search_term;
+}
+
+$where_sql = "";
+if (!empty($where_clauses)) {
+    $where_sql = "WHERE " . implode(" AND ", $where_clauses);
+}
+
+// Get total items for pagination
+$count_query = "SELECT COUNT(*) FROM users " . $where_sql;
+$stmt_count = $pdo->prepare($count_query);
+$stmt_count->execute($params);
+$total_users = $stmt_count->fetchColumn();
+
+$total_pages = ceil($total_users / $results_per_page);
+if ($current_page > $total_pages && $total_pages > 0)
+    $current_page = $total_pages;
+
+$offset = ($current_page - 1) * $results_per_page;
+
+// Fetch users for current page
+$sql = "SELECT * FROM users " . $where_sql . " ORDER BY name LIMIT " . $results_per_page . " OFFSET " . $offset;
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -120,15 +166,15 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <h2 class="text-3xl font-bold text-gray-800 mb-6">Gestión de Usuarios</h2>
 
     <?php if (isset($success)): ?>
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            <?php echo $success; ?>
-        </div>
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                <?php echo $success; ?>
+            </div>
     <?php endif; ?>
 
     <?php if (isset($error)): ?>
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <?php echo $error; ?>
-        </div>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <?php echo $error; ?>
+            </div>
     <?php endif; ?>
 
     <!-- Debug Information Panel - Commented out for production
@@ -266,7 +312,26 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
     <div class="bg-white p-6 rounded-lg shadow-md">
-        <h3 class="text-xl font-semibold mb-4">Lista de Usuarios</h3>
+        <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+            <h3 class="text-xl font-semibold w-full md:w-auto">Lista de Usuarios</h3>
+            <form method="GET" class="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+                <div class="flex items-center space-x-2 w-full md:w-auto">
+                     <label for="search" class="sr-only">Buscar</label>
+                     <input type="text" id="search" name="search" value="<?php echo htmlspecialchars($search_query); ?>" placeholder="Buscar por nombre, usuario o email..."
+                        class="border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm px-3 py-2 w-full md:w-64">
+                </div>
+                <div class="flex items-center space-x-2 w-full md:w-auto">
+                    <label for="filter_role" class="text-sm font-medium text-gray-700 whitespace-nowrap">Filtrar por rol:</label>
+                    <select id="filter_role" name="role" onchange="this.form.submit()" class="border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm px-3 py-2 w-full md:w-auto">
+                        <option value="">Todos los roles</option>
+                        <option value="admin" <?php echo $role_filter === 'admin' ? 'selected' : ''; ?>>Administrador</option>
+                        <option value="teacher" <?php echo $role_filter === 'teacher' ? 'selected' : ''; ?>>Docente</option>
+                        <option value="student" <?php echo $role_filter === 'student' ? 'selected' : ''; ?>>Estudiante</option>
+                    </select>
+                </div>
+                <button type="submit" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded text-sm transition duration-300 w-full md:w-auto">Buscar</button>
+            </form>
+        </div>
         <div class="overflow-x-auto">
             <table class="min-w-full table-auto">
                 <thead>
@@ -279,29 +344,68 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($users as $user): ?>
-                        <tr class="border-t">
-                            <td class="px-4 py-2"><?php echo htmlspecialchars($user['name']); ?></td>
-                            <td class="px-4 py-2"><?php echo htmlspecialchars($user['username']); ?></td>
-                            <td class="px-4 py-2"><?php echo htmlspecialchars($user['email']); ?></td>
-                            <td class="px-4 py-2"><?php echo ucfirst($user['role']); ?></td>
-                            <td class="px-4 py-2">
-                                <button
-                                    onclick="editUser(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username']); ?>', '<?php echo htmlspecialchars($user['email']); ?>', '<?php echo htmlspecialchars($user['name']); ?>', '<?php echo $user['role']; ?>')"
-                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-sm mr-2">Editar</button>
-                                <form method="POST" class="inline"
-                                    onsubmit="return confirm('¿Está seguro de eliminar este usuario?')">
-                                    <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
-                                    <input type="hidden" name="delete_user" value="1">
-                                    <button type="submit"
-                                        class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm">Eliminar</button>
-                                </form>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
+                    <?php if (empty($users)): ?>
+                            <tr>
+                                <td colspan="5" class="px-4 py-8 text-center text-gray-500">No se encontraron usuarios con los filtros actuales.</td>
+                            </tr>
+                    <?php else: ?>
+                            <?php foreach ($users as $user): ?>
+                                    <tr class="border-t">
+                                        <td class="px-4 py-2"><?php echo htmlspecialchars($user['name']); ?></td>
+                                        <td class="px-4 py-2"><?php echo htmlspecialchars($user['username']); ?></td>
+                                        <td class="px-4 py-2"><?php echo htmlspecialchars($user['email']); ?></td>
+                                        <td class="px-4 py-2"><?php echo ucfirst($user['role']); ?></td>
+                                        <td class="px-4 py-2">
+                                            <button
+                                                onclick="editUser(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username']); ?>', '<?php echo htmlspecialchars($user['email']); ?>', '<?php echo htmlspecialchars($user['name']); ?>', '<?php echo $user['role']; ?>')"
+                                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-sm mr-2">Editar</button>
+                                            <form method="POST" class="inline"
+                                                onsubmit="return confirm('¿Está seguro de eliminar este usuario?')">
+                                                <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
+                                                <input type="hidden" name="delete_user" value="1">
+                                                <button type="submit"
+                                                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm">Eliminar</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                            <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
+        
+        <?php if ($total_pages > 1): ?>
+            <div class="mt-6 flex justify-center">
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                    <?php
+                    $params_str = "";
+                    if ($search_query)
+                        $params_str .= "&search=" . urlencode($search_query);
+                    if ($role_filter)
+                        $params_str .= "&role=" . urlencode($role_filter);
+                    ?>
+                
+                    <a href="?page=<?php echo max(1, $current_page - 1) . $params_str; ?>" 
+                       class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 <?php echo $current_page <= 1 ? 'opacity-50 cursor-not-allowed' : ''; ?>">
+                        <span class="sr-only">Anterior</span>
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                
+                    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                            <a href="?page=<?php echo $i . $params_str; ?>" 
+                               class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium <?php echo $i == $current_page ? 'text-primary bg-yellow-50 z-10' : 'text-gray-700 hover:bg-gray-50'; ?>">
+                                <?php echo $i; ?>
+                            </a>
+                    <?php endfor; ?>
+                
+                    <a href="?page=<?php echo min($total_pages, $current_page + 1) . $params_str; ?>" 
+                       class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 <?php echo $current_page >= $total_pages ? 'opacity-50 cursor-not-allowed' : ''; ?>">
+                        <span class="sr-only">Siguiente</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </nav>
+            </div>
+        <?php endif; ?>
     </div>
 </main>
 

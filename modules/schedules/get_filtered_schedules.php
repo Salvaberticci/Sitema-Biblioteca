@@ -84,8 +84,8 @@ ob_start();
             <div class="text-6xl text-gray-300 mb-4">
                 <i class="fas fa-graduation-cap"></i>
             </div>
-            <h3 class="text-xl font-semibold text-gray-600 mb-2">No hay materias disponibles</h3>
-            <p class="text-gray-500">No se encontraron materias en el sistema.</p>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">No hay menciones disponibles</h3>
+            <p class="text-gray-500">No se encontraron menciones en el sistema.</p>
         </div>
     </div>
 <?php else: ?>

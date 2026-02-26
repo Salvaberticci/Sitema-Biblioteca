@@ -11,6 +11,7 @@ $day = $_POST['day'] ?? null;
 $classroom_id = $_POST['classroom_id'] ?? null;
 $start_time = $_POST['start_time'] ?? null;
 $end_time = $_POST['end_time'] ?? null;
+$subject = $_POST['subject'] ?? null;
 
 if (!$course_id || !$teacher_id || !$day || !$classroom_id || !$start_time || !$end_time) {
     echo json_encode([
@@ -86,12 +87,12 @@ try {
 
     // Create the schedule
     $insert_query = "
-        INSERT INTO schedules (course_id, teacher_id, classroom_id, day_of_week, start_time, end_time, semester, academic_year, status)
-        VALUES (?, ?, ?, ?, ?, ?, '2025-1', '2025', 'active')
+        INSERT INTO schedules (course_id, subject, teacher_id, classroom_id, day_of_week, start_time, end_time, semester, academic_year, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, '2025-1', '2025', 'active')
     ";
 
     $stmt = $pdo->prepare($insert_query);
-    $result = $stmt->execute([$course_id, $teacher_id, $classroom_id, $day, $start_time, $end_time]);
+    $result = $stmt->execute([$course_id, $subject, $teacher_id, $classroom_id, $day, $start_time, $end_time]);
 
     if ($result) {
         echo json_encode([

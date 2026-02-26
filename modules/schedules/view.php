@@ -57,9 +57,12 @@ foreach ($schedules as $schedule) {
     <h2 class="text-3xl font-bold text-gray-800 mb-6 animate-slide-in-left flex items-center">
         <i class="fas fa-calendar-alt mr-4 text-primary"></i>
         <?php
-        if ($user_role == 'student') echo 'Mi Horario de Clases';
-        elseif ($user_role == 'teacher') echo 'Mis Horarios de Clases';
-        else echo 'Horarios de Clases';
+        if ($user_role == 'student')
+            echo 'Mi Horario de Clases';
+        elseif ($user_role == 'teacher')
+            echo 'Mis Horarios de Clases';
+        else
+            echo 'Horarios de Clases';
         ?>
     </h2>
 
@@ -116,7 +119,7 @@ foreach ($schedules as $schedule) {
 
         foreach ($days as $day_key => $day_name):
             $day_schedules = $schedules_by_day[$day_key] ?? [];
-        ?>
+            ?>
             <div class="bg-white p-6 rounded-2xl shadow-xl animate-fade-in-up card-hover">
                 <h4 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
                     <i class="fas fa-calendar-day mr-3 text-primary"></i>
@@ -137,11 +140,18 @@ foreach ($schedules as $schedule) {
                 <?php else: ?>
                     <div class="space-y-4">
                         <?php foreach ($day_schedules as $schedule): ?>
-                            <div class="bg-gradient-to-r from-primary to-secondary p-6 rounded-xl text-white shadow-lg transform hover:scale-102 transition duration-300">
+                            <div
+                                class="bg-gradient-to-r from-primary to-secondary p-6 rounded-xl text-white shadow-lg transform hover:scale-102 transition duration-300">
                                 <div class="flex flex-col md:flex-row md:items-center md:justify-between">
                                     <div class="flex-1 mb-4 md:mb-0">
-                                        <h5 class="text-xl font-bold mb-2"><?php echo htmlspecialchars($schedule['course_name']); ?></h5>
-                                        <p class="text-accent mb-1 font-medium"><?php echo htmlspecialchars($schedule['course_code']); ?></p>
+                                        <h5 class="text-xl font-bold mb-1"><?php echo htmlspecialchars($schedule['course_name']); ?>
+                                        </h5>
+                                        <p class="text-white font-semibold text-lg mb-2">
+                                            <i class="fas fa-book-reader mr-2"></i>
+                                            <?php echo htmlspecialchars($schedule['subject'] ?? 'N/A'); ?>
+                                        </p>
+                                        <p class="text-accent mb-1 font-medium">
+                                            <?php echo htmlspecialchars($schedule['course_code']); ?></p>
                                         <div class="flex flex-wrap items-center text-sm text-accent">
                                             <span class="flex items-center mr-4 mb-1">
                                                 <i class="fas fa-user mr-2"></i>

@@ -11,6 +11,7 @@ $day = $_POST['day'] ?? null;
 $classroom_id = $_POST['classroom_id'] ?? null;
 $start_time = $_POST['start_time'] ?? null;
 $end_time = $_POST['end_time'] ?? null;
+$subject = $_POST['subject'] ?? null;
 
 if (!$schedule_id || !$course_id || !$day || !$classroom_id || !$start_time || !$end_time) {
     echo json_encode([
@@ -69,12 +70,12 @@ try {
     // Update the schedule
     $update_query = "
         UPDATE schedules
-        SET classroom_id = ?, day_of_week = ?, start_time = ?, end_time = ?, updated_at = CURRENT_TIMESTAMP
+        SET classroom_id = ?, day_of_week = ?, start_time = ?, end_time = ?, subject = ?, updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
     ";
 
     $stmt = $pdo->prepare($update_query);
-    $result = $stmt->execute([$classroom_id, $day, $start_time, $end_time, $schedule_id]);
+    $result = $stmt->execute([$classroom_id, $day, $start_time, $end_time, $subject, $schedule_id]);
 
     if ($result) {
         echo json_encode([

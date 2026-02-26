@@ -35,10 +35,11 @@
             <div class="animate-fade-in-up" style="animation-delay: 0.4s">
                 <h4 class="text-lg font-semibold mb-4 flex items-center"><i class="fas fa-phone mr-2"></i>Contacto</h4>
                 <ul class="space-y-2">
-                    <li class="flex items-center"><i class="fas fa-map-marker-alt mr-2"></i>Dirección: Calle Principal,
-                        Ciudad</li>
-                    <li class="flex items-center"><i class="fas fa-phone mr-2"></i>Teléfono: (123) 456-7890</li>
-                    <li class="flex items-center"><i class="fas fa-envelope mr-2"></i>Email: info@etc.edu</li>
+                    <li class="flex items-center"><i class="fas fa-map-marker-alt mr-2"></i>Calle 18 entre Av. 4 y
+                        Bolivariana Sector las Acacias.</li>
+                    <li class="flex items-center"><i class="fas fa-phone mr-2"></i>Teléfono: 0271-8289378</li>
+                    <li class="flex items-center"><i class="fas fa-envelope mr-2"></i>Email:
+                        ETCPedroGarciaLeal@gmail.com</li>
                 </ul>
             </div>
             <div class="animate-fade-in-up" style="animation-delay: 0.6s">

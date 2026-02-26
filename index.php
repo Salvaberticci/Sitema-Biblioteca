@@ -10,10 +10,10 @@ if (isset($_GET['logout']) && $_GET['logout'] == 'success') {
 ?>
 
 <?php if ($logout_message): ?>
-    <div
-        class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 animate-fade-in-up text-center max-w-md mx-auto">
-        <i class="fas fa-check-circle mr-2"></i><?php echo $logout_message; ?>
-    </div>
+        <div
+            class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 animate-fade-in-up text-center max-w-md mx-auto">
+            <i class="fas fa-check-circle mr-2"></i><?php echo $logout_message; ?>
+        </div>
 <?php endif; ?>
 
 <main>
@@ -26,17 +26,17 @@ if (isset($_GET['logout']) && $_GET['logout'] == 'success') {
 
             <div class="flex justify-center space-x-6 mb-16">
                 <?php if (!isLoggedIn()): ?>
-                    <a href="login.php"
-                        class="btn-gradient text-white font-bold py-4 px-8 rounded-full shadow-2xl transform hover:scale-105 transition duration-300 flex items-center space-x-2">
-                        <i class="fas fa-sign-in-alt"></i>
-                        <span>Iniciar Sesión</span>
-                    </a>
+                        <a href="login.php"
+                            class="btn-gradient text-white font-bold py-4 px-8 rounded-full shadow-2xl transform hover:scale-105 transition duration-300 flex items-center space-x-2">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Iniciar Sesión</span>
+                        </a>
                 <?php else: ?>
-                    <a href="dashboard.php"
-                        class="bg-secondary hover:bg-dark text-white font-bold py-4 px-8 rounded-full shadow-2xl transform hover:scale-105 transition duration-300 flex items-center space-x-2">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span>Ir al Dashboard</span>
-                    </a>
+                        <a href="dashboard.php"
+                            class="bg-secondary hover:bg-dark text-white font-bold py-4 px-8 rounded-full shadow-2xl transform hover:scale-105 transition duration-300 flex items-center space-x-2">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Ir al Dashboard</span>
+                        </a>
                 <?php endif; ?>
             </div>
         </div>
