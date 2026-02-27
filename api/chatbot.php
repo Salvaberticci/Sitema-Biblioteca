@@ -31,12 +31,13 @@ if (file_exists('../includes/api_keys.php')) {
 
 class ChatbotAPI
 {
-    private $geminiApiKey;
-    private $geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+    private $groqApiKey;
+    private $groqUrl = 'https://api.groq.com/openai/v1/chat/completions';
+    private $groqModel = 'llama-3.3-70b-versatile';
 
     public function __construct()
     {
-        $this->geminiApiKey = defined('GEMINI_API_KEY') ? GEMINI_API_KEY : '';
+        $this->groqApiKey = defined('GROQ_API_KEY') ? GROQ_API_KEY : '';
     }
 
     private function isLibraryQuery($message)
@@ -443,23 +444,11 @@ class ChatbotAPI
 
             $errorMessage = $e->getMessage();
 
-            // Handle Quota Exceeded (HTTP 429)
+            // Handle Rate Limit (HTTP 429)
             if (strpos($errorMessage, 'HTTP 429') !== false) {
                 http_response_code(429);
                 return [
-                    'error' => "La cuota gratuita de la API se ha agotado. Por favor, intenta de nuevo en unas horas o mañana.",
-                    'timestamp' => date('Y-m-d H:i:s')
-                ];
-            }
-
-            // Handle Forbidden/Leaked Key (HTTP 403)
-            if (strpos($errorMessage, 'HTTP 403') !== false) {
-                http_response_code(403);
-                $isLeaked = strpos($errorMessage, 'reported as leaked') !== false;
-                return [
-                    'error' => $isLeaked
-                        ? "La clave de API de Gemini ha sido reportada como filtrada (leaked) por Google y ha sido desactivada por seguridad. Es necesario configurar una nueva clave de API."
-                        : "Acceso denegado a la API de Gemini. La configuración de la clave puede ser incorrecta o estar desactivada.",
+                    'error' => "El servicio de IA está ocupado en este momento. Por favor, intenta de nuevo en unos segundos.",
                     'timestamp' => date('Y-m-d H:i:s')
                 ];
             }
@@ -468,7 +457,16 @@ class ChatbotAPI
             if (strpos($errorMessage, 'HTTP 401') !== false) {
                 http_response_code(401);
                 return [
-                    'error' => "La clave de API de Gemini es inválida o no tiene permisos. Por favor, verifica la configuración.",
+                    'error' => "La clave de API no es válida o no tiene permisos. Por favor, verifica la configuración.",
+                    'timestamp' => date('Y-m-d H:i:s')
+                ];
+            }
+
+            // Handle Forbidden (HTTP 403)
+            if (strpos($errorMessage, 'HTTP 403') !== false) {
+                http_response_code(403);
+                return [
+                    'error' => "Acceso denegado a la API. Por favor, verifica la configuración de la clave.",
                     'timestamp' => date('Y-m-d H:i:s')
                 ];
             }
@@ -476,7 +474,7 @@ class ChatbotAPI
             // Default fallback for other errors
             http_response_code(500);
             return [
-                'error' => 'Lo siento, el servicio de inteligencia artificial no está disponible en este momento por un error técnico. Por favor, intenta de nuevo más tarde.',
+                'error' => 'Lo siento, el servicio de inteligencia artificial no está disponible en este momento. Por favor, intenta de nuevo más tarde.',
                 'timestamp' => date('Y-m-d H:i:s')
             ];
         }
@@ -576,60 +574,50 @@ class ChatbotAPI
 
     private function callGeminiAPI($userMessage, $knowledgeContext)
     {
-        // Prepare the prompt
-        $fullPrompt = ChatbotPrompt::getFullPrompt($userMessage, $knowledgeContext);
+        if (empty($this->groqApiKey)) {
+            throw new Exception('No se ha configurado la clave de API de Groq.');
+        }
 
-        // Note: Since we reset messages on page reload, we don't need conversation context
-        // The generation config parameters will help create more varied responses
+        // Build the system prompt from knowledge context
+        $systemPrompt = "Eres el asistente virtual de la ETC (Escuela Técnica Comercial) 'Pedro García Leal'. " .
+            "Responde SOLO en español. Solo respondes preguntas relacionadas con la institución y el sistema de gestión académica. " .
+            "Si la pregunta no tiene relación con la institución, responde amablemente que no puedes ayudar con ese tema. " .
+            "Sé conciso y amable.\n\n";
 
-        // Prepare API request data with generation config to encourage variety
+        if (!empty($knowledgeContext)) {
+            $systemPrompt .= "Información de referencia sobre la institución:\n" . $knowledgeContext;
+        }
+
+        // Groq uses OpenAI-compatible API
         $data = [
-            'contents' => [
+            'model' => $this->groqModel,
+            'messages' => [
                 [
-                    'parts' => [
-                        [
-                            'text' => $fullPrompt
-                        ]
-                    ]
+                    'role' => 'system',
+                    'content' => $systemPrompt
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $userMessage
                 ]
             ],
-            'generationConfig' => [
-                'temperature' => 0.7,
-                'topK' => 40,
-                'topP' => 0.95,
-                'maxOutputTokens' => 1024,
-                'stopSequences' => []
-            ],
-            'safetySettings' => [
-                [
-                    'category' => 'HARM_CATEGORY_HARASSMENT',
-                    'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'
-                ],
-                [
-                    'category' => 'HARM_CATEGORY_HATE_SPEECH',
-                    'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'
-                ],
-                [
-                    'category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-                    'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'
-                ],
-                [
-                    'category' => 'HARM_CATEGORY_DANGEROUS_CONTENT',
-                    'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'
-                ]
-            ]
+            'temperature' => 0.7,
+            'max_tokens' => 1024,
+            'top_p' => 1,
+            'stream' => false
         ];
 
         // Initialize cURL
         $ch = curl_init();
 
         curl_setopt_array($ch, [
-            CURLOPT_URL => $this->geminiUrl . '?key=' . $this->geminiApiKey,
+            CURLOPT_URL => $this->groqUrl,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode($data),
             CURLOPT_HTTPHEADER => [
-                'Content-Type: application/json'
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $this->groqApiKey
             ],
             CURLOPT_TIMEOUT => 30,
             CURLOPT_SSL_VERIFYPEER => false
@@ -649,14 +637,14 @@ class ChatbotAPI
             throw new Exception('API returned HTTP ' . $httpCode . ': ' . $response);
         }
 
-        // Parse response
+        // Parse OpenAI-compatible response
         $responseData = json_decode($response, true);
 
-        if (!$responseData || !isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
-            throw new Exception('Invalid API response format');
+        if (!$responseData || !isset($responseData['choices'][0]['message']['content'])) {
+            throw new Exception('Invalid API response format: ' . $response);
         }
 
-        $generatedText = $responseData['candidates'][0]['content']['parts'][0]['text'];
+        $generatedText = $responseData['choices'][0]['message']['content'];
 
         // Clean and format response
         return $this->cleanResponse($generatedText);
